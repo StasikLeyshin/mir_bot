@@ -5,45 +5,31 @@ import os
 from pymongo import MongoClient
 #import nest_asyncio
 import importlib
+import configparser
 #nest_asyncio.apply()
 
-from api.api import api, api_url
-from api.tokens_setting import tokens_setting
-from mongodb.create_mongodb import create_mongodb
+from api import api, api_url, tokens_setting
+from mongodb import create_mongodb
 from command_besed import command_list
+from infinity import infinity_bots, infinity_beskon
 
-V = 5.103
-#club_id = 5411326
-club_id = 194180799
-start_time = time.time()
-#apis = api()
-client = MongoClient('localhost', 27017)
-
-create_mongo = create_mongodb(client, "bots", "tokens")
-#create_mongo.get_tokens()
 
 def load_modules(file):
-   files = os.listdir(file)
+   files = os.listdir(f"c:{file}")
+   #files = open(file, encoding='utf-8')
    modules = filter(lambda x: x.endswith('.py'), files)
    for m in modules:
        importlib.import_module("commands_besed." + m[0:-3])
-       #print(m)
-load_modules("commands_besed")
 
-#create_mongo.get_tokens(empty = "ar")
-#client = MongoClient()
-#client = MongoClient('localhost', 27017)
-#db = client['bots']
-#collection = db['tokens']
-#posts = db.posts
-#if posts == None:
-def start(name):
+
+
+def start(name, collection_bots, document_tokens):
     with open(f'{name}.txt') as f:
         lines = f.read().splitlines()
-    #print(lines)
+
     loop = asyncio.get_event_loop()
     tasks = [loop.create_task(api(0, i.split('&')[0]).api_get("groups.getById", v=f"{V}")) for i in lines]
-    results = loop.run_until_complete(asyncio.wait(tasks))
+    loop.run_until_complete(asyncio.wait(tasks))
 
     tokens = []
     tokens_new = []
@@ -63,12 +49,10 @@ def start(name):
     f.write("\n".join(tokens_new))
     f.close()
     loop = asyncio.get_event_loop()
-    #print(tokens_new_t)
     loop.run_until_complete(tokens_setting(V).main(tokens_new_t, ids))
-    create_mongo.create_db(tokens, ids)
+    create_mongo.create_db(collection_bots, document_tokens, tokens, ids)
     return tokens
 
-start("tokens")
 
 async def selection(command_list, text):
     for c in command_list:
@@ -78,122 +62,56 @@ async def selection(command_list, text):
                 #print(c)
                 return c
     return 0
-                #await c.process(V, club_id, message, apis).run()
-
-
-async def main(token, club_id, them):
-    apis = api(club_id, token)
-    asd = await apis.api_get("groups.getLongPollServer", v=V, group_id=club_id)
-    print(asd)
-    if "error" not in asd:
-        server = asd['server']
-        key = asd['key']
-        ts = asd['ts']
-
-        while True:
-            otvet = await api_url(f"{server}?act=a_check&key={key}&ts={ts}&wait=25&mode=2").get_json()
-            if "failed" in otvet:
-                if otvet["failed"] == 2 or otvet["failed"] == 3:
-                    asd = await apis.api_get("groups.getLongPollServer", v=V, group_id=club_id)
-                    if "error" not in asd:
-                        server = asd['server']
-                        key = asd['key']
-                        ts = asd['ts']
-                        continue
-
-                else:
-                    continue
-
-            #print(otvet)
-            updates = otvet["updates"]
-            #print(updates)
-            if "ts" in otvet:
-                ts = otvet['ts']
-            if len(updates) > 0:
-                slovar = updates[0]
-                if "type" in slovar and slovar["type"] == "message_new":
-                    message = slovar["object"]["message"]
-                    from_id = message["from_id"]
-                    peer_id = message["peer_id"]
-                    #print(message)
-
-                    #ls
-                    if from_id == peer_id:pass
-                        #print(message)
-
-                    #besed
-                    if from_id != peer_id:
-                        print(message)
-                        text = message["text"].lower()
-                        sel = await selection(command_list, text)
-
-                        if sel != 0:
-                            await sel.process(V, club_id, message, apis, them, create_mongo).run()
-                            continue
-                        '''for c in command_list:
-                            print(c.keys)
-                            for k in c.keys:
-                                if k == text or k == text[1:]:
-                                    print(c)
-                                    await c.process(V, club_id, message, apis).run()'''
-
-                        #print(message)
 
 
 
-            #for i in range(0, len(otvet["updates"])):pass
-                #print(otvet["updates"])
-    #await api().get_http()
-
-st = create_mongo.get_tokens()
-#print(st)
-async def beskon(st):
-    bots = {}
-    thems = {}
-    for i in st:
-        bots[i["id"]] = api(i["id"], token)
-        if i["them"] in thems:
-            thems[i["them"]] = thems[i["them"]].append(i["id"])
-        elif "" not in thems:
-            thems[i["them"]] = [i["id"]]
-    #print(thems)
-    #print(bots)
-
-    while True:
-        await asyncio.sleep(60)
+def apis_generate(spis):
+    apis = {}
+    for i in spis:
+        apis[i["id"]] = api(i["id"], i["token"])
+    return apis
 
 
+def ctf_get():
+    config = configparser.ConfigParser()
+    config.read("settings.ini")
+    return config
 
 
+if __name__ == "__main__":
+    loop = asyncio.get_event_loop()
 
-loop = asyncio.get_event_loop()
-loop.run_until_complete(beskon(st))
-#loop.run_until_complete(main(token, club_id, "them1"))
+    config = ctf_get()
 
+    mon = config["MongoDb"]
+    localhost = mon["localhost"]
+    port = mon["port"]
+    collection_bots = mon["collection_bots"]
+    document_tokens = mon["document_tokens"]
 
+    vk = config["VK"]
+    V = vk["v"]
 
-#tokens["club_id"] = i
+    mod = config["Modules"]
+    bs = mod["bs"]
+    ls = mod["ls"]
 
-#create_mongodb('localhost', 27017, tokens, ids).create_db()
+    tok = config["Txt"]["tokens"]
 
-#print(lines)
+    load_modules(f"{bs}")
 
+    client = MongoClient(localhost, int(port))
+    create_mongo = create_mongodb(client)
 
-#asyncio.ensure_future(tokens_setting(V).main("tokens"))
+    start(tok, collection_bots, document_tokens)
 
-#async def main(token):pass 
-    
+    spis = create_mongo.get_tokens(collection_bots, document_tokens)
+    apis = apis_generate(spis)
 
+    inf = infinity_bots(V, create_mongo, collection_bots, document_tokens)
+    inf_b = infinity_beskon(V, create_mongo, apis, spis)
 
+    tasks = [loop.create_task(inf.main(apis[i["id"]], i["id"], i["them"])) for i in spis]
+    tasks.append(loop.create_task(inf_b.beskon()))
+    results = loop.run_until_complete(asyncio.wait(tasks))
 
-#loop = asyncio.get_event_loop()
-#print(loop.run_until_complete(fet_get(f"https://api.vk.com/method/utils.getServerTime?v=5.103&access_token={token}")))
-#a = api(club_id, "utils.getServerTime", v = f"{V}", access_token = f"{token}")
-#print(loop.run_until_complete(a.api_get()))
-#print(loop.run_until_complete(api().api_get("utils.getServerTime", v = f"{V}", access_token = f"{token}")))
-print("1) --- %s seconds ---" % (time.time() - start_time))
-
-#response = requests.get(f"https://api.vk.com/method/utils.getServerTime?v=5.103&access_token={token}")
-#print(response.json())
-#print("2) --- %s seconds ---" % (time.time() - start_time))
-#def start(token):

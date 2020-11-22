@@ -4,27 +4,22 @@ from pymongo import MongoClient
 
 class create_mongodb:
     
-    def __init__(self, client, collections, documents):
+    def __init__(self, client):
         
         self.client = client
-        self.collections = collections
-        self.documents = documents
+        #self.collections = collections
+        #self.documents = documents
         #self.tokens = tokens
         #self.ids = ids
 
     
     
-    def create_db(self, tokens, ids):
-        
-        #client = MongoClient(self.host, self.port)
-        db = self.client[f"{self.collections}"]
+    def create_db(self, collections, documents, tokens, ids):
+        db = self.client[f"{collections}"]
         #collection = db['tokens']
-        posts = db[f"{self.documents}"]
+        posts = db[f"{documents}"]
         one_doc = posts.find_one()
-        #posts.find_one({"": "Eliot"})
-        tokens_new = []
         if one_doc != None:
-            #print(posts.find())
             for post in posts.find():
                 if post["id"] in ids:
                     #print(tokens)
@@ -38,9 +33,9 @@ class create_mongodb:
             result = posts.insert_many(tokens)
             #print(result)
 
-    def get_tokens(self, **kwargs):
-        db = self.client[f"{self.collections}"]
-        posts = db[f"{self.documents}"]
+    def get_tokens(self, collections, documents, **kwargs):
+        db = self.client[f"{collections}"]
+        posts = db[f"{documents}"]
         #print(posts.find)
         if "empty" in kwargs:
             kwargs = {}
@@ -53,12 +48,9 @@ class create_mongodb:
         #print(tokens)
         return tokens
 
-    def update(self, club_id, peer_id):
-        db = self.client[f"{self.collections}"]
-        posts = db[f"{self.documents}"]
-        #posts.update({'_id': club_id}, {'$set': {'them.$': 'united+states'}}, upsert=True)
-        #posts.update({'_id':mongo_id}, {"$set": post}, upsert=False)
-        #result = mycollection.insert_one(post)
+    def update(self, collections, documents, club_id, peer_id):
+        db = self.client[f"{collections}"]
+        posts = db[f"{documents}"]
         po = posts.find_one({'peer_id': peer_id})
         if po is None:
             post = posts.find_one({'id': club_id})

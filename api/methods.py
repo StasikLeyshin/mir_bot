@@ -38,14 +38,20 @@ class messages_edit:
     async def strat_send(self):
 
         self.msg = await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id, message=self.text, random_id=0)
+
         return
-        #print(self.msg)
 
     async def finish(self, new_text):
 
-        g = await self.apis.api_post("messages.edit", v=self.v, peer_id=self.peer_id, message=new_text, random_id=0, message_id=self.msg)
+        await self.apis.api_post("messages.edit", v=self.v, peer_id=self.peer_id, message=new_text, random_id=0, message_id=self.msg)
         return
-        #print(g)
+
+    async def del_sms(self):
+        #d = await self.apis.api_post("messages.getByConversationMessageId", v=self.v, peer_id=self.peer_id, conversation_message_ids=conversation_message_id)
+        #print(d["items"][0]["id"])
+        #await self.apis.api_post("messages.delete", v=self.v, message_ids=f"{self.msg}, {d['items'][0]['id']}", delete_for_all=1)
+        await self.apis.api_post("messages.delete", v=self.v, message_ids=self.msg, delete_for_all=1)
+        return
 
 
 

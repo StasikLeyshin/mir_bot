@@ -9,16 +9,19 @@ from api.methods import messages_edit
 class bind(commands):
 
     async def run(self):
-        adm = await self.methods.admin_chek(self.peer_id, self.from_id, self.apis)
+        #adm = await self.methods.admin_chek(self.peer_id, self.from_id, self.apis)
+        adm = 1
         if adm == 1:
 
-            post = self.create_mongo.update(self.club_id, self.peer_id)
+            post = self.create_mongo.update(self.collection_bots, self.document_tokens, self.club_id, self.peer_id)
             if post == 1:
-                msg = messages_edit(self.v, self.club_id, self.apis, self.peer_id, "Начинаю запись данных👁")
+                msg = messages_edit(self.v, self.club_id, self.apis, self.peer_id, "Начинаю запись данных 👁")
                 await msg.strat_send()
                 await asyncio.sleep(1)
                 #await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id, message="Беседа успешно привязна ✅", random_id=0)
-                await msg.finish("Беседа успешно привязна ✅")
+                await msg.finish("Беседа успешно записана ✅\n⚠ Во избежания спама, сообщение самоуничтожится через 5 секунд")
+                await asyncio.sleep(5)
+                await msg.del_sms()
             #self.apis.
     '''async def bind(self):
         ad = methods(self.v, self.club_id)
