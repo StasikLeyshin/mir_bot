@@ -1,7 +1,7 @@
 # [MirBot version 1.0]
 
 
-## 📖 Установка
+## Установка
 ```
 $ git clone https://github.com/StasikLeyshin/mir_bot.git
 $ cd mir_bot
