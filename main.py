@@ -16,7 +16,6 @@ from infinity import infinity_bots, infinity_beskon
 
 def load_modules(file):
    files = os.listdir(f"c:{file}")
-   #files = open(file, encoding='utf-8')
    modules = filter(lambda x: x.endswith('.py'), files)
    for m in modules:
        importlib.import_module("commands_besed." + m[0:-3])
@@ -88,6 +87,8 @@ if __name__ == "__main__":
     port = mon["port"]
     collection_bots = mon["collection_bots"]
     document_tokens = mon["document_tokens"]
+    collection_django = mon["collection_django"]
+    apps = mon["apps"]
 
     vk = config["VK"]
     V = vk["v"]
@@ -109,7 +110,7 @@ if __name__ == "__main__":
     apis = apis_generate(spis)
 
     inf = infinity_bots(V, create_mongo, collection_bots, document_tokens)
-    inf_b = infinity_beskon(V, create_mongo, apis, spis)
+    inf_b = infinity_beskon(V, create_mongo,collection_django, apps, apis, spis)
 
     tasks = [loop.create_task(inf.main(apis[i["id"]], i["id"], i["them"])) for i in spis]
     tasks.append(loop.create_task(inf_b.beskon()))

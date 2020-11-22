@@ -59,3 +59,26 @@ class create_mongodb:
                 posts.save(post)
                 return 1
         return 0
+
+    def get_them(self, db, apps, them):
+        posts = db[f"{apps}_topics"]
+        post = posts.find_one({'them':"1"})
+
+
+
+
+    def get(self, collections, apps, **kwargs):
+        db = self.client[f"{collections}"]
+        if "empty" in kwargs:
+            kwargs = {}
+        self.get_them(db, apps, kwargs["them"])
+        posts = db[f"{apps}_rassilka"]
+        if "empty" in kwargs:
+            kwargs = {}
+        thems = []
+        for post in posts.find(kwargs):
+            thems.append(post)
+
+        return thems
+
+

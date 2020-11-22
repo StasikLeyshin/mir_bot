@@ -4,12 +4,14 @@ import asyncio
 
 class infinity_beskon:
 
-    def __init__(self, V, create_mongo, apis, st):
+    def __init__(self, V, create_mongo, apps, collection_django, apis, st):
 
         self.V = V
         self.create_mongo = create_mongo
+        self.apps = apps
         self.apis = apis
         self.st = st
+        self.collection_django = collection_django
 
     async def generate(self, st):
         thems = {}
@@ -22,6 +24,9 @@ class infinity_beskon:
 
 
     async def beskon(self):
-        await self.generate(self.st)
+        gen = await self.generate(self.st)
+        #print(gen)
+        loop = asyncio.get_running_loop()
         while True:
+            loop.create_task(self.create_mongo.get(self.collection_django, self.apps))
             await asyncio.sleep(60)

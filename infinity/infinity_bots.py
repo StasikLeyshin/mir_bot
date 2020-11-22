@@ -26,9 +26,11 @@ class infinity_bots:
 
     async def main(self, apis, club_id, them):
         #apis = api(club_id, token)
+        print("-" * 40)
+        print(f"Start group ID: [{club_id}] Them: [{them}]")
         loop = asyncio.get_running_loop()
         asd = await apis.api_get("groups.getLongPollServer", v=self.V, group_id=club_id)
-        print(asd)
+        #print(asd)
         if "error" not in asd:
             server = asd['server']
             key = asd['key']
