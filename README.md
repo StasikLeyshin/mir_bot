@@ -10,7 +10,10 @@ $ pip install -r requirements.txt
 
 Создайте текстовый файл `tokens.txt`</br>
 И положите в него токены от групп вк в формате `токен&тема`</br></br>
-## Запуск:
+## Запуск
 ```
 $ python main.py
 ```
+</br>
+##Contributing
+Мой [VK](https://vk.com/id597624554)
