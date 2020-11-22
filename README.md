@@ -14,6 +14,6 @@ $ pip install -r requirements.txt
 ```
 $ python main.py
 ```
-</br>
+
 ## Contributing</br>
 Мой [VK](https://vk.com/id597624554)
