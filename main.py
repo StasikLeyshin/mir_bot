@@ -78,6 +78,10 @@ def ctf_get():
 
 
 if __name__ == "__main__":
+    #import requests
+    #import datetime
+    #requests.post("http://127.0.0.1:8000/api/", data={"id": 5454, "start_date": datetime.datetime.now()})
+
     loop = asyncio.get_event_loop()
 
     config = ctf_get()
@@ -99,6 +103,8 @@ if __name__ == "__main__":
 
     tok = config["Txt"]["tokens"]
 
+    url_dj = config["Django"]["url_dj"]
+
     load_modules(f"{bs}")
 
     client = MongoClient(localhost, int(port))
@@ -110,7 +116,7 @@ if __name__ == "__main__":
     apis = apis_generate(spis)
 
     inf = infinity_bots(V, create_mongo, collection_bots, document_tokens)
-    inf_b = infinity_beskon(V, create_mongo,collection_django, apps, apis, spis)
+    inf_b = infinity_beskon(V, create_mongo, collection_django, apps, collection_bots, document_tokens, apis, spis, url_dj)
 
     tasks = [loop.create_task(inf.main(apis[i["id"]], i["id"], i["them"])) for i in spis]
     tasks.append(loop.create_task(inf_b.beskon()))

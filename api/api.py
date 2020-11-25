@@ -3,6 +3,7 @@ import aiohttp
 import asyncio
 import json
 import ujson
+import requests
 
 from api.api_error import api_error
 
@@ -49,7 +50,7 @@ class api:
         async with aiohttp.ClientSession() as session:
             async with session.post(f"https://api.vk.com/method/{method}?", data=kwargs) as response:
 
-                d = await response.json(loads = ujson.loads)
+                d = await response.json(loads=ujson.loads)
                 if_error = api_error(self.club_id, self.token, **d)
                 check = await if_error.error()
 
@@ -78,6 +79,37 @@ class api_url:
 
                 elif check["code"] == 0:
                     return check
+
+    async def post_json(self, **kwargs):
+
+        async with aiohttp.ClientSession() as session:
+            async with session.post(f"{self.url}", data=kwargs) as response:
+
+                d = await response.json(loads=ujson.loads)
+                if_error = api_error(0, "empty", **d)
+                check = await if_error.error()
+
+                if check["code"] == 1:
+                    return d
+
+                elif check["code"] == 0:
+                    return check
+
+    async def post_files(self, **kwargs):
+
+
+        #async with aiohttp.ClientSession() as session:
+            #async with session.post(f"{self.url}", files=kwargs) as response:
+        response = requests.post(self.url, files=kwargs)
+        d = response.json()
+        if_error = api_error(0, "empty", **d)
+        check = await if_error.error()
+
+        if check["code"] == 1:
+            return d
+
+        elif check["code"] == 0:
+            return check
 
 
 

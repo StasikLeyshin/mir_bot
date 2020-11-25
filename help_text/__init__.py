@@ -1,0 +1,1 @@
+from .text_func import opredel_screen

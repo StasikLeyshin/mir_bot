@@ -60,25 +60,46 @@ class create_mongodb:
                 return 1
         return 0
 
-    def get_them(self, db, apps, them):
-        posts = db[f"{apps}_topics"]
-        post = posts.find_one({'them':"1"})
 
-
-
-
-    def get(self, collections, apps, **kwargs):
+    def get_them(self, collections, apps, id_ras):
         db = self.client[f"{collections}"]
-        if "empty" in kwargs:
-            kwargs = {}
-        self.get_them(db, apps, kwargs["them"])
+        posts = db[f"{apps}_rassilka_them"]
+        thems_id = []
+        thems = []
+        for post in posts.find({"rassilka_id": id_ras}):
+            thems_id.append(post["topics_id"])
+        posts = db[f"{apps}_topics"]
+        for i in thems_id:
+            thems.append(posts.find_one({'id': i})["soc"])
+        #post = posts.find_one({'id':them_id})
+        return thems
+
+
+
+
+    def get(self, collections, apps):
+        db = self.client[f"{collections}"]
+        kwargs = {}
+        #if "empty" in kwargs:
+            #kwargs = {}
+        #self.get_them(db, apps, kwargs["them"])
         posts = db[f"{apps}_rassilka"]
-        if "empty" in kwargs:
-            kwargs = {}
+        #if "empty" in kwargs:
+            #kwargs = {}
         thems = []
         for post in posts.find(kwargs):
             thems.append(post)
 
         return thems
+
+
+    def get_peer_id(self, collections, documents, club_id):
+        peer_id = 0
+        db = self.client[f"{collections}"]
+        posts = db[f"{documents}"]
+        po = posts.find_one({'id': club_id})
+        if "peer_id" in po:
+            peer_id = po["peer_id"]
+        return peer_id
 
 

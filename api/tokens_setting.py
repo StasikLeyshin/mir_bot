@@ -6,7 +6,8 @@ import os
 import time
 
 
-from api import api, api_one_run
+from api import api
+from api.api_execute import api_one_run
 
 class tokens_setting:
 
