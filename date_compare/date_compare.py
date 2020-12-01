@@ -15,20 +15,23 @@ class date_compare:
 
 
     def converting(self):
-        number = re.findall('\d+', self.period)[0]
-        number = int(number)
-        if "мин" in self.period:
-            d = self.date_new + datetime.timedelta(minutes=number)
-            return d
-        elif "час" in self.period:
-            d = self.date_new + datetime.timedelta(hours=number)
-            return d
-        elif "ден" in self.period or "сут" in self.period:
-            d = self.date_new + datetime.timedelta(days=number)
-            return d
-        elif "неде" in self.period:
-            d = self.date_new + datetime.timedelta(hours=number)
-            return d
+        if len(self.period) >1:
+            number = re.findall('\d+', self.period)[0]
+            number = int(number)
+            if "мин" in self.period:
+                d = self.date_new + datetime.timedelta(minutes=number)
+                return d
+            elif "час" in self.period:
+                d = self.date_new + datetime.timedelta(hours=number)
+                return d
+            elif "ден" in self.period or "сут" in self.period:
+                d = self.date_new + datetime.timedelta(days=number)
+                return d
+            elif "неде" in self.period:
+                d = self.date_new + datetime.timedelta(hours=number)
+                return d
+        else:
+            return "1"
 
 
 

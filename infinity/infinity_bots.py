@@ -37,42 +37,45 @@ class infinity_bots:
             ts = asd['ts']
 
             while True:
-                otvet = await api_url(f"{server}?act=a_check&key={key}&ts={ts}&wait=25&mode=2").get_json()
-                if "failed" in otvet:
-                    if otvet["failed"] == 2 or otvet["failed"] == 3:
-                        asd = await apis.api_get("groups.getLongPollServer", v=self.V, group_id=club_id)
-                        if "error" not in asd:
-                            server = asd['server']
-                            key = asd['key']
-                            ts = asd['ts']
+                try:
+                    otvet = await api_url(f"{server}?act=a_check&key={key}&ts={ts}&wait=25&mode=2").get_json()
+                    if "failed" in otvet:
+                        if otvet["failed"] == 2 or otvet["failed"] == 3:
+                            asd = await apis.api_get("groups.getLongPollServer", v=self.V, group_id=club_id)
+                            if "error" not in asd:
+                                server = asd['server']
+                                key = asd['key']
+                                ts = asd['ts']
+                                continue
+
+                        else:
                             continue
 
-                    else:
-                        continue
+                    updates = otvet["updates"]
+                    if "ts" in otvet:
+                        ts = otvet['ts']
+                    if len(updates) > 0:
+                        slovar = updates[0]
+                        if "type" in slovar and slovar["type"] == "message_new":
+                            message = slovar["object"]["message"]
+                            from_id = message["from_id"]
+                            peer_id = message["peer_id"]
+                            # print(message)
 
-                updates = otvet["updates"]
-                if "ts" in otvet:
-                    ts = otvet['ts']
-                if len(updates) > 0:
-                    slovar = updates[0]
-                    if "type" in slovar and slovar["type"] == "message_new":
-                        message = slovar["object"]["message"]
-                        from_id = message["from_id"]
-                        peer_id = message["peer_id"]
-                        # print(message)
+                            # ls
+                            if from_id == peer_id:pass
+                            # print(message)
 
-                        # ls
-                        if from_id == peer_id: pass
-                        # print(message)
+                            # bs
+                            if from_id != peer_id:
+                                print(message)
+                                text = message["text"].lower()
+                                sel = await self.selection(command_list, text)
 
-                        # bs
-                        if from_id != peer_id:
-                            print(message)
-                            text = message["text"].lower()
-                            sel = await self.selection(command_list, text)
-
-                            if sel != 0:
-                                loop.create_task(sel.process(self.V, club_id, message, apis, them, self.create_mongo, self.collection_bots, self.document_tokens).run())
-                                #await sel.process(self.V, club_id, message, apis, them, self.create_mongo).run()
-                                continue
+                                if sel != 0:
+                                    loop.create_task(sel.process(self.V, club_id, message, apis, them, self.create_mongo, self.collection_bots, self.document_tokens).run())
+                                    #await sel.process(self.V, club_id, message, apis, them, self.create_mongo).run()
+                                    continue
+                except:
+                    continue
 

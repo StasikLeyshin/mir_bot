@@ -67,9 +67,15 @@ class infinity_beskon:
         for i in results:
             #print(i["text"])
             date_chek = date_compare(i["date_start"], i["period"]).compare_date()
-            # await api_url(f"{self.url_dj}").post_json(id=i["id"], date_start=date_chek)
-            if date_chek != "0":
-                spis_ras = self.create_mongo.get_them(self.collection_django, self.apps, 11)
+            if date_chek == "1":
+                #await api_url(f"{self.url_dj}").post_json(id=i["id"], delete="1")
+                spis_ras = self.create_mongo.get_them(self.collection_django, self.apps, i["id"])
+                await self.dispatch(i, spis_ras, gen)
+                await api_url(f"{self.url_dj}").post_json(id=i["id"], delete="1")
+
+            elif date_chek != "0":
+                await api_url(f"{self.url_dj}").post_json(id=i["id"], date_start=date_chek)
+                spis_ras = self.create_mongo.get_them(self.collection_django, self.apps, i["id"])
                 await self.dispatch(i, spis_ras, gen)
 
 
