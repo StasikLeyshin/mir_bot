@@ -14,7 +14,7 @@ class methods:
         self.club_id = club_id
 
     async def admin_chek(self, peer_id, from_id, apis):
-        response = await apis.api_get("messages.getConversationMembers", peer_id=peer_id, v = self.v)
+        response = await apis.api_get("messages.getConversationMembers", peer_id=peer_id, v=self.v)
         if "error" not in response:
             for element in response["items"]:
                 if element["is_admin"] is True and from_id == element["member_id"]:

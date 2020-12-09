@@ -78,8 +78,25 @@ class infinity_beskon:
                 spis_ras = self.create_mongo.get_them(self.collection_django, self.apps, i["id"])
                 await self.dispatch(i, spis_ras, gen)
 
+    async def peer_ids_add(self, apis_new, club_id):
+        #for i in self.apis:
+        p = await self.apis[int(club_id)].api_post("messages.getConversations", v=self.V, count=200)
+        for i in p["items"]:
+            #print(i)
+            if int(i["conversation"]["peer"]["id"]) > 2000000000:
+                print(i["conversation"]["peer"]["id"], club_id)
+        return
+            #self.create_mongo.update(self.collection_bots, self.document_tokens, i, self.peer_id)
+
+
+
 
     async def beskon(self):
+        #[await self.peer_ids_add(self.apis[i], i) for i in self.apis]
+        #loop = asyncio.get_running_loop()
+        #tasks = [loop.create_task(self.peer_ids_add(self.apis[i], i)) for i in self.apis]
+        #loop.run_until_complete(asyncio.wait(tasks))
+        #await self.peer_ids_add()
         gen = await self.generate(self.st)
         loop = asyncio.get_running_loop()
         while True:

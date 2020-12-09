@@ -25,9 +25,9 @@ class api_error:
             return {"code" : 0, "error": self.kwargs["error"]["error_msg"]}
         elif "failed" in self.kwargs:
             logger.error(f'club_id: {self.club_id} | error_code: {self.kwargs["failed"]} | failed | method: failed')
-            return {"code" : 0, "failed": self.kwargs["failed"]}
+            return {"code": 0, "failed": self.kwargs["failed"]}
         else:
-            return {"code" : 1}
+            return {"code": 1}
             
         
         

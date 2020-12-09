@@ -26,6 +26,8 @@ def start(name, collection_bots, document_tokens):
     with open(f'{name}.txt') as f:
         lines = f.read().splitlines()
 
+    print(f"number tokens: {len(lines)}")
+
     loop = asyncio.get_event_loop()
     tasks = [loop.create_task(api(0, i.split('&')[0]).api_get("groups.getById", v=f"{V}")) for i in lines]
     loop.run_until_complete(asyncio.wait(tasks))
@@ -114,10 +116,11 @@ if __name__ == "__main__":
 
     spis = create_mongo.get_tokens(collection_bots, document_tokens)
     apis = apis_generate(spis)
-
+    print(f"number of working tokens: {len(apis)}")
+    #print(apis)
     inf = infinity_bots(V, create_mongo, collection_bots, document_tokens)
     inf_b = infinity_beskon(V, create_mongo, collection_django, apps, collection_bots, document_tokens, apis, spis, url_dj)
-
+    #tasks = []
     tasks = [loop.create_task(inf.main(apis[i["id"]], i["id"], i["them"])) for i in spis]
     tasks.append(loop.create_task(inf_b.beskon()))
     results = loop.run_until_complete(asyncio.wait(tasks))
