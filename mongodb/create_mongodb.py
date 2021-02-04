@@ -41,17 +41,24 @@ class create_mongodb:
             kwargs = {}
         tokens = []
         ids = []
+        tokens_new = []
         for post in posts.find(kwargs):
             #print(post)
             tokens.append({"id": post["id"], "token": post["token"], "them": post["them"]})
+            if "peer_id" in post:
+                tokens_new.append({"id": post["id"], "token": post["token"], "them": post["them"], "name": post["name"],
+                                   "peer_id": post["peer_id"]})
+            else:
+                tokens_new.append({"id": post["id"], "token": post["token"], "them": post["them"], "name": post["name"]})
             #tokens[post["id"]] = post["token"]
         #print(tokens)
-        return tokens
+        return tokens, tokens_new
 
     def update(self, collections, documents, club_id, peer_id):
         db = self.client[f"{collections}"]
         posts = db[f"{documents}"]
-        po = posts.find_one({'peer_id': peer_id})
+        po = posts.find_one({'id': club_id, 'peer_id': peer_id})
+        print(po)
         if po is None:
             post = posts.find_one({'id': club_id})
             if post is not None:

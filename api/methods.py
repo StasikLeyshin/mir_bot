@@ -17,8 +17,9 @@ class methods:
         response = await apis.api_get("messages.getConversationMembers", peer_id=peer_id, v=self.v)
         if "error" not in response:
             for element in response["items"]:
-                if element["is_admin"] is True and from_id == element["member_id"]:
-                    return 1
+                if "is_admin" in element:
+                    if element["is_admin"] is True and from_id == element["member_id"]:
+                        return 1
             return 0
         return -1
 

@@ -23,19 +23,20 @@ class api:
 
         strings = []
         #print(kwargs)
-        for key,item in kwargs.items():
+        for key, item in kwargs.items():
             strings.append("{}={}".format(key.capitalize().lower(), item))
             #print(strings)
 
         result = "&".join(strings)
         result1 = ", ".join(strings)
         #result = '='.join([f'{key.capitalize()}: {value}' for key, value in kwargs[0].items()])
+        link = f"https://api.vk.com/method/{method}?{result}&access_token={self.token}"
         async with aiohttp.ClientSession() as session:
-            async with session.get(f"https://api.vk.com/method/{method}?{result}&access_token={self.token}") as response:
+            async with session.get(link) as response:
 
                 d = await response.json(loads = ujson.loads)
                 if_error = api_error(self.club_id, self.token, **d)
-                check = await if_error.error()
+                check = await if_error.error(link)
 
                 if check["code"] == 1:
                     return d["response"]
@@ -47,12 +48,13 @@ class api:
     async def api_post(self, method, **kwargs):
 
         kwargs["access_token"] = self.token
+        link = f"https://api.vk.com/method/{method}?"
         async with aiohttp.ClientSession() as session:
-            async with session.post(f"https://api.vk.com/method/{method}?", data=kwargs) as response:
+            async with session.post(link, data=kwargs) as response:
 
                 d = await response.json(loads=ujson.loads)
                 if_error = api_error(self.club_id, self.token, **d)
-                check = await if_error.error()
+                check = await if_error.error(link)
 
                 if check["code"] == 1:
                     return d["response"]
@@ -68,12 +70,13 @@ class api_url:
         self.url = url
 
 
-    async def get_json(self):
+    async def get_json(self, club_id=0):
+        link = f"{self.url}"
         async with aiohttp.ClientSession() as session:
-            async with session.get(f"{self.url}") as response:
+            async with session.get(link) as response:
                 d = await response.json(loads=ujson.loads)
-                if_error = api_error(0, "empty", **d)
-                check = await if_error.error()
+                if_error = api_error(club_id, "empty", **d)
+                check = await if_error.error(self.url)
                 if check["code"] == 1:
                     return d
 
@@ -81,13 +84,13 @@ class api_url:
                     return check
 
     async def post_json(self, **kwargs):
-
+        link = f"{self.url}"
         async with aiohttp.ClientSession() as session:
-            async with session.post(f"{self.url}", data=kwargs) as response:
+            async with session.post(link, data=kwargs) as response:
 
                 d = await response.json(loads=ujson.loads)
                 if_error = api_error(0, "empty", **d)
-                check = await if_error.error()
+                check = await if_error.error(self.url)
 
                 if check["code"] == 1:
                     return d
@@ -103,7 +106,7 @@ class api_url:
         response = requests.post(self.url, files=kwargs)
         d = response.json()
         if_error = api_error(0, "empty", **d)
-        check = await if_error.error()
+        check = await if_error.error(self.url)
 
         if check["code"] == 1:
             return d

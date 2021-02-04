@@ -3,10 +3,14 @@ import asyncio
 import time
 import os
 from pymongo import MongoClient
-#import nest_asyncio
+import nest_asyncio
 import importlib
 import configparser
-#nest_asyncio.apply()
+nest_asyncio.apply()
+from flask import Flask
+from aiohttp import web
+
+#app = Flask(__name__)
 
 from api import api, api_url, tokens_setting
 from mongodb import create_mongodb
@@ -21,12 +25,18 @@ def load_modules(file):
        importlib.import_module("commands_besed." + m[0:-3])
 
 
+#@app.route('/')
+#def hello():
+    #return 'Hello, World!'
+
+
 
 def start(name, collection_bots, document_tokens):
     with open(f'{name}.txt') as f:
         lines = f.read().splitlines()
 
     print(f"number tokens: {len(lines)}")
+    #print(lines)
 
     loop = asyncio.get_event_loop()
     tasks = [loop.create_task(api(0, i.split('&')[0]).api_get("groups.getById", v=f"{V}")) for i in lines]
@@ -79,10 +89,116 @@ def ctf_get():
     return config
 
 
+async def executor_post(request: web.Request):
+    #print(await request.text())
+    event = await request.json()
+    #event = await request.text()
+    #tasks.append(loop.create_task(inf.main(apis[i["id"]], i["id"], i["them"])))
+    #print(event)
+    if "token" in event and "soc" in event and "id" not in event:
+        result = await api(0, event["token"]).api_get("groups.getById", v=f"{V}")
+        if "error" not in result:
+            data = {"status": 1, "id": result[0]["id"], "name": result[0]["name"]}
+            apis[result[0]["id"]] = api(result[0]["id"], event["token"])
+            spis.append({"id": result[0]["id"], "name": result[0]["name"], "token": event["token"], "them": event["soc"]})
+            '''create_mongo.create_db(collection_bots,
+                                   document_tokens,
+                                   [{"id": result[0]["id"],
+                                     "name": result[0]["name"],
+                                     "token": event["token"],
+                                     "them": event["soc"]}],
+                                   [result[0]["id"]])'''
+            await tokens_setting(V).main([event["token"]], [result[0]["id"]])
+
+        else:
+            data = {"status": 0}
+
+        return web.json_response(data)
+
+    elif "id" in event:
+        result = await api(0, event["token"]).api_get("groups.getById", v=f"{V}")
+        if "error" not in result:
+            #print("------------------")
+            data = {"status": 1, "id": result[0]["id"], "name": result[0]["name"]}
+            #print(event["id"], spis)
+            token = apis[event["id"]].token
+            del apis[event["id"]]
+            for i in spis:
+                if i["id"] == event["id"]:
+                    soc = i["them"]
+                    spis.remove(i)
+                    break
+            apis[result[0]["id"]] = api(result[0]["id"], event["token"])
+            spis.append({"id": result[0]["id"], "name": result[0]["name"], "token": event["token"], "them": event["soc"]})
+            if token != event["token"]:
+                loop_control[result[0]["id"]] = event["soc"]
+                loop.create_task(inf.main(apis[result[0]["id"]], result[0]["id"], event["soc"], loop_control))
+            if loop_control[result[0]["id"]] != event["soc"]:
+                loop_control[result[0]["id"]] = event["soc"]
+                loop.create_task(inf.main(apis[result[0]["id"]], result[0]["id"], event["soc"], loop_control))
+
+
+
+        else:
+            data = {"status": 0}
+
+        return web.json_response(data)
+
+
+
+
+    return web.Response(text="Hello, wor ld")
+
+async def executor_get(request: web.Request):
+    #event = await request.json()
+    event = await request.text()
+    print(event)
+    return web.Response(text="Hello, wor ld")
+
+
+async def test():
+    app = web.Application()
+    app.router.add_route(
+        path='/',
+        method='POST',
+        handler=executor_post
+    )
+    app.router.add_route(
+        path='/',
+        method='GET',
+        handler=executor_get
+    )
+    web.run_app(app=app, host="127.0.0.1", port=5000)
+
+async def te():
+    try:
+        await asyncio.sleep(10)
+        loop_control[5411326] = "e"
+    except Exception as e:
+        print(e)
+
+async def add_group(spis_new):
+    ap_url = api_url(f"{url_dj}?")
+    for i in spis_new:
+        if "peer_id" in i:
+            await ap_url.post_json(create=1, token=i["token"], id_group=i["id"], name=i["name"], them=i["them"], peer_id=i["peer_id"])
+        else:
+            await ap_url.post_json(create=1, token=i["token"], id_group=i["id"], name=i["name"], them=i["them"])
+    return
+
+
+
+
+
 if __name__ == "__main__":
     #import requests
     #import datetime
-    #requests.post("http://127.0.0.1:8000/api/", data={"id": 5454, "start_date": datetime.datetime.now()})
+    #result = requests.post("https://api.vk.com/method/groups.getById", data={"access_token": "c18533e0a343cf748c1c1f167f11876a32082494b463155109fe18f5e52cc9e39f931a8eaaa367d7c4313", "v": 5.103})
+    #print(result.json())
+    #import threading
+    #x = threading.Thread(target=app.run())
+    #x.start()
+    #print(1)
 
     loop = asyncio.get_event_loop()
 
@@ -112,16 +228,36 @@ if __name__ == "__main__":
     client = MongoClient(localhost, int(port))
     create_mongo = create_mongodb(client)
 
-    start(tok, collection_bots, document_tokens)
-
-    spis = create_mongo.get_tokens(collection_bots, document_tokens)
+    #start(tok, collection_bots, document_tokens)
+    toke = create_mongo.get_tokens(collection_bots, document_tokens)
+    #loop1 = asyncio.get_event_loop()
+    #toke = loop.run_until_complete(api_url(f"{url_dj}?").post_json(get=1))
+    #toke = await api_url(f"{url_dj}?").post_json(get=1)
+    #spis = toke["list"]
+    spis = toke[0]
+    spis_new = toke[1]
     apis = apis_generate(spis)
     print(f"number of working tokens: {len(apis)}")
-    #print(apis)
-    inf = infinity_bots(V, create_mongo, collection_bots, document_tokens)
+
+    inf = infinity_bots(V, create_mongo, collection_bots, document_tokens, url_dj)
     inf_b = infinity_beskon(V, create_mongo, collection_django, apps, collection_bots, document_tokens, apis, spis, url_dj)
-    #tasks = []
-    tasks = [loop.create_task(inf.main(apis[i["id"]], i["id"], i["them"])) for i in spis]
-    tasks.append(loop.create_task(inf_b.beskon()))
+    #tasks = []'''
+    #loop1 = asyncio.get_running_loop()
+    tasks = []
+    loop_control = {}
+    for i in spis:
+        loop_control[i["id"]] = i["them"]
+        #loop_control[spis[i]["id"]] = 0
+
+    #tasks = [loop.create_task(inf.main(apis[i["id"]], i["id"], i["them"], loop_control)) for i in spis]
+
+
+    #tasks.append(loop.create_task(inf_b.beskon()))
+    #print(tasks)
+    #tasks.append(loop.create_task(test()))
+    tasks.append(loop.create_task(add_group(spis_new)))
+    #tasks.append(loop.create_task(te()))
+    #print(111111111111)
     results = loop.run_until_complete(asyncio.wait(tasks))
+    #print(1)
 

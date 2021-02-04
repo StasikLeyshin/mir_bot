@@ -97,8 +97,9 @@ class infinity_beskon:
         #tasks = [loop.create_task(self.peer_ids_add(self.apis[i], i)) for i in self.apis]
         #loop.run_until_complete(asyncio.wait(tasks))
         #await self.peer_ids_add()
-        gen = await self.generate(self.st)
+        #gen = await self.generate(self.st)
         loop = asyncio.get_running_loop()
         while True:
+            gen = await self.generate(self.st)
             loop.create_task(self.get_rass(gen))
             await asyncio.sleep(60)

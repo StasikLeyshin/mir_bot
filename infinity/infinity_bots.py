@@ -7,12 +7,13 @@ from command_besed import command_list
 
 class infinity_bots:
 
-    def __init__(self, V, create_mongo, collection_bots, document_tokens):
+    def __init__(self, V, create_mongo, collection_bots, document_tokens, url_dj):
 
         self.V = V
         self.create_mongo = create_mongo
         self.collection_bots = collection_bots
         self.document_tokens = document_tokens
+        self.url_dj = url_dj
 
     async def selection(self, command_list, text):
         for c in command_list:
@@ -24,7 +25,7 @@ class infinity_bots:
         return 0
 
 
-    async def main(self, apis, club_id, them):
+    async def main(self, apis, club_id, them, control):
         #apis = api(club_id, token)
         print("-" * 40)
         print(f"Start group ID: [{club_id}] Them: [{them}]")
@@ -32,13 +33,17 @@ class infinity_bots:
         asd = await apis.api_get("groups.getLongPollServer", v=self.V, group_id=club_id)
         #print(asd)
         if "error" not in asd:
+            #print(asd)
             server = asd['server']
             key = asd['key']
             ts = asd['ts']
 
             while True:
                 try:
-                    otvet = await api_url(f"{server}?act=a_check&key={key}&ts={ts}&wait=25&mode=2").get_json()
+                    if control[club_id] != them:
+                        print(f"Close {club_id}")
+                        return
+                    otvet = await api_url(f"{server}?act=a_check&key={key}&ts={ts}&wait=25&mode=2").get_json(club_id)
                     if "failed" in otvet:
                         if otvet["failed"] == 2 or otvet["failed"] == 3:
                             asd = await apis.api_get("groups.getLongPollServer", v=self.V, group_id=club_id)
@@ -76,6 +81,14 @@ class infinity_bots:
                                     loop.create_task(sel.process(self.V, club_id, message, apis, them, self.create_mongo, self.collection_bots, self.document_tokens).run())
                                     #await sel.process(self.V, club_id, message, apis, them, self.create_mongo).run()
                                     continue
-                except:
-                    continue
 
+
+                except Exception as e:
+                    print(e)
+                    continue
+        #print(asd["code"])
+        elif "error" in asd and asd["errcode"] in [5, 38]:
+            #print(111111111111111111111)
+            await api_url(f"{self.url_dj}").post_json(club_id=club_id, status=1)
+            return
+        #print(asd)
