@@ -4,7 +4,7 @@ import asyncio
 from api.methods import methods
 class commands:
 
-    def __init__(self, v, club_id, message, apis, them, create_mongo, collection_bots, document_tokens):
+    def __init__(self, v, club_id, message, apis, them, create_mongo, collection_bots, document_tokens, url_dj):
 
         self.v = v
         self.club_id = club_id
@@ -23,6 +23,7 @@ class commands:
         self.create_mongo = create_mongo
         self.collection_bots = collection_bots
         self.document_tokens = document_tokens
+        self.url_dj = url_dj
 
     '''async def bind(self):
         ad = methods(self.v, self.club_id)

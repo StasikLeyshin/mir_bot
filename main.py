@@ -9,6 +9,7 @@ import configparser
 nest_asyncio.apply()
 from flask import Flask
 from aiohttp import web
+import random
 
 #app = Flask(__name__)
 
@@ -16,13 +17,22 @@ from api import api, api_url, tokens_setting
 from mongodb import create_mongodb
 from command_besed import command_list
 from infinity import infinity_bots, infinity_beskon
+from generating_questions import generating
+from edite_text import opredel_skreen, chunks
 
+def load_modules(file, file_ls):
 
-def load_modules(file):
-   files = os.listdir(f"c:{file}")
-   modules = filter(lambda x: x.endswith('.py'), files)
-   for m in modules:
-       importlib.import_module("commands_besed." + m[0:-3])
+    files = os.listdir(f"c:{file}")
+    file_ls = os.listdir(f"c:{file_ls}")
+    modules = filter(lambda x: x.endswith('.py'), files)
+    modules_ls = filter(lambda x: x.endswith('.py'), file_ls)
+    for m in modules:
+        print(m)
+        importlib.import_module("commands_besed." + m[0:-3])
+    for n in modules_ls:
+        print(n)
+        importlib.import_module("commands_ls." + n[0:-3])
+    return
 
 
 #@app.route('/')
@@ -78,7 +88,9 @@ async def selection(command_list, text):
 
 def apis_generate(spis):
     apis = {}
+    #print(spis)
     for i in spis:
+        print(i)
         apis[i["id"]] = api(i["id"], i["token"])
     return apis
 
@@ -109,6 +121,8 @@ async def executor_post(request: web.Request):
                                      "them": event["soc"]}],
                                    [result[0]["id"]])'''
             await tokens_setting(V).main([event["token"]], [result[0]["id"]])
+            loop_control[result[0]["id"]] = event["soc"]
+            loop.create_task(inf.main(apis[result[0]["id"]], result[0]["id"], event["soc"], loop_control))
 
         else:
             data = {"status": 0}
@@ -138,16 +152,56 @@ async def executor_post(request: web.Request):
                 loop.create_task(inf.main(apis[result[0]["id"]], result[0]["id"], event["soc"], loop_control))
 
 
-
         else:
             data = {"status": 0}
 
         return web.json_response(data)
 
+    elif "token" in event and "user_link" in event:
+        screen_name = await opredel_skreen(event["user_link"], event["user_link"])
+        #print(screen_name)
+        result = await api(0, event["token"]).api_get("users.get", v=V, user_ids=screen_name)
+        if "error" not in result:
+            user_id = result[0]["id"]
+            data = {"status": 1, "user_id": user_id}
+        else:
+            data = {"status": 0}
+        return web.json_response(data)
+
+    elif "token" in event and "question" in event:
+        start_time = time.time()
+        users = create_mongo.users_get()
+        ran = ["🌝 Вопрос дня и уже у тебя в личных сообщениях, скорее отвечай!",
+               "👾 Новый день, новый вопрос, новые возможности, и это всё доступно тебе уже сейчас, можешь уже отвечать:)",
+               "🌚 Утро позднее, утро раннее, а вопрос дня неизменно уже у тебя)",
+               "👻 Новый вопрос! Бегом отвечать!"
+               ]
+        users_new = await chunks(users, 100)
+        for i in users_new:
+            result = loop.create_task(api(0, event["token"]).api_post("messages.send", v=V, peer_ids=i,
+                                                                      message=f"{random.choice(ran)}\n\n"
+                                                                      f"{event['question']}\n\n"
+                                                                      f"⚠ Чтобы ответить на вопрос, напишите /ответ номер вопроса и ваш ответ\n\n"
+                                                                      f"❗Номер текущего вопроса: {event['question_id']}",
+                                                                      random_id=0))
+            await asyncio.sleep(1)
+
+        '''import requests
+        result = requests.post("https://api.vk.com/method/messages.send", data={
+        "access_token": event["token"],
+        "v": 5.103,
+        "random_id": 0,
+        "message": "1111",
+        "peer_ids":users})'''
+        result = ""
+        if "error" in result:
+            data = {"status": 0}
+        else:
+            data = {"status": 1}
+        return web.json_response(data)
 
 
-
-    return web.Response(text="Hello, wor ld")
+    return web.json_response({"status": 0})
 
 async def executor_get(request: web.Request):
     #event = await request.json()
@@ -194,6 +248,7 @@ if __name__ == "__main__":
     #import requests
     #import datetime
     #result = requests.post("https://api.vk.com/method/groups.getById", data={"access_token": "c18533e0a343cf748c1c1f167f11876a32082494b463155109fe18f5e52cc9e39f931a8eaaa367d7c4313", "v": 5.103})
+    #result = requests.post("http://127.0.0.1:8000/api/", data={"spec": 1})
     #print(result.json())
     #import threading
     #x = threading.Thread(target=app.run())
@@ -223,25 +278,34 @@ if __name__ == "__main__":
 
     url_dj = config["Django"]["url_dj"]
 
-    load_modules(f"{bs}")
+    questions_file = config["Questions"]["file"]
+
+    load_modules(f"{bs}", f"{ls}")
 
     client = MongoClient(localhost, int(port))
-    create_mongo = create_mongodb(client)
+    create_mongo = create_mongodb(client, collection_django, apps)
+
+    loop.run_until_complete(generating(questions_file, create_mongo).sp_vopr())
+
+    #files = os.listdir("generating_questions/img")
+    #print(files)
+    #print(filter(lambda x: x.endswith('.png'), files))
 
     #start(tok, collection_bots, document_tokens)
-    toke = create_mongo.get_tokens(collection_bots, document_tokens)
+    #toke = create_mongo.get_tokens(collection_bots, document_tokens)
     #loop1 = asyncio.get_event_loop()
-    #toke = loop.run_until_complete(api_url(f"{url_dj}?").post_json(get=1))
+    toke = loop.run_until_complete(api_url(f"{url_dj}?").post_json(get=1))
     #toke = await api_url(f"{url_dj}?").post_json(get=1)
     #spis = toke["list"]
-    spis = toke[0]
-    spis_new = toke[1]
+    spis = toke["list"]
+    #spis_new = toke[1]
+    #print(spis)
     apis = apis_generate(spis)
     print(f"number of working tokens: {len(apis)}")
 
     inf = infinity_bots(V, create_mongo, collection_bots, document_tokens, url_dj)
     inf_b = infinity_beskon(V, create_mongo, collection_django, apps, collection_bots, document_tokens, apis, spis, url_dj)
-    #tasks = []'''
+    #tasks = []
     #loop1 = asyncio.get_running_loop()
     tasks = []
     loop_control = {}
@@ -249,15 +313,14 @@ if __name__ == "__main__":
         loop_control[i["id"]] = i["them"]
         #loop_control[spis[i]["id"]] = 0
 
-    #tasks = [loop.create_task(inf.main(apis[i["id"]], i["id"], i["them"], loop_control)) for i in spis]
+    tasks = [loop.create_task(inf.main(apis[i["id"]], i["id"], i["them"], loop_control)) for i in spis]
 
-
-    #tasks.append(loop.create_task(inf_b.beskon()))
+    tasks.append(loop.create_task(inf_b.beskon()))
     #print(tasks)
-    #tasks.append(loop.create_task(test()))
-    tasks.append(loop.create_task(add_group(spis_new)))
+    tasks.append(loop.create_task(test()))
+    #tasks.append(loop.create_task(add_group(spis_new)))
     #tasks.append(loop.create_task(te()))
     #print(111111111111)
     results = loop.run_until_complete(asyncio.wait(tasks))
-    #print(1)
+    #print(1)"""
 

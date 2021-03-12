@@ -34,7 +34,7 @@ class infinity_beskon:
         for i in range(9):
             image = kwargs[f"image_{i+1}"]
             if image != "0":
-                res = await photo_upload(self.apis[int(club_id)],self.V, peer_id, kwargs[f"image_{i+1}"]).upload()
+                res = await photo_upload(self.apis[int(club_id)], self.V, peer_id, kwargs[f"image_{i+1}"]).upload()
                 if res != None:
                     if len(post) > 1:
                         post += f",{res}"
@@ -55,10 +55,12 @@ class infinity_beskon:
             if i in gen:
                 for j in gen[i]:
                     #print(j)
-                    peer_id = self.create_mongo.get_peer_id(self.collection_bots, self.document_tokens, j)
-                    if peer_id != 0:
+                    #peer_id = self.create_mongo.get_peer_id(self.collection_bots, self.document_tokens, j)
+                    peer_id = self.create_mongo.get_peer_id_new(self.collection_django, self.apps, j)
+                    if peer_id[0] != "0":
+                        for i in peer_id:
                         #print(self.apis)
-                        loop.create_task(self.send(kwargs, j, peer_id, text, post))
+                            loop.create_task(self.send(kwargs, j, int(i), text, post))
 
 
 

@@ -3,6 +3,7 @@ import asyncio
 
 import command_besed
 from commands import commands
+from api import api_url
 
 from api.methods import messages_edit
 
@@ -15,15 +16,17 @@ class bind(commands):
         #print(adm)
         if adm == 1:
 
-            post = self.create_mongo.update(self.collection_bots, self.document_tokens, self.club_id, self.peer_id)
+            #post = self.create_mongo.update(self.collection_bots, self.document_tokens, self.club_id, self.peer_id)
+            post = await api_url(f"{self.url_dj}").post_json(club_id=self.club_id, peer_id=self.peer_id, status=2)
             #print(post)
-            if post == 1:
-                await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
-                                         message="Беседа успешно привязна ✅", random_id=0)
-                #messages_edit(self.v, self.club_id, self.apis, self.peer_id, "Беседа успешно записана ✅")
-            else:
-                await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
-                                         message="Беседа уже была добавлена ⛔", random_id=0)
+            if "peer_id" in post:
+                if post["peer_id"] == 1:
+                    await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
+                                             message="Беседа успешно привязна ✅", random_id=0)
+                    #messages_edit(self.v, self.club_id, self.apis, self.peer_id, "Беседа успешно записана ✅")
+                else:
+                    await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
+                                             message="Беседа уже была добавлена ⛔", random_id=0)
                 #messages_edit(self.v, self.club_id, self.apis, self.peer_id, "Беседа уже была добавлена ⛔")
                 #msg = messages_edit(self.v, self.club_id, self.apis, self.peer_id, "Начинаю запись данных 👁")
                 #await msg.strat_send()
@@ -44,5 +47,7 @@ class bind(commands):
 binds = command_besed.Command()
 
 binds.keys = ['привязать', 'привязка']
-binds.description = 'Пришлю картинку с котиком'
+binds.description = 'Привязка группы'
 binds.process = bind
+binds.topics_blocks = ["consultants"]
+binds.topics_resolution = []

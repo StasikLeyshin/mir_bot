@@ -1,13 +1,16 @@
-command_list = []
+command_ls_list = []
 
 
 class Command:
+
+
    def __init__(self):
+
        self.__keys = []
        self.topics_blocks = []
        self.topics_resolution = []
        self.description = ''
-       command_list.append(self)
+       command_ls_list.append(self)
 
    @property
    def keys(self):
@@ -17,6 +20,7 @@ class Command:
    def keys(self, mas):
        for k in mas:
            self.__keys.append(k.lower())
+
 
    def process(self):
        pass

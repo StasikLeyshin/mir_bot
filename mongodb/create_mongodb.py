@@ -4,9 +4,11 @@ from pymongo import MongoClient
 
 class create_mongodb:
     
-    def __init__(self, client):
+    def __init__(self, client, collections_django, apps_django):
         
         self.client = client
+        self.collections_django = collections_django
+        self.apps_django = apps_django
         #self.collections = collections
         #self.documents = documents
         #self.tokens = tokens
@@ -109,4 +111,100 @@ class create_mongodb:
             peer_id = po["peer_id"]
         return peer_id
 
+    def get_peer_id_new(self, collections, apps, club_id):
+        peer_id = 0
+        db = self.client[f"{collections}"]
+        posts = db[f"{apps}_groups"]
+        po = posts.find_one({'id_group': club_id})
+        if "peer_id_new" in po:
+            peer_id = po["peer_id_new"]
+            peer_id_news = peer_id.split(', ')
+        return peer_id_news
 
+    def questions_update(self, collections, documents, vopr):
+        db = self.client[f"{collections}"]
+        posts = db[f"{documents}"]
+        posts.remove({})
+        posts.insert_many(vopr)
+        return
+
+    def questions_get(self, collections="bots", documents="questions"):
+        db = self.client[f"{collections}"]
+        posts = db[f"{documents}"]
+        vopr = ""
+        for post in posts.find({}):
+            if len(vopr) > 1:
+                vopr += f"\n{post['nom']}. {post['vopr']}"
+            else:
+                vopr += f"{post['nom']}. {post['vopr']}"
+        return vopr
+
+    def questions_get_one(self, number, collections="bots", documents="questions"):
+        db = self.client[f"{collections}"]
+        posts = db[f"{documents}"]
+        po = posts.find_one({'nom': number})
+        if po is not None:
+            return po["otvet"]
+        else:
+            return ""
+
+    def rating(self, user_id):
+        #try:
+        db = self.client[f"{self.collections_django}"]
+        posts = db[f"{self.apps_django}_users"]
+        po = posts.find_one({'user_id': str(user_id)})
+        if po is not None:
+            return po
+        return -1
+        #except Exception as e:
+            #print(e)
+
+
+    def answer(self, number):
+
+        db = self.client[f"{self.collections_django}"]
+        posts = db[f"{self.apps_django}_questions"]
+        po = posts.find_one({'id': int(number)})
+        if po is None:
+            return 0
+        else:
+            po_new = posts.find_one({'id': int(number) + 1})
+            #print(po_new)
+            if po_new is None:
+                return 1
+            else:
+                return 2
+
+    def users_get(self):
+
+        db = self.client[f"{self.collections_django}"]
+        posts = db[f"{self.apps_django}_users"]
+        users = ""
+        for post in posts.find({}):
+            if len(users) > 1:
+                users += f",{post['user_id']}"
+            else:
+                users += f"{post['user_id']}"
+        return users
+
+    def users_get_chek(self, user_id):
+        db = self.client[f"{self.collections_django}"]
+        posts = db[f"{self.apps_django}_users"]
+        po = posts.find_one({'user_id': str(user_id)})
+        if po is None:
+            return 0
+        else:
+            return 1
+
+    def answer_chek(self, user_id, number):
+
+        db = self.client[f"{self.collections_django}"]
+        posts = db[f"{self.apps_django}_users"]
+        po = posts.find_one({'user_id': str(user_id)})
+        user_id_mongo = po["id"]
+        post = db[f"{self.apps_django}_answers"]
+        ans = post.find_one({'user_id': user_id_mongo, 'question_id': int(number)})
+        if ans is None:
+            return (1, user_id_mongo, number)
+        else:
+            return (0)

@@ -4,6 +4,7 @@ import asyncio
 import json
 import ujson
 import requests
+import time
 
 from api.api_error import api_error
 
@@ -16,6 +17,7 @@ class api:
         self.token = token
         #self.method = method
         #self.kwargs = kwargs
+        self.start_time = time.time()
 
 
 
@@ -46,10 +48,10 @@ class api:
 
 
     async def api_post(self, method, **kwargs):
-
         kwargs["access_token"] = self.token
         link = f"https://api.vk.com/method/{method}?"
-        async with aiohttp.ClientSession() as session:
+        connector = aiohttp.TCPConnector(limit_per_host=500)
+        async with aiohttp.ClientSession(connector=connector) as session:
             async with session.post(link, data=kwargs) as response:
 
                 d = await response.json(loads=ujson.loads)

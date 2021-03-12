@@ -4,6 +4,7 @@ import asyncio
 
 from api import api_url
 from command_besed import command_list
+from command_ls import command_ls_list
 
 class infinity_bots:
 
@@ -15,13 +16,30 @@ class infinity_bots:
         self.document_tokens = document_tokens
         self.url_dj = url_dj
 
-    async def selection(self, command_list, text):
+    async def selection(self, command_list, text, them):
+        flag = False
         for c in command_list:
-            # print(c.keys)
+            #print(c.keys)
             for k in c.keys:
                 if k == text or k == text[1:]:
                     # print(c)
+                    flag = True
+                    break
+                elif k == text.split(" ")[0] or k == text.split(" ")[0][1:]:
+                    flag = True
+                    break
+                #print(text.split(" ")[0])
+            #print(flag)
+            if flag:
+                for m in c.topics_blocks:
+                    if m == them or m == them[1:]:
+                        return 0
+                if len(c.topics_resolution) == 0:
                     return c
+                for n in c.topics_resolution:
+                    if n == them or n == them[1:]:
+                        return c
+                return 0
         return 0
 
 
@@ -68,17 +86,39 @@ class infinity_bots:
                             # print(message)
 
                             # ls
-                            if from_id == peer_id:pass
-                            # print(message)
-
+                            if from_id == peer_id:
+                                print(message)
+                                text = message["text"].lower()
+                                sel = await self.selection(command_ls_list, text, them)
+                                #print(sel, text, command_ls_list)
+                                blocs = ["target", "consultants"]
+                                print(sel)
+                                if sel != 0:
+                                    loop.create_task(sel.process(self.V, club_id, message, apis, them,
+                                                                 self.create_mongo,
+                                                                 self.collection_bots,
+                                                                 self.document_tokens,
+                                                                 self.url_dj).run())
+                                    continue
+                                else:
+                                    if them in blocs:
+                                        otvet = self.create_mongo.questions_get_one(text)
+                                        if otvet != "":
+                                            await apis.api_post("messages.send", v=self.V, peer_id=message["peer_id"],
+                                                                message=otvet, random_id=0)
+                                            continue
                             # bs
                             if from_id != peer_id:
                                 print(message)
                                 text = message["text"].lower()
-                                sel = await self.selection(command_list, text)
+                                sel = await self.selection(command_list, text, them)
 
                                 if sel != 0:
-                                    loop.create_task(sel.process(self.V, club_id, message, apis, them, self.create_mongo, self.collection_bots, self.document_tokens).run())
+                                    loop.create_task(sel.process(self.V, club_id, message, apis, them,
+                                                                 self.create_mongo,
+                                                                 self.collection_bots,
+                                                                 self.document_tokens,
+                                                                 self.url_dj).run())
                                     #await sel.process(self.V, club_id, message, apis, them, self.create_mongo).run()
                                     continue
 
