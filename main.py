@@ -10,15 +10,17 @@ nest_asyncio.apply()
 from flask import Flask
 from aiohttp import web
 import random
+import threading
 
 #app = Flask(__name__)
 
-from api import api, api_url, tokens_setting
+from api import api, api_url, tokens_setting, collecting_list_users
 from mongodb import create_mongodb
 from command_besed import command_list
 from infinity import infinity_bots, infinity_beskon
 from generating_questions import generating
 from edite_text import opredel_skreen, chunks
+from Telegram import test1
 
 def load_modules(file, file_ls):
 
@@ -176,15 +178,20 @@ async def executor_post(request: web.Request):
                "🌚 Утро позднее, утро раннее, а вопрос дня неизменно уже у тебя)",
                "👻 Новый вопрос! Бегом отвечать!"
                ]
-        users_new = await chunks(users, 100)
-        for i in users_new:
-            result = loop.create_task(api(0, event["token"]).api_post("messages.send", v=V, peer_ids=i,
+        #users_new = await chunks(users, 100)
+        #for i in users_new:
+        result = loop.create_task(collecting_list_users(V, event['club_id']).run(users,
+                                                                                 api(event['club_id'],
+                                                                                     event['token']),
+                                                                                 event['question'],
+                                                                                 event['question_id']))
+        '''result = loop.create_task(api(0, event["token"]).api_post("messages.send", v=V, peer_ids=i,
                                                                       message=f"{random.choice(ran)}\n\n"
                                                                       f"{event['question']}\n\n"
                                                                       f"⚠ Чтобы ответить на вопрос, напишите /ответ номер вопроса и ваш ответ\n\n"
                                                                       f"❗Номер текущего вопроса: {event['question_id']}",
-                                                                      random_id=0))
-            await asyncio.sleep(1)
+                                                                      random_id=0))'''
+        #await asyncio.sleep(1)
 
         '''import requests
         result = requests.post("https://api.vk.com/method/messages.send", data={
@@ -222,6 +229,8 @@ async def test():
         method='GET',
         handler=executor_get
     )
+    #import nest_asyncio
+    #nest_asyncio.apply()
     web.run_app(app=app, host="127.0.0.1", port=5000)
 
 async def te():
@@ -318,6 +327,11 @@ if __name__ == "__main__":
     tasks.append(loop.create_task(inf_b.beskon()))
     #print(tasks)
     tasks.append(loop.create_task(test()))
+
+    #tasks.append(test1())
+    x = threading.Thread(target=test1)
+    x.start()
+
     #tasks.append(loop.create_task(add_group(spis_new)))
     #tasks.append(loop.create_task(te()))
     #print(111111111111)

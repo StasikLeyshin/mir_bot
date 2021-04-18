@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import asyncio
 from pymongo import MongoClient
-
+var = "code.py"
 class create_mongodb:
     
     def __init__(self, client, collections_django, apps_django):
@@ -180,12 +180,18 @@ class create_mongodb:
         db = self.client[f"{self.collections_django}"]
         posts = db[f"{self.apps_django}_users"]
         users = ""
+        repeat = []
         for post in posts.find({}):
             if len(users) > 1:
-                users += f",{post['user_id']}"
+                if post['user_id'] not in repeat and post['user_id'] != '':
+                    #print(post)
+                    users += f",{post['user_id']}"
+                    repeat.append(post['user_id'])
             else:
                 users += f"{post['user_id']}"
-        return users
+                repeat.append(post['user_id'])
+        #print(repeat)
+        return repeat
 
     def users_get_chek(self, user_id):
         db = self.client[f"{self.collections_django}"]

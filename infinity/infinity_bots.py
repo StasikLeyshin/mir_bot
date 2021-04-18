@@ -101,7 +101,7 @@ class infinity_bots:
                                                                  self.url_dj).run())
                                     continue
                                 else:
-                                    if them in blocs:
+                                    if them not in blocs:
                                         otvet = self.create_mongo.questions_get_one(text)
                                         if otvet != "":
                                             await apis.api_post("messages.send", v=self.V, peer_id=message["peer_id"],
