@@ -18,11 +18,11 @@ class bind(commands):
 
             #post = self.create_mongo.update(self.collection_bots, self.document_tokens, self.club_id, self.peer_id)
             post = await api_url(f"{self.url_dj}").post_json(club_id=self.club_id, peer_id=self.peer_id, status=2)
-            #print(post)
+            print(post)
             if "peer_id" in post:
                 if post["peer_id"] == 1:
                     await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
-                                             message="Беседа успешно привязна ✅", random_id=0)
+                                             message="Привязал ✅", random_id=0) #Беседа успешно привязна ✅
                     #messages_edit(self.v, self.club_id, self.apis, self.peer_id, "Беседа успешно записана ✅")
                 else:
                     await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,

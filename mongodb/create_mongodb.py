@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 import asyncio
 from pymongo import MongoClient
+import os
+import traceback
+import numpy as np
+
+from api import api_url, api, photo_upload
 var = "code.py"
 class create_mongodb:
     
@@ -111,14 +116,25 @@ class create_mongodb:
             peer_id = po["peer_id"]
         return peer_id
 
-    def get_peer_id_new(self, collections, apps, club_id):
+    def get_peer_id_new(self, collections, apps, club_id, id_ras):
         peer_id = 0
+        f = 0
+        peer_id_news = []
         db = self.client[f"{collections}"]
-        posts = db[f"{apps}_groups"]
-        po = posts.find_one({'id_group': club_id})
-        if "peer_id_new" in po:
-            peer_id = po["peer_id_new"]
-            peer_id_news = peer_id.split(', ')
+        posts = db[f"{apps}_rassilka_them_peer_id"]
+        res_ids = posts.find({"rassilka_id": id_ras})
+        posts = db[f"{apps}_conversations_ab"]
+        #res_ids_ab = posts.find({})
+        for i in res_ids:
+            po = posts.find_one({'id': i["conversations_ab_id"]})
+            peer_id_news.append(po["Conver"])
+            f = 1
+        if f == 0:
+            posts = db[f"{apps}_groups"]
+            po = posts.find_one({'id_group': club_id})
+            if "peer_id_new" in po:
+                peer_id = po["peer_id_new"]
+                peer_id_news = peer_id.split(', ')
         return peer_id_news
 
     def questions_update(self, collections, documents, vopr):
@@ -126,6 +142,10 @@ class create_mongodb:
         posts = db[f"{documents}"]
         posts.remove({})
         posts.insert_many(vopr)
+        posts_ab = db["questions_abitur_photo"]
+        posts_ab.remove({})
+        posts_ab = db["users"]
+        posts_ab.remove({})
         return
 
     def questions_get(self, collections="bots", documents="questions"):
@@ -142,11 +162,48 @@ class create_mongodb:
     def questions_get_one(self, number, collections="bots", documents="questions"):
         db = self.client[f"{collections}"]
         posts = db[f"{documents}"]
+
+        # posts_ab = db["questions_abitur_photo"]
+        #
+        # posts_ab.remove({})
+
         po = posts.find_one({'nom': number})
         if po is not None:
             return po["otvet"]
         else:
             return ""
+
+    async def questions_get_abitur(self, apis, v, peer_id, nap, collections="bots", documents="questions_abitur_photo"):
+        db = self.client[f"{collections}"]
+        posts = db[f"{documents}"]
+        po = posts.find_one({"nap": nap})
+        if po is not None:
+            return po["att"]
+        else:
+            files = os.listdir("generating_questions/img")
+            post = ""
+            #loop = asyncio.get_running_loop()
+            for i in files:
+                if "png" in i:
+                    if nap in i:
+                        res = await photo_upload(apis, v, peer_id, f"{i}", "generating_questions/img/").upload()
+                        # print(res)
+                        """res = await photo_upload(self.apis,
+                                             self.v, self.peer_id,
+                                             f"{i}",
+                                             "generating_questions/img/").upload()"""
+                        # print(res)
+                        if len(post) > 1:
+                            #post = f"{res}," + post
+                            post = post + f",{res}"
+                        else:
+                            post += f"{res}"
+
+            posts.insert_one({"nap": nap, "att": post})
+            #posts.insert_many([{"att": post}])
+
+            return post
+
 
     def rating(self, user_id):
         #try:
@@ -214,3 +271,564 @@ class create_mongodb:
             return (1, user_id_mongo, number)
         else:
             return (0)
+
+    def add_user(self, user_id, f=0, flag=1, vrem=0, slov={}, collections="bots", documents="users", nap="0"):
+        db = self.client[f"{collections}"]
+        posts = db[f"{documents}"]
+        po_new = posts.find_one({'user_id': user_id})
+        if po_new is not None:
+            #posts.remove({'user_id': user_id})
+            #posts.insert_one({"user_id": user_id, "flag": 0})
+            po_new['flag'] = f
+            if nap != "0":
+                po_new['nap'] = nap
+            if flag == 1:
+                po_new['time'] = vrem
+                po_new['slov'] = slov
+            elif flag == 2:
+                po_new['time'] = vrem
+
+            posts.save(po_new)
+            #posts.update({"user_id": user_id}, {"flag": 0})
+            return 1
+        else:
+            if flag == 1:
+                posts.insert_one({"user_id": user_id, "flag": f, "predm": "", "bal": 0, "time": vrem, "slov": slov, "slov_questions": {}, "slych": 0, "nap": nap})
+            else:
+                posts.insert_one({"user_id": user_id, "flag": f, "predm": "", "bal": 0, "nap": nap})
+            return 1
+
+    def check_user(self, user_id, collections="bots", documents="users"):
+        db = self.client[f"{collections}"]
+        posts = db[f"{documents}"]
+        po_new = posts.find_one({'user_id': user_id})
+        if po_new is None:
+            return 0
+        else:
+            return po_new["flag"]
+
+    def check_user_nap(self, user_id, collections="bots", documents="users"):
+        db = self.client[f"{collections}"]
+        posts = db[f"{documents}"]
+        po_new = posts.find_one({'user_id': user_id})
+        if po_new is None:
+            return "0"
+        else:
+            return po_new["nap"]
+
+    def generation_questions(self, user_id, number, collections="bots", documents="users"):
+        try:
+            db = self.client[f"{collections}"]
+            posts = db[f"{documents}"]
+            po_new = posts.find_one({'user_id': user_id})
+            if po_new is not None:
+                if po_new["flag"] == 4:
+                    if len(po_new["slov_questions"]) == 0:
+                        db_new = self.client[f"{self.collections_django}"]
+                        posts_new = db_new[f"{self.apps_django}_answers_unban_new1"]
+                        questions_list = list(posts_new.find({}))
+                        np.random.shuffle(questions_list)
+                        k = 1
+                        slov_questions = {"count": 1, "count_answer": 0, "count_correct_answers": 0,
+                                          "peer_id": po_new["slov"][f"{number}"]}
+                        for i in questions_list:
+                            question = i["question"].split('\n')
+                            question_new = question[0]
+                            question.pop(0)
+                            np.random.shuffle(question)
+                            answer = i["answer"]
+                            kk = 1
+                            answer_new = []
+                            for j in question:
+                                l = j.split(" ")
+                                if answer in l[0]:
+                                    slov_questions[f"{k}"] = {"answer": str(kk)}
+                                l.pop(0)
+                                answer_new.append(f"{kk}) {' '.join(l)}")
+                                kk += 1
+                            slov_questions[f"{k}"]["question"] = str(question_new) + "\n" + "\n".join(answer_new)
+                            k += 1
+                            if k == 9:
+                                break
+                        po_new["slov_questions"] = slov_questions
+                        posts.save(po_new)
+                        print(slov_questions)
+                        return 3, slov_questions["1"]["question"]
+                    else:
+                        if number == po_new["slov_questions"][f"{po_new['slov_questions']['count']}"]["answer"]:
+                            if int(int(po_new['slov_questions']['count']) + 1) == 8:
+                                if int(int(po_new['slov_questions']["count_correct_answers"]) + 1) == 5:
+                                    peer_id = po_new['slov_questions']["peer_id"]
+                                    po_new["slov_questions"] = {}
+                                    posts.save(po_new)
+                                    return 1, peer_id
+                                else:
+                                    #po_new["slov_questions"] = {}
+                                    posts.save(po_new)
+                                    return -1, ""
+                            elif int(int(po_new['slov_questions']["count_correct_answers"]) + 1) == 5:
+                                peer_id = po_new['slov_questions']["peer_id"]
+                                po_new["slov_questions"] = {}
+                                posts.save(po_new)
+                                return 1, peer_id
+                            po_new['slov_questions']['count'] = str(int(int(po_new['slov_questions']['count']) + 1))
+                            po_new['slov_questions']['count_correct_answers'] = str(int(int(po_new['slov_questions']['count_correct_answers']) + 1))
+                            posts.save(po_new)
+                            return 2, po_new["slov_questions"][f"{po_new['slov_questions']['count']}"]["question"]
+                        else:
+                            if int(int(po_new['slov_questions']['count']) + 1) == 8:
+                                #po_new["slov_questions"] = {}
+                                posts.save(po_new)
+                                return -1, ""
+                            po_new['slov_questions']['count'] = str(int(int(po_new['slov_questions']['count']) + 1))
+                            posts.save(po_new)
+                            return 2, po_new["slov_questions"][f"{po_new['slov_questions']['count']}"]["question"]
+        except Exception as e:
+            print(traceback.format_exc())
+
+
+    def unban(self, user_id, peer_id, collections="bots", documents="users"):
+        try:
+            db = self.client[f"{collections}"]
+            posts = db[f"{peer_id}"]
+            po_new = posts.find_one({'user_id': int(user_id)})
+            if po_new is not None:
+                if "count" in po_new["ban"]:
+                    print("BAN EST")
+                    po_new["ban"][str(po_new["ban"]["count"])]["status"] = False
+                    print(po_new)
+                    posts.save(po_new)
+
+                post = db[f"{documents}"]
+                pos_new = post.find_one({'user_id': user_id})
+                pos_new['slych'] = 0
+                post.save(pos_new)
+                return
+        except Exception as e:
+            print(traceback.format_exc())
+
+    def null_attempt(self, user_id, collections="bots", documents="users"):
+        db = self.client[f"{collections}"]
+        posts = db[f"{documents}"]
+        po_new = posts.find_one({'user_id': user_id})
+        if po_new is not None:
+            peer_id = po_new["slov_questions"]["peer_id"]
+            po_new["slov_questions"] = {}
+            posts.save(po_new)
+            pos = db[f"{peer_id}"]
+            pos_new = pos.find_one({"user_id": int(user_id)})
+            if pos_new is not None:
+                if "count" in pos_new["ban"]:
+                    pos_new["ban"][str(pos_new["ban"]["count"])]["chance"] = 0
+                    pos.save(pos_new)
+        return
+
+
+    def check_user_unban(self, user_id, vrem, slych, flag, collections="bots", documents="users"):
+        db = self.client[f"{collections}"]
+        posts = db[f"{documents}"]
+        po_new = posts.find_one({'user_id': user_id})
+        if po_new is not None:
+            if flag:
+                po_new['time'] = vrem
+                po_new['slych'] = slych
+                posts.save(po_new)
+                return 1
+            return po_new['time'], po_new['slych']
+
+    def edit_user(self, user_id, predm, collections="bots", documents="users"):
+        db = self.client[f"{collections}"]
+        posts = db[f"{documents}"]
+        po_new = posts.find_one({'user_id': user_id})
+        if po_new is not None:
+            po_new['predm'] = predm
+            posts.save(po_new)
+        return 1
+
+    def check_predmet(self, user_id, collections="bots", documents="users"):
+        db = self.client[f"{collections}"]
+        posts = db[f"{documents}"]
+        po_new = posts.find_one({'user_id': user_id})
+        if po_new is not None:
+            return po_new['predm']
+        return 0
+
+    def start_bs(self, peer_id, users, users_vse, users_adm, collections="bots"):
+        try:
+            db = self.client[f"{collections}"]
+            posts = db[f"{peer_id}"]
+            #users_new = users.copy()
+            users_vse_new = users_vse.copy()
+            pos = posts.find({})
+            pos_d = list(pos)
+
+            for i in pos_d:
+                if i["user_id"] not in users_vse:
+                    i["output"] = True
+                    if "kicked" in i:
+                        if not i["kicked"]:
+                            i["kicked"] = False
+                else:
+                    i["output"] = False
+                    if "kicked" in i:
+                        if not i["kicked"]:
+                            i["kicked"] = False
+                    #del users[i["user_id"]]
+                    users_vse_new.remove(i["user_id"])
+                if i["user_id"] in users_adm:
+                    i["admin"] = True
+                else:
+                    i["admin"] = False
+            for i in users_vse_new:
+                pos_d.append({"user_id": i, "admin": users[i]["admin"], "output": False, "kicked": False, "moder": {}, "ban": {}, "warn": {}, "mute": {}})
+
+            posts.remove({})
+            posts.insert_many(pos_d)
+            posts = db[f"settings"]
+            po = posts.find_one({"perv": 1})
+            if po is None:
+                posts.insert_one({"perv": 1, "peer_ids": f"{peer_id}"})
+            else:
+                sp = str(po["peer_ids"]).split(", ")
+                if str(peer_id) not in sp:
+                    sp.append(str(peer_id))
+                    po["peer_ids"] = ", ".join(sp)
+                    posts.save(po)
+            # db = self.client[f"{collections}"]
+            # posts = db[f"{peer_id}"]
+            # users_new = users.copy()
+            # for i in users:
+            #     po = posts.find_one({'user_id': i["user_id"]})
+            #     if po is not None:
+            #         if "output" in po:
+            #             if po["output"]:
+            #                 po["output"] = False
+            #                 po.save(po)
+            #         users_new.remove(i)
+            #     else:
+            #         i["ban"] = {}
+            #         i["warn"] = {"count": 0}
+            #         i["mute"] = {}
+            #         i["output"] = False
+            # pos = posts.find({})
+            # for i in pos:
+            #     if i["user_id"] not in users_vse:
+            #         po = posts.find_one({'user_id': i["user_id"]})
+            #         po["output"] = True
+            #         po.save(po)
+            # #pos.save(pos)
+            # posts.insert_many(users_new)
+        except Exception as e:
+            print(traceback.format_exc())
+
+    async def admin_check(self, user_id, peer_id, f=0, collections="bots"):
+        try:
+            db = self.client[f"{collections}"]
+            if f == 1:
+                posts_ab = db[f"conversations"]
+                pos_new = posts_ab.find_one({"peer_id_zl": int(peer_id)})
+                if pos_new is not None:
+                    peer_id_ab = pos_new["peer_id_ab"]
+                    posts = db[f"{peer_id_ab}"]
+            else:
+                posts = db[f"{peer_id}"]
+            pos = posts.find_one({"user_id": int(user_id)})
+            if pos is not None:
+                return pos["admin"]
+            else:
+                return False
+        except Exception as e:
+            print(traceback.format_exc())
+
+    async def ban_check(self, user_id, peer_id, cause, vrem, start_time, user_admin, collections="bots"):
+        try:
+            db = self.client[f"{collections}"]
+            posts = db[f"{peer_id}"]
+            pos = posts.find_one({"user_id": int(user_id)})
+            if pos is not None:
+                if not pos["ban"]:
+                    pos["ban"]["1"] = {}
+                    pos["ban"]["1"]["status"] = True
+                    pos["ban"]["1"]["time"] = vrem
+                    pos["ban"]["1"]["cause"] = cause
+                    pos["ban"]["1"]["start_time"] = start_time
+                    pos["ban"]["1"]["user_admin"] = user_admin
+                    pos["ban"]["1"]["chance"] = 1
+                    pos["ban"]["count"] = 1
+                    posts.save(pos)
+                    return 1
+                else:
+                    if pos["ban"][str(pos["ban"]["count"])]["status"] == True:
+                        return 0
+                    else:
+                        pos["ban"][str(pos["ban"]["count"] + 1)] = {}
+                        pos["ban"][str(pos["ban"]["count"] + 1)]["status"] = True
+                        pos["ban"][str(pos["ban"]["count"] + 1)]["time"] = vrem
+                        pos["ban"][str(pos["ban"]["count"] + 1)]["cause"] = cause
+                        pos["ban"][str(pos["ban"]["count"] + 1)]["start_time"] = start_time
+                        pos["ban"][str(pos["ban"]["count"] + 1)]["user_admin"] = user_admin
+                        pos["ban"][str(pos["ban"]["count"] + 1)]["chance"] = 1
+                        pos["ban"]["count"] += 1
+                        posts.save(pos)
+                        return pos["ban"]["count"]
+            else:
+                posts.insert_one(
+                    {"user_id": int(user_id), "admin": False, "output": False, "kicked": False, "moder": {},
+                     "ban": {
+                         "1": {
+                             "status": True,
+                             "time": vrem,
+                             "cause": cause,
+                             "start_time": start_time,
+                             "user_admin": user_admin,
+                             "chance": 1
+                     },
+                     "count": 1},
+                     "warn": {},
+                     "mute": {}})
+                return 1
+        except Exception as e:
+            print(traceback.format_exc())
+
+    async def add_warn(self, user_id, peer_id, cause, vrem, start_time, user_admin, collections="bots"):
+        try:
+            db = self.client[f"{collections}"]
+            posts = db[f"{peer_id}"]
+            pos = posts.find_one({"user_id": int(user_id)})
+            if pos is not None:
+                if not pos["warn"]:
+                    pos["warn"]["count"] = 1
+                    pos["warn"]["count_old"] = 2
+                    pos["warn"]["1"] = {}
+                    pos["warn"]["1"]["status"] = True
+                    pos["warn"]["1"]["time"] = vrem
+                    pos["warn"]["1"]["cause"] = cause
+                    pos["warn"]["1"]["start_time"] = start_time
+                    pos["warn"]["1"]["user_admin"] = user_admin
+                    posts.save(pos)
+                    return 1
+                else:
+                    if pos["warn"]["count"] == 2:
+                        pos["warn"][str(pos["warn"]["count_old"])] = {}
+                        pos["warn"][str(pos["warn"]["count_old"])]["time"] = vrem
+                        pos["warn"][str(pos["warn"]["count_old"])]["cause"] = cause
+                        pos["warn"][str(pos["warn"]["count_old"])]["status"] = True
+                        pos["warn"][str(pos["warn"]["count_old"])]["start_time"] = start_time
+                        pos["warn"][str(pos["warn"]["count_old"])]["user_admin"] = user_admin
+                        pos["warn"]["count_old"] += 1
+                        pos["warn"]["count"] = 0
+                        # pos["ban"]["status"] = True
+                        # pos["ban"]["time"] = vrem
+                        # pos["ban"]["cause"] = cause
+                        posts.save(pos)
+                        await self.ban_check(user_id, peer_id, cause, vrem, start_time, user_admin)
+                        return 3
+                    else:
+                        pos["warn"][str(pos["warn"]["count_old"])] = {}
+                        pos["warn"][str(pos["warn"]["count_old"])]["time"] = vrem
+                        pos["warn"][str(pos["warn"]["count_old"])]["cause"] = cause
+                        pos["warn"][str(pos["warn"]["count_old"])]["status"] = True
+                        pos["warn"][str(pos["warn"]["count_old"])]["start_time"] = start_time
+                        pos["warn"][str(pos["warn"]["count_old"])]["user_admin"] = user_admin
+                        pos["warn"]["count"] += 1
+                        pos["warn"]["count_old"] += 1
+                        posts.save(pos)
+                        return pos["warn"]["count"]
+
+
+            return -1
+        except Exception as e:
+            print(traceback.format_exc())
+
+    async def ban_remove(self, user_id, peer_id, collections="bots"):
+        db = self.client[f"{collections}"]
+        posts_ab = db[f"conversations"]
+        pos_new = posts_ab.find_one({"peer_id_zl": int(peer_id)})
+        if pos_new is not None:
+            peer_id_ab = pos_new["peer_id_ab"]
+            posts = db[f"{peer_id_ab}"]
+            pos = posts.find_one({"user_id": int(user_id)})
+            if pos is not None:
+                pos["ban"][str(pos["ban"]["count"])]["status"] = False
+                pos["output"] = False
+                pos["kicked"] = False
+                posts.save(pos)
+
+    async def add_user_bs(self, user_id, peer_id, f=0, collections="bots"):
+        """
+        Добавляет нового пользователя в бд при переходе по ссылке или по добавлении в беседу
+        :param user_id: Id пользователя, которого необходимо добавить
+        :param peer_id: Id беседы Злюки
+        :param collections:
+        :return:
+        """
+        db = self.client[f"{collections}"]
+        posts_ab = db[f"conversations"]
+        pos_new = posts_ab.find_one({"peer_id_zl": int(peer_id)})
+        if pos_new is not None:
+            peer_id_ab = pos_new["peer_id_ab"]
+            posts = db[f"{peer_id_ab}"]
+            pos = posts.find_one({"user_id": int(user_id)})
+            if pos is None:
+                posts.insert_one(
+                    {"user_id": int(user_id), "admin": False, "output": False, "kicked": False, "moder": {}, "ban": {},
+                     "warn": {},
+                     "mute": {}})
+            else:
+                if f == 1:
+                    if "count" in pos["ban"]:
+                        #print(pos["ban"][str(pos["ban"]["count"])])
+                        if pos["ban"][str(pos["ban"]["count"])]["status"]:
+                            return 2
+                else:
+                    pos["output"] = False
+                    pos["kicked"] = False
+                    posts.save(pos)
+            return 1
+
+    async def remove_user_bs(self, user_id, peer_id, f=0, collections="bots"):
+
+        try:
+            db = self.client[f"{collections}"]
+            posts_ab = db[f"conversations"]
+            pos_new = posts_ab.find_one({"peer_id_zl": int(peer_id)})
+            if pos_new is not None:
+                peer_id_ab = pos_new["peer_id_ab"]
+                posts = db[f"{peer_id_ab}"]
+                pos = posts.find_one({"user_id": int(user_id)})
+                if pos is None:
+                    if f == 0:
+                        posts.insert_one(
+                            {"user_id": int(user_id), "admin": False, "output": True, "kicked": False, "moder": {},
+                             "ban": {},
+                             "warn": {}, "mute": {}})
+                    else:
+                        posts.insert_one(
+                            {"user_id": int(user_id), "admin": False, "output": False, "kicked": True, "moder": {},
+                             "ban": {},
+                             "warn": {}, "mute": {}})
+                else:
+                    if f == 0:
+                        pos["output"] = True
+                    else:
+                        pos["kicked"] = True
+                    posts.save(pos)
+                return 1
+        except Exception as e:
+            print(traceback.format_exc())
+
+
+    async def remove_ban_warn(self, vrem, collections="bots"):
+        try:
+            db = self.client[f"{collections}"]
+            posts_peer_ids = db[f"settings"]
+            pos_new = posts_peer_ids.find_one({"perv": 1})
+            peer_ids = pos_new["peer_ids"].split(", ")
+            #print(peer_ids)
+            for i in peer_ids:
+                posts = db[f"{i}"]
+                pos = posts.find({})
+                for j in pos:
+                    if "count" in j["ban"]:
+                        if j["ban"][str(j["ban"]["count"])]["status"]:
+                            if int(j["ban"][str(j["ban"]["count"])]["time"]) <= int(vrem):
+                                j["ban"][str(j["ban"]["count"])]["status"] = False
+                                posts.save(j)
+                    if "count" in j["warn"]:
+                        if j['warn']['count'] > 0:
+                            for g in range(1, 3):
+                                if f'{j["warn"]["count_old"] - g}' in j['warn']:
+                                    if j['warn'][f'{j["warn"]["count_old"] - g}']["status"]:
+                                        if int(j['warn'][f'{j["warn"]["count_old"] - g}']["time"]) <= int(vrem):
+                                            j["warn"][str(j["warn"]["count_old"] - g)]["status"] = False
+                                            j["warn"]["count"] = j["warn"]["count"] - 1
+                                            #j["warn"]["count_old"] = j["warn"]["count_old"] - 1
+                                            posts.save(j)
+            return 1
+        except Exception as e:
+            print(traceback.format_exc())
+
+
+
+
+
+    async def add_besed_zl(self, peer_id_ab, peer_id_zl, collections="bots", documents="conversations"):
+        db = self.client[f"{collections}"]
+        posts = db[f"{documents}"]
+        pos = posts.find_one({"peer_id_ab": int(peer_id_ab)})
+        if pos is None:
+            posts.insert_one({"peer_id_ab": int(peer_id_ab), "peer_id_zl": int(peer_id_zl)})
+            return 1
+        else:
+            return 0
+
+    async def get_settings(self, collections="bots", documents="settings"):
+        db = self.client[f"{collections}"]
+        posts = db[f"{documents}"]
+        pos = posts.find_one({"perv": 1})
+        if pos is not None:
+            return pos["peer_ids"].split(", ")
+
+
+    async def ban_chek(self, user_id, collections="bots"):
+        try:
+            slov = {"peer_ids": []}
+            db = self.client[f"{collections}"]
+            posts_peer_ids = db[f"settings"]
+            pos_new = posts_peer_ids.find_one({"perv": 1})
+            peer_ids = pos_new["peer_ids"].split(", ")
+            #print(peer_ids)
+            k = 1
+            for i in peer_ids:
+                posts = db[f"{i}"]
+                pos = posts.find_one({"user_id": int(user_id)})
+                if pos is not None:
+                    if "count" in pos["ban"]:
+                        if pos["ban"][str(pos["ban"]["count"])]["status"] and pos["ban"][str(pos["ban"]["count"])]["chance"] > 0:
+                            slov["peer_ids"].append(i)
+                            slov[f"{i}"] = {"count": pos["ban"]["count"], "user_id": int(user_id)}
+                            slov[f"{k}"] = f"{i}"
+                            k += 1
+            return slov
+
+        except Exception as e:
+            print(traceback.format_exc())
+            return slov
+
+    async def add_users_zawarn(self, user_id, vrem, peer_id, collections="bots"):
+        """
+        Добавляет пользователя при подозрении на мат
+        :param user_id: ID пользователя
+        :param vrem: время отпрвки сообщения с матом
+        :param peer_id: ID беседы
+        :param collections:
+        :return: 1
+        """
+        db = self.client[f"{collections}"]
+        posts = db[f"users_warn"]
+        posts.insert_one({"user_id": user_id, "peer_id": peer_id, "vrem": vrem, "status": False})
+        return 1
+
+    async def chek_zawarn(self, user_id, vrem, collections="bots"):
+        """
+        Добавляет пользователя при подозрении на мат
+        :param user_id: ID пользователя
+        :param vrem: время отпрвки сообщения с матом
+        :param peer_id: ID беседы
+        :param collections:
+        :return: 1
+        """
+        db = self.client[f"{collections}"]
+        posts = db[f"users_warn"]
+        pos = posts.find_one({"user_id": int(user_id), "vrem": int(vrem)})
+        if pos is not None:
+            if not pos["status"]:
+                pos["status"] = True
+                posts.save(pos)
+                return 1, pos["peer_id"]
+            else:
+                return 0, ""
+
+
+        return -1, ""
+

@@ -1,0 +1,1 @@
+from .text_photo import text_photo

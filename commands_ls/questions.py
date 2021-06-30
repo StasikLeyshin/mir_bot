@@ -34,10 +34,21 @@ class answers_img(commands):
         #await time.sleep(2)
         print(post)'''
         #print(1111111111111)
-        vopr = self.create_mongo.questions_get()
-        await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
-                                 message=f"✏ Чтобы узнать ответ на вопрос, напишите номер интересующего вас вопроса.\n{vopr}",
-                                 random_id=0)
+        if self.them == "tema1":
+            # vopr = await self.create_mongo.questions_get_abitur(self.apis, self.v, self.peer_id)
+            # await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
+            #                          message=f"✏ Чтобы узнать ответ на вопрос, напишите номер интересующего вас вопроса.",
+            #                          random_id=0,
+            #                          attachment=vopr)
+            await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
+                                     message=f"📚 Выберите интересующий уровень образования.",
+                                     random_id=0,
+                                     keyboard=self.level_education())
+        else:
+            vopr = self.create_mongo.questions_get()
+            await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
+                                     message=f"✏ Чтобы узнать ответ на вопрос, напишите номер интересующего вас вопроса.\n{vopr}",
+                                     random_id=0)
 
 
 

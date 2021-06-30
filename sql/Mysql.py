@@ -25,7 +25,7 @@ def pol_js(u1, u2=0, u3=0, u4=0, f=0):
 	plus = "and campus LIKE 'moscow' and (level LIKE 'bach' or level LIKE 'spec')"
 	#cursor.execute(f"SELECT * FROM test5 WHERE {u1} >= 1 and {u2} >= 1 and {u3} >= 1 and (last_year_min LIKE '—' or last_year_min <= {u4}) {plus}")
 	cursor.execute(
-		f"SELECT * FROM test5 WHERE {u1} >= 1 and {u2} >= 1 and {u3} >= 1 and (last_year_min <= {u4}) {plus}")
+		f"SELECT * FROM test5 WHERE {u1} >= 1 and {u2} >= 1 and {u3} >= 1 and (last_year_min <= {u4} and last_year_min NOT LIKE '—') {plus}")
 	# if u4 != 0:
 	# 	cursor.execute(f"SELECT * from test5 where {u1} in (1) and {u2} in (1) and {u3} in (1) and (last_year_min LIKE '—' or last_year_min <= {u4}) and campus LIKE 'moscow' and (level LIKE 'bach' or level LIKE 'spec')")
 	# elif u3 != 0:
@@ -34,16 +34,24 @@ def pol_js(u1, u2=0, u3=0, u4=0, f=0):
 	# 	cursor.execute(f"SELECT * from test5 where {u1} in (1) and (last_year_min LIKE '—' or last_year_min <= {u2}) and campus LIKE 'moscow' and (level LIKE 'bach' or level LIKE 'spec')")
 	# #print(cursor)
 	results = cursor.fetchall()
-	connection.close()
 	#print(results)
 	g = {}
 	#try:
 	g["quantity"] = len(results)
+	if g["quantity"] == 0:
+		cursor.execute(
+			f"SELECT * FROM test5 WHERE {u1} >= 1 and {u2} >= 1 and {u3} >= 1 and (last_year_min <= 310 and last_year_min NOT LIKE '—') {plus}")
+		results = cursor.fetchall()
+		g["quantity"] = -1
+	connection.close()
 	g["programs"] = []
 	if f == 1:
 		for i in results:
 			if i[10] != '—':
 				g["programs"].append({"name": i[1], "code": i[2], "link": i[29], "bal": i[10], "places": i[7]})
+			else:
+				print({"name": i[1], "code": i[2], "link": i[29], "bal": i[10], "places": i[7]})
+
 	#except Exception as e:
 		#print(e)
 	#print (result[2])

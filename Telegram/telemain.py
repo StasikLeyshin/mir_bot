@@ -1,5 +1,5 @@
 import telebot
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, InlineKeyboardButton
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
 # import asyncio
 # import configparser
 # from pymongo import MongoClient
@@ -14,7 +14,7 @@ from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, InlineKeyb
 from Telegram.bot_setting import bot
 from Telegram.user import users
 from sql import pol_js
-from generating_questions import questions
+from generating_questions import questions, questions_col
 
 # from aiogram import Bot, types
 # from aiogram.dispatcher import Dispatcher
@@ -66,7 +66,7 @@ from generating_questions import questions
 #         bot.reply_to(message, "supergroup")
 
 def generating_q(file):
-    f2 = open(f"{file}.txt", "r+", encoding="cp1251")
+    f2 = open(f"{file}.txt", "r+", encoding="utf8")
     s = f2.readlines()
     f2.seek(0)
     f2.close()
@@ -75,14 +75,32 @@ def generating_q(file):
         pas = i[i.find(":") + 1:]
         logi = i[:i.find(":")]
         nom = pas[pas.find(":") + 1:].replace("\\v", "\n")
+        vopr = pas[:pas.find(':')].replace("\x1e", "")
         questions["nom"][logi] = nom
-        questions["vopr"][logi] = pas[:pas.find(":")]
+        questions["vopr"][vopr] = nom
         questions["spis_nom"].append(str(logi))
-        questions["spis_vop"].append(f"{logi}. {pas[:pas.find(':')]}")
+        questions["spis_vop"].append(f"{vopr}")
 
-def add_users(message_id, user_id, chat_id, subjects="", bal=0, f=0, spis=[]):
+def generating_col(file):
+    f2 = open(f"{file}.txt", "r+", encoding="utf8")
+    s = f2.readlines()
+    f2.seek(0)
+    f2.close()
+    #vopr = {"nom": {}, "vopr": {}, "spis_nom": [], "spis_vop": []}
+    for i in s:
+        pas = i[i.find(":") + 1:]
+        logi = i[:i.find(":")]
+        nom = pas[pas.find(":") + 1:].replace("\\v", "\n")
+        vopr = pas[:pas.find(':')].replace("\x1e", "")
+        questions_col["nom"][logi] = nom
+        questions_col["vopr"][vopr] = nom
+        questions_col["spis_nom"].append(str(logi))
+        questions_col["spis_vop"].append(f"{vopr}")
 
-    users[f"{user_id}&{chat_id}"] = {"message_id": message_id, "subjects": subjects, "bal": bal, "f": f, "spis": spis}
+def add_users(message_id, user_id, chat_id, subjects="", bal=0, f=0, spis=[], perv=""):
+
+    users[f"{user_id}&{chat_id}"] = {"message_id": message_id, "subjects": subjects, "bal": bal, "f": f, "spis": spis,
+                                     "perv": perv}
 
 def add_bal_users(user_id, chat_id, bal):
     users[f"{user_id}&{chat_id}"]["bal"] = bal
@@ -90,11 +108,13 @@ def add_bal_users(user_id, chat_id, bal):
 def check_users(user_id, chat_id):
     if f"{user_id}&{chat_id}" in users:
         return True,\
-               users[f"{user_id}&{chat_id}"]["message_id"],\
-               users[f"{user_id}&{chat_id}"]["subjects"],\
-               users[f"{user_id}&{chat_id}"]["bal"],\
-               users[f"{user_id}&{chat_id}"]["f"],\
-               users[f"{user_id}&{chat_id}"]["spis"]
+            users[f"{user_id}&{chat_id}"]["message_id"],\
+            users[f"{user_id}&{chat_id}"]["subjects"],\
+            users[f"{user_id}&{chat_id}"]["bal"],\
+            users[f"{user_id}&{chat_id}"]["f"],\
+            users[f"{user_id}&{chat_id}"]["spis"],\
+            users[f"{user_id}&{chat_id}"]["perv"]
+
     return False
 
 def del_users(user_id, chat_id):
@@ -207,20 +227,33 @@ def callback_query(call):
     # elif call.data == "cb_no":
     #     bot.answer_callback_query(call.id, "Answer is No")
     if call.data == "questions":
-
-        de = chunks(questions["spis_vop"], 15)
-        l = list(de)
-        ff = 1
-        for i in l:
-            #if ff == 1:
-                #bot.send_message(call.message.chat.id, "Выберете номер интересуещего вас вопроса\n\n" + str('\n\n'.join(i)))
-            #elif ff == len(l):
-                #bot.send_message(call.message.chat.id, '\n\n'.join(i), reply_markup=gen_markup(0, len(questions["spis_nom"])))
-            #else:
-            bot.send_message(call.message.chat.id, '\n\n'.join(i))
-            ff += 1
-        bot.send_message(call.message.chat.id, "🗳 Выберете номер интересуещего вас вопроса",
-                         reply_markup=gen_markup(0, len(questions["spis_nom"])))
+        if call.message.chat.id != -1001290867279:
+            markup = ReplyKeyboardMarkup()
+            for i in questions["spis_vop"]:
+                markup.add(KeyboardButton(i))
+            markup.add(KeyboardButton("Меню"))
+            bot.send_message(call.message.chat.id, "🗳 Выберите интересующий вас вопрос",
+                             reply_markup=markup)
+        else:
+            markup = ReplyKeyboardMarkup()
+            for i in questions_col["spis_vop"]:
+                markup.add(KeyboardButton(i))
+            markup.add(KeyboardButton("Меню"))
+            bot.send_message(call.message.chat.id, "🗳 Выберите интересующий вас вопрос",
+                             reply_markup=markup)
+        # de = chunks(questions["spis_vop"], 15)
+        # l = list(de)
+        # ff = 1
+        # for i in l:
+        #     #if ff == 1:
+        #         #bot.send_message(call.message.chat.id, "Выберете номер интересуещего вас вопроса\n\n" + str('\n\n'.join(i)))
+        #     #elif ff == len(l):
+        #         #bot.send_message(call.message.chat.id, '\n\n'.join(i), reply_markup=gen_markup(0, len(questions["spis_nom"])))
+        #     #else:
+        #     bot.send_message(call.message.chat.id, '\n\n'.join(i))
+        #     ff += 1
+        # bot.send_message(call.message.chat.id, "🗳 Выберете номер интересуещего вас вопроса",
+        #                  reply_markup=gen_markup(0, len(questions["spis_nom"])))
         # bot.edit_message_text("Выберете номер интересуещего вас вопроса", call.message.chat.id, call.message.message_id,
         #                       reply_markup=gen_markup(0, len(questions["spis_nom"])))
     elif call.data == "menu":
@@ -255,7 +288,7 @@ def callback_query(call):
                     f = 0
                     if check[4] + 1 == len(check[5]) - 1:
                         f = 2
-                    bot.edit_message_text("🔎 Высокие шансы поступления:\n\n" + "\n\n".join(check[5][check[4] + 1]),
+                    bot.edit_message_text(check[6] + "\n\n".join(check[5][check[4] + 1]),
                                           call.message.chat.id, call.message.message_id,
                                           parse_mode='HTML',
                                           reply_markup=gen_menu_one(f)
@@ -263,7 +296,8 @@ def callback_query(call):
                     add_users(call.message.message_id, call.from_user.id, call.message.chat.id,
                               subjects=check[2],
                               spis=check[5],
-                              f=check[4] + 1)
+                              f=check[4] + 1,
+                              perv=check[6])
 
     elif call.data == "back":
         if call.message.chat.type == "private":
@@ -273,7 +307,7 @@ def callback_query(call):
                     f = 0
                     if check[4] - 1 == 0:
                         f = 1
-                    bot.edit_message_text("🔎 Высокие шансы поступления:\n\n" + "\n\n".join(check[5][check[4] - 1]),
+                    bot.edit_message_text(check[6] + "\n\n".join(check[5][check[4] - 1]),
                                           call.message.chat.id, call.message.message_id,
                                           parse_mode='HTML',
                                           reply_markup=gen_menu_one(f)
@@ -281,8 +315,8 @@ def callback_query(call):
                     add_users(call.message.message_id, call.from_user.id, call.message.chat.id,
                               subjects=check[2],
                               spis=check[5],
-                              f=check[4] - 1
-                              )
+                              f=check[4] - 1,
+                              perv=check[6])
 
     elif call.data == "nap1":
         if call.message.chat.type == "private":
@@ -301,7 +335,7 @@ def callback_query(call):
             pol_sql = pol_js(predmets[0], predmets[1], predmets[2], str(check[3]), 1)
             spis = []
             for i in pol_sql["programs"]:
-               spis.append(f"🔮 <a href='{i['link']}'>{i['name']} {i['code']}</a>\n📊 Прошлогодний проходной балл: {i['bal']}\n"
+               spis.append(f"🔮 <a href='{i['link']}'>{i['name']} {i['code']}</a>\n📊 Прошлогодний проходной балл на бюджет:{i['bal']}\n"
                            f"👥 Количество бюджетных мест: {i['places']}")
             de = chunks(spis, 10)
             l = list(de)
@@ -388,12 +422,36 @@ def message_handler(message):
 
     #bot.send_message(message.chat.id, "Выберете номер интересуещего вас вопроса", reply_markup=gen_markup(0))
 
+# @bot.message_handler(commands=['id'])
+# def message_handler(message):
+#     bot.send_message(message.chat.id, f"{message.chat.id}") #-1001290867279
+
 @bot.message_handler()
 def message_handler_empty(message):
+
+    if message.text == "Меню":
+        if message.chat.type == "private":
+            bot.send_message(message.chat.id, "🌐 Команды бота:\n\n"
+                                              "📝 Вопросы — покажет список часто задаваемых вопросов.\n\n"
+                                              "📈 Направления — подберёт перспективные направления по проходным баллам",
+                             reply_markup=gen_menu(True))
+        else:
+            bot.send_message(message.chat.id, "🌐 Команды бота:\n\n"
+                                              "📝 Вопросы — покажет список часто задаваемых вопросов.\n\n",
+                             reply_markup=gen_menu(False))
+
+    if message.chat.id != -1001290867279:
+        if message.text in questions["spis_vop"]:
+            bot.send_message(message.chat.id, questions["vopr"][message.text])
+    else:
+        if message.text in questions_col["spis_vop"]:
+            bot.send_message(message.chat.id, questions_col["vopr"][message.text])
+
     if message.chat.type == "private":
         number = if_int(message.text)
         if number:
             if 310 >= number >= 0:
+                number = number - 10
                 subjects = {"math&rus&info": "Математика Русский Информатика и ИКТ",
                             "math&rus&phys": "Математика Русский Физика",
                             "math&rus&chem": "Математика Русский Химия",
@@ -402,36 +460,52 @@ def message_handler_empty(message):
                             "math&rus&art": "Математика Русский Творческий экзамен",
                             "rus&soc&art": "Русский Обществознание Творческий экзамен", "reduction": "rus&soc&art"}
                 check = check_users(message.from_user.id, message.chat.id)
-                predmets = check[2].split("&")
-                #print(check, predmets)
-                pol_sql = pol_js(predmets[0], predmets[1], predmets[2], str(number), 1)
-                if pol_sql["quantity"] != 0:
-                    spis = []
-                    for i in pol_sql["programs"]:
-                        spis.append(
-                            f"🔮 <a href='{i['link']}'>{i['name']} {i['code']}</a>\n📊 Прошлогодний проходной балл: {i['bal']}\n"
-                            f"👥 Количество бюджетных мест: {i['places']}")
-                    de = chunks(spis, 10)
-                    l = list(de)
-                    #print(len(l))
-                    #print(l)
-                    add_users(message.message_id, message.from_user.id, message.chat.id, subjects=check[2], f=0, spis=l)
+                if check:
+                    predmets = check[2].split("&")
+                    #print(check, predmets)
+                    pol_sql = pol_js(predmets[0], predmets[1], predmets[2], str(number), 1)
+                    if pol_sql["quantity"] != 0:
+                        spis = []
+                        for i in pol_sql["programs"]:
+                            spis.append(
+                                f"🔮 <a href='{i['link']}'>{i['name']} {i['code']}</a>\n📊 Прошлогодний проходной балл на бюджет: {i['bal']}\n"
+                                f"👥 Количество бюджетных мест: {i['places']}")
+                        de = chunks(spis, 10)
+                        l = list(de)
+                        #print(len(l))
+                        #print(l)
 
-                    ff = 1
-                    bot.delete_message(message.chat.id, message.message_id)
-                    if len(l) > 1:
-                    #for i in l:
-                        #if ff == 1:
-                        # m = bot.send_message(message.chat.id, "🔎 Высокие шансы поступления:\n\n" + "\n\n".join(l[0]),
-                        #                      parse_mode='HTML',
-                        #                      reply_markup=gen_menu_one())
-                        bot.edit_message_text("🔎 Высокие шансы поступления:\n\n" + "\n\n".join(l[0]),
-                                              message.chat.id, check[1],
-                                              parse_mode='HTML',
-                                              reply_markup=gen_menu_one(1)
-                                              )
-                    elif len(l) == 1:
-                        bot.edit_message_text("🔎 Высокие шансы поступления:\n\n" + "\n\n".join(l[0]),
+                        ff = 1
+                        bot.delete_message(message.chat.id, message.message_id)
+                        perv = "🔎 Высокие шансы поступления:\n\n"
+                        if pol_sql["quantity"] == -1:
+                            perv = "🔎 Гарантированное поступление на платное обучение, но на бюджет в прошлом году баллы были выше.\n\n"
+
+                        add_users(message.message_id, message.from_user.id, message.chat.id, subjects=check[2], f=0, spis=l,
+                                  perv=perv)
+
+                        if len(l) > 1:
+                        #for i in l:
+                            #if ff == 1:
+                            # m = bot.send_message(message.chat.id, "🔎 Высокие шансы поступления:\n\n" + "\n\n".join(l[0]),
+                            #                      parse_mode='HTML',
+                            #                      reply_markup=gen_menu_one())
+                            bot.edit_message_text(perv + "\n\n".join(l[0]),
+                                                  message.chat.id, check[1],
+                                                  parse_mode='HTML',
+                                                  reply_markup=gen_menu_one(1)
+                                                  )
+                        elif len(l) == 1:
+
+                            bot.edit_message_text(perv + "\n\n".join(l[0]),
+                                                  message.chat.id, check[1],
+                                                  parse_mode='HTML',
+                                                  reply_markup=gen_menu_one(3)
+                                                  )
+                    else:
+                        bot.edit_message_text("🏤 В РТУ МИРЭА много разных программ и не всегда стоит ориентироваться на проходные баллы прошлого года. Со всеми программами можно ознакомиться на сайте: https://priem.mirea.ru/guide/?level=bach-spec\n\n"
+                                              "📖 А ещё у нас очень доступное платное образование, а при оплате до 18 августа можно получить скидку на обучение: ссылка.\n\n"
+                                              "💰Кстати, если вы поступите на бюджет мы вам вернём всю сумму.",
                                               message.chat.id, check[1],
                                               parse_mode='HTML',
                                               reply_markup=gen_menu_one(3)
@@ -485,6 +559,7 @@ def message_handler_empty(message):
 
 def test1():
     generating_q("FAQ_T")
+    generating_col("FAQ_T_col")
 
     bot.polling(none_stop=True)
 

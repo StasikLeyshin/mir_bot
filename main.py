@@ -29,10 +29,8 @@ def load_modules(file, file_ls):
     modules = filter(lambda x: x.endswith('.py'), files)
     modules_ls = filter(lambda x: x.endswith('.py'), file_ls)
     for m in modules:
-        print(m)
         importlib.import_module("commands_besed." + m[0:-3])
     for n in modules_ls:
-        print(n)
         importlib.import_module("commands_ls." + n[0:-3])
     return
 
@@ -92,7 +90,6 @@ def apis_generate(spis):
     apis = {}
     #print(spis)
     for i in spis:
-        print(i)
         apis[i["id"]] = api(i["id"], i["token"])
     return apis
 
@@ -288,13 +285,19 @@ if __name__ == "__main__":
     url_dj = config["Django"]["url_dj"]
 
     questions_file = config["Questions"]["file"]
+    questions_file_abitur = config["Questions"]["file_abitur"]
+    questions_file_col = config["Questions"]["file_col"]
 
     load_modules(f"{bs}", f"{ls}")
 
     client = MongoClient(localhost, int(port))
     create_mongo = create_mongodb(client, collection_django, apps)
 
-    loop.run_until_complete(generating(questions_file, create_mongo).sp_vopr())
+    loop.run_until_complete(generating(questions_file, create_mongo).sp_vopr(encoding=1, f=1))
+
+    loop.run_until_complete(generating(questions_file_abitur, create_mongo).sp_vopr(encoding=1, f=1))
+
+    loop.run_until_complete(generating(questions_file_col, create_mongo).sp_vopr(encoding=1, f=1, nap="col"))
 
     #files = os.listdir("generating_questions/img")
     #print(files)
