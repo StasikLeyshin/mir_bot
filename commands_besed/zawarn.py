@@ -23,10 +23,23 @@ class zawarn(commands):
                 cause = "Использование ненормативной лексики"
                 ply = await self.display_time(vrem)
                 result_new = await warn_give_out(self.v).ban_give(self.apis, self.create_mongo, result[1], cause,
-                                                              self.chat_id_param(result[1]), str(user_id), str(self.from_id), vrem, ply)
+                                                                  self.chat_id_param(result[1]), str(user_id),
+                                                                  str(self.from_id), vrem, ply)
 
                 await self.apis.api_post("messages.send", v=self.v, peer_id=result[1],
-                                         message=result_new[1], random_id=0, forward=self.answer_msg_other_parameters(result[1], con_id))
+                                         message=result_new[1], random_id=0,
+                                         forward=self.answer_msg_other_parameters(result[1], con_id))
+                if len(result_new) == 3:
+                    loop = asyncio.get_running_loop()
+                    for i in result_new[2]:
+                        try:
+                            loop.create_task(
+                                self.apis.api_post("messages.removeChatUser", chat_id=self.chat_id_param(i),
+                                                   member_id=user_id,
+                                                   v=self.v))
+                        except:
+                            pass
+                    return
 
                 if result_new[0]:
                     await self.apis.api_post("execute", code=kick(users=[user_id], chat_id=self.chat_id_param(result[1])),

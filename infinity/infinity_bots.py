@@ -237,7 +237,7 @@ class infinity_bots:
                                                 continue
                                         else:
                                             await apis.api_post("messages.send", v=self.V, peer_id=message["peer_id"],
-                                                                message="Для получения ответа, Выберите интересующий уровень образования.",
+                                                                message="Для получения ответа, выберите интересующий уровень образования.",
                                                                 random_id=0,
                                                                 keyboard=self.level_education())
 

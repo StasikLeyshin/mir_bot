@@ -100,6 +100,20 @@ class api_url:
                 elif check["code"] == 0:
                     return check
 
+    async def get_html(self, **kwargs):
+        link = f"{self.url}"
+        async with aiohttp.ClientSession() as session:
+            async with session.get(link) as response:
+                d = await response.text()
+                return d
+                #if_error = api_error(club_id, "empty", **d)
+                #check = await if_error.error(self.url)
+                #if check["code"] == 1:
+                    #return d
+
+                #elif check["code"] == 0:
+                    #return check
+
     async def post_files(self, **kwargs):
 
 

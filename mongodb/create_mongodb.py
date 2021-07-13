@@ -6,59 +6,61 @@ import traceback
 import numpy as np
 
 from api import api_url, api, photo_upload
+
 var = "code.py"
+
+
 class create_mongodb:
-    
+
     def __init__(self, client, collections_django, apps_django):
-        
+
         self.client = client
         self.collections_django = collections_django
         self.apps_django = apps_django
-        #self.collections = collections
-        #self.documents = documents
-        #self.tokens = tokens
-        #self.ids = ids
+        # self.collections = collections
+        # self.documents = documents
+        # self.tokens = tokens
+        # self.ids = ids
 
-    
-    
     def create_db(self, collections, documents, tokens, ids):
         db = self.client[f"{collections}"]
-        #collection = db['tokens']
+        # collection = db['tokens']
         posts = db[f"{documents}"]
         one_doc = posts.find_one()
         if one_doc != None:
             for post in posts.find():
                 if post["id"] in ids:
-                    #print(tokens)
+                    # print(tokens)
                     del tokens[ids.index(post["id"])]
                     del ids[ids.index(post["id"])]
 
             if len(tokens) > 0:
                 posts.insert_many(tokens)
-        
+
         elif one_doc == None:
             result = posts.insert_many(tokens)
-            #print(result)
+            # print(result)
 
     def get_tokens(self, collections, documents, **kwargs):
         db = self.client[f"{collections}"]
         posts = db[f"{documents}"]
-        #print(posts.find)
+        # print(posts.find)
         if "empty" in kwargs:
             kwargs = {}
         tokens = []
         ids = []
         tokens_new = []
         for post in posts.find(kwargs):
-            #print(post)
+            # print(post)
             tokens.append({"id": post["id"], "token": post["token"], "them": post["them"]})
             if "peer_id" in post:
                 tokens_new.append({"id": post["id"], "token": post["token"], "them": post["them"], "name": post["name"],
                                    "peer_id": post["peer_id"]})
             else:
-                tokens_new.append({"id": post["id"], "token": post["token"], "them": post["them"], "name": post["name"]})
-            #tokens[post["id"]] = post["token"]
-        #print(tokens)
+                tokens_new.append(
+                    {"id": post["id"], "token": post["token"], "them": post["them"], "name": post["name"]})
+            # tokens[post["id"]] = post["token"]
+        # print(tokens)
         return tokens, tokens_new
 
     def update(self, collections, documents, club_id, peer_id):
@@ -74,7 +76,6 @@ class create_mongodb:
                 return 1
         return 0
 
-
     def get_them(self, collections, apps, id_ras):
         db = self.client[f"{collections}"]
         posts = db[f"{apps}_rassilka_them"]
@@ -85,27 +86,23 @@ class create_mongodb:
         posts = db[f"{apps}_topics"]
         for i in thems_id:
             thems.append(posts.find_one({'id': i})["soc"])
-        #post = posts.find_one({'id':them_id})
+        # post = posts.find_one({'id':them_id})
         return thems
-
-
-
 
     def get(self, collections, apps):
         db = self.client[f"{collections}"]
         kwargs = {}
-        #if "empty" in kwargs:
-            #kwargs = {}
-        #self.get_them(db, apps, kwargs["them"])
+        # if "empty" in kwargs:
+        # kwargs = {}
+        # self.get_them(db, apps, kwargs["them"])
         posts = db[f"{apps}_rassilka"]
-        #if "empty" in kwargs:
-            #kwargs = {}
+        # if "empty" in kwargs:
+        # kwargs = {}
         thems = []
         for post in posts.find(kwargs):
             thems.append(post)
 
         return thems
-
 
     def get_peer_id(self, collections, documents, club_id):
         peer_id = 0
@@ -124,7 +121,7 @@ class create_mongodb:
         posts = db[f"{apps}_rassilka_them_peer_id"]
         res_ids = posts.find({"rassilka_id": id_ras})
         posts = db[f"{apps}_conversations_ab"]
-        #res_ids_ab = posts.find({})
+        # res_ids_ab = posts.find({})
         for i in res_ids:
             po = posts.find_one({'id': i["conversations_ab_id"]})
             peer_id_news.append(po["Conver"])
@@ -182,7 +179,7 @@ class create_mongodb:
         else:
             files = os.listdir("generating_questions/img")
             post = ""
-            #loop = asyncio.get_running_loop()
+            # loop = asyncio.get_running_loop()
             for i in files:
                 if "png" in i:
                     if nap in i:
@@ -194,28 +191,26 @@ class create_mongodb:
                                              "generating_questions/img/").upload()"""
                         # print(res)
                         if len(post) > 1:
-                            #post = f"{res}," + post
+                            # post = f"{res}," + post
                             post = post + f",{res}"
                         else:
                             post += f"{res}"
 
             posts.insert_one({"nap": nap, "att": post})
-            #posts.insert_many([{"att": post}])
+            # posts.insert_many([{"att": post}])
 
             return post
 
-
     def rating(self, user_id):
-        #try:
+        # try:
         db = self.client[f"{self.collections_django}"]
         posts = db[f"{self.apps_django}_users"]
         po = posts.find_one({'user_id': str(user_id)})
         if po is not None:
             return po
         return -1
-        #except Exception as e:
-            #print(e)
-
+        # except Exception as e:
+        # print(e)
 
     def answer(self, number):
 
@@ -226,7 +221,7 @@ class create_mongodb:
             return 0
         else:
             po_new = posts.find_one({'id': int(number) + 1})
-            #print(po_new)
+            # print(po_new)
             if po_new is None:
                 return 1
             else:
@@ -241,13 +236,13 @@ class create_mongodb:
         for post in posts.find({}):
             if len(users) > 1:
                 if post['user_id'] not in repeat and post['user_id'] != '':
-                    #print(post)
+                    # print(post)
                     users += f",{post['user_id']}"
                     repeat.append(post['user_id'])
             else:
                 users += f"{post['user_id']}"
                 repeat.append(post['user_id'])
-        #print(repeat)
+        # print(repeat)
         return repeat
 
     def users_get_chek(self, user_id):
@@ -277,8 +272,8 @@ class create_mongodb:
         posts = db[f"{documents}"]
         po_new = posts.find_one({'user_id': user_id})
         if po_new is not None:
-            #posts.remove({'user_id': user_id})
-            #posts.insert_one({"user_id": user_id, "flag": 0})
+            # posts.remove({'user_id': user_id})
+            # posts.insert_one({"user_id": user_id, "flag": 0})
             po_new['flag'] = f
             if nap != "0":
                 po_new['nap'] = nap
@@ -289,11 +284,12 @@ class create_mongodb:
                 po_new['time'] = vrem
 
             posts.save(po_new)
-            #posts.update({"user_id": user_id}, {"flag": 0})
+            # posts.update({"user_id": user_id}, {"flag": 0})
             return 1
         else:
             if flag == 1:
-                posts.insert_one({"user_id": user_id, "flag": f, "predm": "", "bal": 0, "time": vrem, "slov": slov, "slov_questions": {}, "slych": 0, "nap": nap})
+                posts.insert_one({"user_id": user_id, "flag": f, "predm": "", "bal": 0, "time": vrem, "slov": slov,
+                                  "slov_questions": {}, "slych": 0, "nap": nap})
             else:
                 posts.insert_one({"user_id": user_id, "flag": f, "predm": "", "bal": 0, "nap": nap})
             return 1
@@ -363,7 +359,7 @@ class create_mongodb:
                                     posts.save(po_new)
                                     return 1, peer_id
                                 else:
-                                    #po_new["slov_questions"] = {}
+                                    # po_new["slov_questions"] = {}
                                     posts.save(po_new)
                                     return -1, ""
                             elif int(int(po_new['slov_questions']["count_correct_answers"]) + 1) == 5:
@@ -372,12 +368,13 @@ class create_mongodb:
                                 posts.save(po_new)
                                 return 1, peer_id
                             po_new['slov_questions']['count'] = str(int(int(po_new['slov_questions']['count']) + 1))
-                            po_new['slov_questions']['count_correct_answers'] = str(int(int(po_new['slov_questions']['count_correct_answers']) + 1))
+                            po_new['slov_questions']['count_correct_answers'] = str(
+                                int(int(po_new['slov_questions']['count_correct_answers']) + 1))
                             posts.save(po_new)
                             return 2, po_new["slov_questions"][f"{po_new['slov_questions']['count']}"]["question"]
                         else:
                             if int(int(po_new['slov_questions']['count']) + 1) == 8:
-                                #po_new["slov_questions"] = {}
+                                # po_new["slov_questions"] = {}
                                 posts.save(po_new)
                                 return -1, ""
                             po_new['slov_questions']['count'] = str(int(int(po_new['slov_questions']['count']) + 1))
@@ -385,7 +382,6 @@ class create_mongodb:
                             return 2, po_new["slov_questions"][f"{po_new['slov_questions']['count']}"]["question"]
         except Exception as e:
             print(traceback.format_exc())
-
 
     def unban(self, user_id, peer_id, collections="bots", documents="users"):
         try:
@@ -423,7 +419,6 @@ class create_mongodb:
                     pos.save(pos_new)
         return
 
-
     def check_user_unban(self, user_id, vrem, slych, flag, collections="bots", documents="users"):
         db = self.client[f"{collections}"]
         posts = db[f"{documents}"]
@@ -457,7 +452,7 @@ class create_mongodb:
         try:
             db = self.client[f"{collections}"]
             posts = db[f"{peer_id}"]
-            #users_new = users.copy()
+            # users_new = users.copy()
             users_vse_new = users_vse.copy()
             pos = posts.find({})
             pos_d = list(pos)
@@ -473,14 +468,16 @@ class create_mongodb:
                     if "kicked" in i:
                         if not i["kicked"]:
                             i["kicked"] = False
-                    #del users[i["user_id"]]
+                    # del users[i["user_id"]]
                     users_vse_new.remove(i["user_id"])
                 if i["user_id"] in users_adm:
                     i["admin"] = True
                 else:
                     i["admin"] = False
             for i in users_vse_new:
-                pos_d.append({"user_id": i, "admin": users[i]["admin"], "output": False, "kicked": False, "moder": {}, "ban": {}, "warn": {}, "mute": {}})
+                pos_d.append(
+                    {"user_id": i, "admin": users[i]["admin"], "output": False, "kicked": False, "moder": {}, "ban": {},
+                     "warn": {}, "mute": {}})
 
             posts.remove({})
             posts.insert_many(pos_d)
@@ -530,7 +527,7 @@ class create_mongodb:
                 if pos_new is not None:
                     peer_id_ab = pos_new["peer_id_ab"]
                     posts = db[f"{peer_id_ab}"]
-            else:
+            elif f == 0:
                 posts = db[f"{peer_id}"]
             pos = posts.find_one({"user_id": int(user_id)})
             if pos is not None:
@@ -582,8 +579,8 @@ class create_mongodb:
                              "start_time": start_time,
                              "user_admin": user_admin,
                              "chance": 1
-                     },
-                     "count": 1},
+                         },
+                         "count": 1},
                      "warn": {},
                      "mute": {}})
                 return 1
@@ -606,7 +603,7 @@ class create_mongodb:
                     pos["warn"]["1"]["start_time"] = start_time
                     pos["warn"]["1"]["user_admin"] = user_admin
                     posts.save(pos)
-                    return 1
+                    return 1, 1
                 else:
                     if pos["warn"]["count"] == 2:
                         pos["warn"][str(pos["warn"]["count_old"])] = {}
@@ -617,12 +614,15 @@ class create_mongodb:
                         pos["warn"][str(pos["warn"]["count_old"])]["user_admin"] = user_admin
                         pos["warn"]["count_old"] += 1
                         pos["warn"]["count"] = 0
+                        ban = 1
+                        if "count" in pos["ban"]:
+                            ban = pos["ban"]["count"]
                         # pos["ban"]["status"] = True
                         # pos["ban"]["time"] = vrem
                         # pos["ban"]["cause"] = cause
                         posts.save(pos)
-                        await self.ban_check(user_id, peer_id, cause, vrem, start_time, user_admin)
-                        return 3
+                        #res = await self.ban_check(user_id, peer_id, cause, vrem, start_time, user_admin)
+                        return 3, pos["warn"]["count_old"] - 1, ban
                     else:
                         pos["warn"][str(pos["warn"]["count_old"])] = {}
                         pos["warn"][str(pos["warn"]["count_old"])]["time"] = vrem
@@ -633,8 +633,7 @@ class create_mongodb:
                         pos["warn"]["count"] += 1
                         pos["warn"]["count_old"] += 1
                         posts.save(pos)
-                        return pos["warn"]["count"]
-
+                        return pos["warn"]["count"], pos["warn"]["count_old"] - 1
 
             return -1
         except Exception as e:
@@ -677,7 +676,7 @@ class create_mongodb:
             else:
                 if f == 1:
                     if "count" in pos["ban"]:
-                        #print(pos["ban"][str(pos["ban"]["count"])])
+                        # print(pos["ban"][str(pos["ban"]["count"])])
                         if pos["ban"][str(pos["ban"]["count"])]["status"]:
                             return 2
                 else:
@@ -717,14 +716,13 @@ class create_mongodb:
         except Exception as e:
             print(traceback.format_exc())
 
-
     async def remove_ban_warn(self, vrem, collections="bots"):
         try:
             db = self.client[f"{collections}"]
             posts_peer_ids = db[f"settings"]
             pos_new = posts_peer_ids.find_one({"perv": 1})
             peer_ids = pos_new["peer_ids"].split(", ")
-            #print(peer_ids)
+            # print(peer_ids)
             for i in peer_ids:
                 posts = db[f"{i}"]
                 pos = posts.find({})
@@ -742,15 +740,11 @@ class create_mongodb:
                                         if int(j['warn'][f'{j["warn"]["count_old"] - g}']["time"]) <= int(vrem):
                                             j["warn"][str(j["warn"]["count_old"] - g)]["status"] = False
                                             j["warn"]["count"] = j["warn"]["count"] - 1
-                                            #j["warn"]["count_old"] = j["warn"]["count_old"] - 1
+                                            # j["warn"]["count_old"] = j["warn"]["count_old"] - 1
                                             posts.save(j)
             return 1
         except Exception as e:
             print(traceback.format_exc())
-
-
-
-
 
     async def add_besed_zl(self, peer_id_ab, peer_id_zl, collections="bots", documents="conversations"):
         db = self.client[f"{collections}"]
@@ -769,7 +763,6 @@ class create_mongodb:
         if pos is not None:
             return pos["peer_ids"].split(", ")
 
-
     async def ban_chek(self, user_id, collections="bots"):
         try:
             slov = {"peer_ids": []}
@@ -777,7 +770,7 @@ class create_mongodb:
             posts_peer_ids = db[f"settings"]
             pos_new = posts_peer_ids.find_one({"perv": 1})
             peer_ids = pos_new["peer_ids"].split(", ")
-            #print(peer_ids)
+            # print(peer_ids)
             k = 1
             for i in peer_ids:
                 posts = db[f"{i}"]
@@ -829,6 +822,322 @@ class create_mongodb:
             else:
                 return 0, ""
 
-
         return -1, ""
 
+    async def user_info(self, user_id, peer_id, collections="bots"):
+
+        db = self.client[f"{collections}"]
+        posts = db[f"{peer_id}"]
+        pos = posts.find_one({"user_id": int(user_id)})
+        if pos is not None:
+            return pos
+        return False
+
+    async def profile_users_add(self, user_id, achievements="0", scores=0, sms=0, reputation_plus=0, reputation_minus=0,
+                                f=0,
+                                collections="bots", documents="profile_users"):
+        db = self.client[f"{collections}"]
+        posts_peer_ids = db[f"settings"]
+        pos_new = posts_peer_ids.find_one({"perv": 1})
+        peer_ids = pos_new["peer_ids"].split(", ")
+        flag = False
+        for i in peer_ids:
+            posts = db[f"{i}"]
+            pos = posts.find_one({"user_id": int(user_id)})
+            if pos is not None:
+                flag = True
+                break
+        if flag:
+            posts = db[f"{documents}"]
+            pos = posts.find_one({"user_id": int(user_id)})
+            if pos is None:
+                if achievements != "0":
+                    posts.insert_one({"user_id": int(user_id), "achievements":
+                        {
+                            "1":
+                                {
+                                    "status": True,
+                                    "scores": float(scores),
+                                    "name": achievements
+                                }
+                        },
+                                      "count_achievements": 1, "scores": 0 + float(scores), "sms": sms,
+                                      "reputation_plus":
+                                          {
+                                              "1": {
+                                                  "status": True,
+                                                  "vrem": reputation_plus
+                                              },
+                                              "2": {
+                                                  "status": True,
+                                                  "vrem": reputation_plus
+                                              },
+                                              "3": {
+                                                  "status": False,
+                                                  "vrem": reputation_plus
+                                              },
+                                              "4": {
+                                                  "status": False,
+                                                  "vrem": reputation_plus
+                                              },
+                                          },
+                                      "count_plus": 0,
+                                      "reputation_minus":
+                                          {
+                                              "1": {
+                                                  "status": True,
+                                                  "vrem": reputation_plus
+                                              },
+                                              "2": {
+                                                  "status": True,
+                                                  "vrem": reputation_plus
+                                              },
+                                              "3": {
+                                                  "status": False,
+                                                  "vrem": reputation_plus
+                                              },
+                                              "4": {
+                                                  "status": False,
+                                                  "vrem": reputation_plus
+                                              },
+                                          },
+                                      "count_minus": 0
+                                      })
+                elif achievements == "0":
+                    posts.insert_one({"user_id": int(user_id), "achievements": {},
+                                      "count_achievements": 1, "scores": 0 + float(scores), "sms": sms,
+                                      "reputation_plus":
+                                          {
+                                              "1": {
+                                                  "status": True,
+                                                  "vrem": reputation_plus
+                                              },
+                                              "2": {
+                                                  "status": True,
+                                                  "vrem": reputation_plus
+                                              },
+                                              "3": {
+                                                  "status": False,
+                                                  "vrem": reputation_plus
+                                              },
+                                              "4": {
+                                                  "status": False,
+                                                  "vrem": reputation_plus
+                                              },
+                                          },
+                                      "count_plus": 0,
+                                      "reputation_minus":
+                                          {
+                                              "1": {
+                                                  "status": True,
+                                                  "vrem": reputation_plus
+                                              },
+                                              "2": {
+                                                  "status": True,
+                                                  "vrem": reputation_plus
+                                              },
+                                              "3": {
+                                                  "status": False,
+                                                  "vrem": reputation_plus
+                                              },
+                                              "4": {
+                                                  "status": False,
+                                                  "vrem": reputation_plus
+                                              },
+                                          },
+                                      "count_minus": 0
+                                      })
+
+                if sms != 0:
+                    return 1
+                return [achievements], 0 + round(float(scores), 3), 1
+
+            else:
+                if reputation_plus != 0:
+                    if "reputation_plus" not in pos:
+                        if f == 1:
+                            return True
+                        pos["reputation_plus"] = {}
+                        pos["reputation_plus"]["1"] = {}
+                        pos["reputation_plus"]["2"] = {}
+                        pos["reputation_plus"]["3"] = {}
+                        pos["reputation_plus"]["4"] = {}
+                        pos["reputation_plus"]["1"] = {"status": True, "vrem": reputation_plus + 86400}
+                        pos["reputation_plus"]["2"] = {"status": True, "vrem": reputation_plus}
+                        if pos["scores"] > 35:
+                            pos["reputation_plus"]["3"] = {"status": True, "vrem": reputation_plus}
+                        else:
+                            pos["reputation_plus"]["3"] = {"status": False, "vrem": reputation_plus}
+                        if pos["scores"] > 45:
+                            pos["reputation_plus"]["4"] = {"status": True, "vrem": reputation_plus}
+                        else:
+                            pos["reputation_plus"]["4"] = {"status": False, "vrem": reputation_plus}
+                        #pos["reputation_plus"]["count"] = 2
+                        pos["count_plus"] = 1
+                        kol_c = pos["count_plus"]
+                        posts.save(pos)
+                        return kol_c
+                    else:
+                        r_3 = True
+                        r_4 = True
+                        if pos["scores"] > 40:
+                            pos["reputation_plus"]["3"]["status"] = True
+                            r_3 = False
+                        if pos["scores"] > 45:
+                            pos["reputation_plus"]["4"]["status"] = True
+                            r_4 = False
+                        if r_3:
+                            pos["reputation_plus"]["3"]["status"] = False
+                        if r_4:
+                            pos["reputation_plus"]["4"]["status"] = False
+
+                        for i in pos["reputation_plus"]:
+                            if pos["reputation_plus"][str(i)]["status"]:
+                                if reputation_plus >= pos["reputation_plus"][str(i)]["vrem"]:
+                                    if f == 1:
+                                        return True
+                                    pos["reputation_plus"][str(i)]["vrem"] = reputation_plus + 86400
+                                    #pos["reputation_plus"]["count"] = int(i) + 1
+                                    pos["count_plus"] += 1
+                                    kol_c = pos["count_plus"]
+                                    posts.save(pos)
+                                    return kol_c
+                        return False
+
+                if reputation_minus != 0:
+                    if pos["scores"] < 30:
+                        return False
+                    if "reputation_minus" not in pos:
+                        if f == 1:
+                            return True
+                        pos["reputation_minus"] = {}
+                        pos["reputation_minus"]["1"] = {}
+                        pos["reputation_minus"]["2"] = {}
+                        pos["reputation_minus"]["3"] = {}
+                        pos["reputation_minus"]["4"] = {}
+                        pos["reputation_minus"]["1"] = {"status": True, "vrem": reputation_minus + 86400}
+                        pos["reputation_minus"]["2"] = {"status": True, "vrem": reputation_minus}
+                        if pos["scores"] > 40:
+                            pos["reputation_minus"]["3"] = {"status": True, "vrem": reputation_minus}
+                        else:
+                            pos["reputation_minus"]["3"] = {"status": False, "vrem": reputation_minus}
+                        if pos["scores"] > 50:
+                            pos["reputation_minus"]["4"] = {"status": True, "vrem": reputation_minus}
+                        else:
+                            pos["reputation_minus"]["4"] = {"status": False, "vrem": reputation_minus}
+                        #pos["reputation_minus"]["count"] = 2
+                        pos["count_minus"] = 1
+                        kol_c = pos["count_minus"]
+                        posts.save(pos)
+                        return kol_c
+                    else:
+                        if pos["scores"] < 30:
+                            return False
+                        r_3 = True
+                        r_4 = True
+                        if pos["scores"] > 40:
+                            pos["reputation_minus"]["3"]["status"] = True
+                            r_3 = False
+                        if pos["scores"] > 50:
+                            pos["reputation_minus"]["4"]["status"] = True
+                            r_4 = False
+                        if r_3:
+                            pos["reputation_plus"]["3"]["status"] = False
+                        if r_4:
+                            pos["reputation_plus"]["4"]["status"] = False
+                        for i in pos["reputation_minus"]:
+                            if pos["reputation_minus"][str(i)]["status"]:
+                                if reputation_minus >= pos["reputation_minus"][str(i)]["vrem"]:
+                                    if f == 1:
+                                        return True
+                                    pos["reputation_minus"][str(i)]["vrem"] = reputation_minus + 86400
+                                    #pos["reputation_minus"]["count"] = 2
+                                    pos["count_minus"] += 1
+                                    kol_c = pos["count_minus"]
+                                    posts.save(pos)
+                                    return kol_c
+                        return False
+
+
+                if sms != 0:
+                    pos["sms"] += sms
+                    kol_sms = pos["sms"]
+                    posts.save(pos)
+                    return kol_sms
+                if achievements == "0" and scores == 0 and sms == 0 and reputation_plus == 0 and reputation_minus == 0:
+                    ach = []
+                    if len(pos["achievements"]) > 0:
+                        for i in pos["achievements"]:
+                            if pos["achievements"][i]["status"]:
+                                ach.append(f'{pos["achievements"][i]["name"]} — {pos["achievements"][i]["scores"]}')
+                        return ach, round(pos["scores"], 3), pos["sms"]
+                    else:
+                        return [achievements], round(pos["scores"], 3), pos["sms"]
+
+                elif achievements != "0":
+                    flag_new = True
+                    for i in pos["achievements"]:
+                        if pos["achievements"][i]["name"] == achievements:
+                            flag_new = False
+
+                    if flag_new:
+                        pos["achievements"][str(pos["count_achievements"] + 1)] = {}
+                        pos["achievements"][str(pos["count_achievements"] + 1)]["status"] = True
+                        pos["achievements"][str(pos["count_achievements"] + 1)]["scores"] = scores
+                        pos["achievements"][str(pos["count_achievements"] + 1)]["name"] = achievements
+                        pos["count_achievements"] += 1
+                    pos["scores"] += scores
+                    pos["sms"] += sms
+                    scor = pos["scores"]
+                    posts.save(pos)
+                elif achievements == "0":
+                    pos["sms"] += sms
+                    pos["scores"] += scores
+                    scor = pos["scores"]
+                    posts.save(pos)
+
+                return [achievements], 0 + round(float(scor), 3)
+        else:
+            return False
+
+    #async def profile_users_chek_(self, reputation, collections="bots", documents="profile_users"):
+
+
+        # pos = posts.find_one({"user_id": int(user_id)})
+        # if pos is None:
+
+    async def globan_add(self, user_id, vrem, adm_id, cause, collections="bots", documents="globan"):
+        db = self.client[f"{collections}"]
+        posts = db[f"{documents}"]
+        po_new = posts.find_one({'user_id': int(user_id)})
+        if po_new is None:
+            posts.insert_one({"user_id": int(user_id), "status": True, "cause": cause, "vrem": vrem, "admin_id": adm_id})
+            posts_peer_ids = db[f"settings"]
+            pos_new = posts_peer_ids.find_one({"perv": 1})
+            peer_ids = pos_new["peer_ids"].split(", ")
+            return 1, peer_ids
+        else:
+            if po_new["status"]:
+                posts_peer_ids = db[f"settings"]
+                pos_new = posts_peer_ids.find_one({"perv": 1})
+                peer_ids = pos_new["peer_ids"].split(", ")
+                return 2, peer_ids
+            else:
+                po_new["status"] = True
+                po_new["vrem"] = vrem
+                po_new["admin_id"] = adm_id
+                po_new["cause"] = cause
+                posts.save(po_new)
+                posts_peer_ids = db[f"settings"]
+                pos_new = posts_peer_ids.find_one({"perv": 1})
+                peer_ids = pos_new["peer_ids"].split(", ")
+                return 1, peer_ids
+
+    async def globan_chek(self, user_id, collections="bots", documents="globan"):
+        db = self.client[f"{collections}"]
+        posts = db[f"{documents}"]
+        po_new = posts.find_one({'user_id': int(user_id)})
+        if po_new is not None:
+            return po_new["status"]
+        else:
+            return False

@@ -54,6 +54,16 @@ class warn(commands):
                     await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
                                              message=result[1], random_id=0)
 
+                    if len(result) == 3:
+                        loop = asyncio.get_running_loop()
+                        for i in result[2]:
+                            try:
+                                loop.create_task(
+                                    self.apis.api_post("messages.removeChatUser", chat_id=self.chat_id_param(i),
+                                                       member_id=user_id,
+                                                       v=self.v))
+                            except:pass
+                        return
                     if result[0]:
                         await self.apis.api_post("execute", code=kick(users=[user_id], chat_id=self.chat_id()),
                                                  v=self.v)

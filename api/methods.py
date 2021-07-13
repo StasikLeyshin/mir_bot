@@ -60,7 +60,7 @@ class messages_edit:
         self.masg = 0
 
 
-    async def strat_send(self):
+    async def start_send(self):
 
         self.msg = await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id, message=self.text, random_id=0)
 

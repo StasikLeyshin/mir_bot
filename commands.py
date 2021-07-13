@@ -3,7 +3,10 @@ import asyncio
 import json
 import re
 
+
 from api.methods import methods
+from api import api_url
+
 class commands:
 
     def __init__(self, v, club_id, message, apis, them, create_mongo, collection_bots, document_tokens, url_dj):
@@ -42,6 +45,29 @@ class commands:
                          "Рус + общ + ист": "rus&soc&hist",
                          "Рус + мат(проф.) + твор": "math&rus&art",
                          "Рус + общ + твор": "rus&soc&art"}
+
+        self.sms_awards = {
+            100: ["Ууф, сотка сообщений, у нас любитель початиться", 2],
+            1000: ["Ого, тысяча сообщений, еще не флудер года, но всё впереди", 6],
+            2000: ["That's a lot of masseges! How abount a little more? Две тысячи сообщений пройдено!", 9],
+            5000: ["ГЛАВНЫЙ ФЛУДЕР ГОДА НАЙДЕН! ПЯТЬ ТЫСЯЧ СООБЩЕНИЙ ЕСТЬ!", 12]
+        }
+        self.reputation_plus_awards = {
+            1: ["А вы, я погляжу, хороший малый", 1],
+            5: ["Добрый чел, позитивный", 3],
+            10: ["Поднял репутацию уже десяти Си-Джеям!", 6]
+        }
+        self.reputation_minus_awards = {
+            1: ["Токсик обнаружен", -0.001],
+            2: ["Злой чел, негативный", -0.01],
+            5: ["Самый душный в чате", -0.02],
+            7: ["Ну давай, давай, нападай", -0.04],
+            9: ["Я ведь не отстану, каждому токсику по перевоспитанию", -0.06],
+            10: ["Вот это ты конечно натоксичил", -0.07],
+            13: ["Сжёг рейтинг уже тринадцати людям", -0.08],
+            16: ["Токсим токсим токсим каждый день", -0.09],
+            20: ["Партия недовольна вами, минус тарелка рис", -0.1]
+        }
 
     def button_vk(self, label, color, payload=""):
         return {
@@ -182,6 +208,7 @@ class commands:
     def chat_id(self):
         return str(int(self.peer_id) - 2000000000)
 
+
     def chat_id_param(self, per_id):
         return str(int(per_id) - 2000000000)
 
@@ -252,7 +279,7 @@ class commands:
             if "reply_message" in self.message:
                 user_id = self.message["reply_message"]["from_id"]
             else:
-                user_id = self.fwd_messages["from_id"]
+                user_id = self.fwd_messages[0]["from_id"]
             if self.is_int(user_id):
                 user_id = str(user_id)
                 return user_id
@@ -280,7 +307,83 @@ class commands:
                     return user_id
                 else:
                     return False
+        return False
 
+    # получение текста ачивки и количества баллов
+    async def txt_achievement(self, txt):
+        txt_list = txt.split(" ")
+        if "[id" in str(txt.lower()) or "[club" in str(txt.lower()) or "vk.com/" in txt.lower():
+            del txt_list[0]
+            del txt_list[0]
+            l = len(txt_list) - 1
+            kol = txt_list[l]
+            del txt_list[l]
+            return " ".join(txt_list), kol
+        else:
+            del txt_list[0]
+            l = len(txt_list) - 1
+            kol = txt_list[l]
+            del txt_list[l]
+            return " ".join(txt_list), kol
+
+
+    async def ls_open_check(self, fr_id):
+        res = await self.apis.api_post("messages.isMessagesFromGroupAllowed", v=self.v, group_id=self.club_id,
+                                       user_id=fr_id)
+        if res["is_allowed"] == 1:
+            return True
+        else:
+            return False
+
+
+    # поиск по html
+    def fin(self, s, first, last):
+        try:
+            start = s.index(str(first)) + len(str(first))
+            end = s.index(str(last), start)
+            return s[start:end]
+        except ValueError:
+            return ""
+
+    async def info_user(self, user_id, res=0, f=0):
+        if str(user_id)[0] == "-":
+            return "Таких не знаем🤖"
+
+        warn = ""
+        ban = ""
+        if f == 0:
+            info = await self.create_mongo.user_info(user_id, self.peer_id)
+            if not info:
+                return "Такого не существует в природе👽"
+
+            if "count_old" in info["warn"]:
+                warn = f"☢ Варны: [{info['warn']['count']}/3]\n🤡 Количество варнов: {info['warn']['count_old'] - 1}\n\n"
+            if "count" in info["ban"]:
+                ban = f"🤡 Количество банов: {info['ban']['count']}\n\n"
+
+        result = await self.apis.api_post("users.get", v=self.v, user_ids=f"{user_id}", name_case="gen")
+        name = f'{result[0]["first_name"]} {result[0]["last_name"]}'
+
+        if res == 0:
+            res = await self.create_mongo.profile_users_add(user_id)
+
+
+        awards = ""
+        if len(res[0]) >= 1:
+            if res[0][0] == "0":
+                awards = f"💬 Количество сообщений: {res[2]}\n📊 Рейтинг: {res[1]}\n👻 Ачивки:\n📛 Ачивок нет"
+            else:
+                awards = f"💬 Количество сообщений: {res[2]}\n📊 Рейтинг: {res[1]}\n👻 Ачивки:\n" + "\n".join(res[0])
+
+        # p = requests.get('https://vk.com/foaf.php?id=' + str(self.from_id))
+        s = await api_url('https://vk.com/foaf.php?id=' + str(user_id)).get_html()
+        l = self.fin(s, "<ya:created dc:date=", "/>\n")
+        q = l[1:-7]
+        q = q[:-9]
+        q = q.replace('-', '.')
+        q = q.split(".")
+        q = str(q[2]) + "." + str(q[1]) + "." + str(q[0])
+        return f"👤 Профиль [id{user_id}|{name}]\n\n📆 Дата регистрации: {q}\n\n{warn}{ban}{awards}"
 
 
     '''async def bind(self):

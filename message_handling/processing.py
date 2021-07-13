@@ -5,6 +5,7 @@ import urllib.request
 import random
 from random import randint
 import re
+import asyncio
 
 
 from commands import commands
@@ -84,6 +85,14 @@ class processing(commands):
     async def run(self, bad_words):
         if self.peer_id == 2000000024:
             return
+
+        kol_sms = await self.create_mongo.profile_users_add(self.from_id, sms=1)
+        if kol_sms in self.sms_awards:
+            res = await self.create_mongo.profile_users_add(self.from_id, f"🏆 {self.sms_awards[int(kol_sms)][0]}", self.sms_awards[int(kol_sms)][1])
+            ach = f"👻 [id{self.from_id}|Вы] получили ачивку:\n\n🏆 {self.sms_awards[int(kol_sms)][0]}\n\n📊 Рейтинг: {res[1]}"
+            await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
+                                     message=ach, random_id=0, forward=self.answer_msg())
+
         flag = False
         flag_new = False
         for i in bad_words:
@@ -99,24 +108,25 @@ class processing(commands):
             try:
                 if len(self.message["attachments"]) != 0:
                     for i in self.message["attachments"]:
-                        rand = randint(0, 9999999999)
-                        rand_name = f"{self.peer_id}_{self.from_id}_{self.date}_{rand}.jpg"
-                        g = await self.photo_r_json(i["photo"]["sizes"])
-                        g_url = g["url"]
-                        urllib.request.urlretrieve(g_url, rand_name)
-                        txt = await text_photo().run(rand_name)
-                        os.remove(rand_name)
-                        for i in bad_words:
-                            for j in txt.lower().split(" "):
-                                if not flag_new:
-                                    if RegexpProc.test(j):
-                                        flag_new = True
-                                if i in txt.lower():
-                                    if i == j:
-                                        flag = True
-                                        break
-                        if flag:
-                            break
+                        if "photo" in i:
+                            rand = randint(0, 9999999999)
+                            rand_name = f"{self.peer_id}_{self.from_id}_{self.date}_{rand}.jpg"
+                            g = await self.photo_r_json(i["photo"]["sizes"])
+                            g_url = g["url"]
+                            urllib.request.urlretrieve(g_url, rand_name)
+                            txt = await text_photo().run(rand_name)
+                            os.remove(rand_name)
+                            for i in bad_words:
+                                for j in txt.lower().split(" "):
+                                    if not flag_new:
+                                        if RegexpProc.test(j):
+                                            flag_new = True
+                                    if i in txt.lower():
+                                        if i == j:
+                                            flag = True
+                                            break
+                            if flag:
+                                break
             except Exception as e:
                 print(traceback.format_exc())
         if flag:
@@ -131,6 +141,17 @@ class processing(commands):
 
                     await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
                                              message=result[1], random_id=0, forward=self.answer_msg())
+
+                    if len(result) == 3:
+                        loop = asyncio.get_running_loop()
+                        for i in result[2]:
+                            try:
+                                loop.create_task(
+                                    self.apis.api_post("messages.removeChatUser", chat_id=self.chat_id_param(i),
+                                                       member_id=self.from_id,
+                                                       v=self.v))
+                            except:pass
+                        return
 
                     if result[0]:
                         await self.apis.api_post("execute", code=kick(users=[self.from_id], chat_id=self.chat_id()),

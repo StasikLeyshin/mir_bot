@@ -24,7 +24,7 @@ class test(commands):
 
                 #"/home/stas/mir_bot/media/2021/06/28/28ae1abb0bcacd6e81ad2de947ba86da.jpg"
                 await self.apis.api_post("messages.send", v=self.v, peer_id=2000000023,
-                                         message="test", random_id=0, attachment=res)#, forward=msg)
+                                         message="test", random_id=0)  # , attachment=res)#, forward=msg)
             except Exception as e:
                 print(traceback.format_exc())
 
