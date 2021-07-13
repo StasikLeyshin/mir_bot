@@ -96,6 +96,7 @@ class processing(commands):
         flag_new = False
         for i in bad_words:
             for j in self.text.lower().split(" "):
+
                 if not flag_new:
                     if RegexpProc.test(j):
                         flag_new = True
