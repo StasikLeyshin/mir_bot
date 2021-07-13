@@ -92,7 +92,6 @@ class processing(commands):
             ach = f"👻 [id{self.from_id}|Вы] получили ачивку:\n\n🏆 {self.sms_awards[int(kol_sms)][0]}\n\n📊 Рейтинг: {res[1]}"
             await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
                                      message=ach, random_id=0, forward=self.answer_msg())
-
         flag = False
         flag_new = False
         for i in bad_words:
