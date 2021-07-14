@@ -718,6 +718,7 @@ class create_mongodb:
 
     async def remove_ban_warn(self, vrem, collections="bots"):
         try:
+            print(vrem)
             db = self.client[f"{collections}"]
             posts_peer_ids = db[f"settings"]
             pos_new = posts_peer_ids.find_one({"perv": 1})

@@ -2,6 +2,7 @@
 
 import asyncio
 import datetime as DT
+from bs4 import BeautifulSoup
 
 from date_compare import date_compare
 from api import api_url, api, photo_upload
@@ -111,6 +112,9 @@ class infinity_beskon:
         tek = await self.current_time()
         await self.create_mongo.remove_ban_warn(tek)
 
+    async def parsing_mirea(self):
+        txt = await api_url("https://priem.mirea.ru/accepted-entrants-list/#bach").get_html()
+        soup = BeautifulSoup(txt, 'lxml')
 
 
     async def beskon(self):
@@ -125,4 +129,5 @@ class infinity_beskon:
             gen = await self.generate(self.st)
             loop.create_task(self.get_rass(gen))
             loop.create_task(self.withdrawal_warn_ban())
+            #loop.create_task(self.parsing_mirea())
             await asyncio.sleep(60)

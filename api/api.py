@@ -100,7 +100,7 @@ class api_url:
                 elif check["code"] == 0:
                     return check
 
-    async def get_html(self, **kwargs):
+    async def get_html(self):
         link = f"{self.url}"
         async with aiohttp.ClientSession() as session:
             async with session.get(link) as response:

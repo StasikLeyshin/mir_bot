@@ -17,7 +17,6 @@ class zawarn(commands):
             vrem = spis[1]
             con_id = spis[2]
             result = await self.create_mongo.chek_zawarn(user_id, vrem)
-            print(result)
             if result[0] == 1:
                 vrem = 86400
                 cause = "Использование ненормативной лексики"
