@@ -1142,3 +1142,114 @@ class create_mongodb:
             return po_new["status"]
         else:
             return False
+
+    async def admin_answer_check(self, user_id, collections="bots", documents="admin_answer"):
+        db = self.client[f"{collections}"]
+        posts = db[f"{documents}"]
+        po_new = posts.find_one({'user_id': int(user_id)})
+        if po_new is None:
+            return 1
+        else:
+            return po_new["count"] + 1
+
+    async def admin_answer_add(self, user_id, text, msg_id, conversation_message_ids, msg_id_forwarded, vrem, collections="bots", documents="admin_answer"):
+        db = self.client[f"{collections}"]
+        posts = db[f"{documents}"]
+        po_new = posts.find_one({'user_id': int(user_id)})
+        if po_new is None:
+            posts.insert_one({"user_id": int(user_id),
+                              "answer":
+                                  {
+                                      "1":
+                                          {
+                                              "status": False,
+                                              "msg_id": msg_id,
+                                              "conversation_message_ids": conversation_message_ids,
+                                              "text": text,
+                                              "date": vrem,
+                                              "date_answer": 0,
+                                              "admin_id": 0,
+                                              "msg_id_forwarded": msg_id_forwarded,
+                                              "answer": ""
+                                          }
+                                  },
+                              "count": 1
+                              })
+            return 1
+        else:
+            po_new["answer"][str(po_new["count"] + 1)] =\
+                {
+                    "status": False,
+                    "msg_id": msg_id,
+                    "conversation_message_ids": conversation_message_ids,
+                    "text": text,
+                    "date": vrem,
+                    "date_answer": 0,
+                    "admin_id": 0,
+                    "msg_id_forwarded": msg_id_forwarded,
+                    "answer": ""
+                }
+            po_new["count"] += 1
+            count = po_new["count"]
+            posts.save(po_new)
+            return count
+
+    async def admin_answer_otv(self, user_id=0, admin_id=0, answer=0, count_id=0, vrem=0, f=0, collections="bots",
+                               documents="admin_answer"):
+        db = self.client[f"{collections}"]
+
+        if f == 1:
+            post = db[f"admin_answer_id"]
+            po_n = post.find_one({'user_id': int(admin_id)})
+            if po_n is not None:
+                user_id = po_n["priv_id"]
+                count_id = po_n["count"]
+                po_n["status"] = False
+                post.save(po_n)
+
+        posts = db[f"{documents}"]
+        po_new = posts.find_one({'user_id': int(user_id)})
+        if po_new is not None:
+            if not po_new["answer"][str(count_id)]["status"]:
+                flag = False
+                slov_new = {}
+                count_old = 0
+                if f == 1:
+                    po_new["answer"][str(count_id)]["status"] = True
+                    po_new["answer"][str(count_id)]["date_answer"] = vrem
+                    po_new["answer"][str(count_id)]["admin_id"] = admin_id
+                    po_new["answer"][str(count_id)]["answer"] = answer
+                elif f == 0:
+                    post = db[f"admin_answer_id"]
+                    po_n = post.find_one({'user_id': int(admin_id)})
+                    if po_n is None:
+                        post.insert_one({"user_id": int(admin_id), "priv_id": int(user_id), "status": True,
+                                         "count": int(count_id)})
+                    else:
+                        if po_n["status"]:
+                            flag = True
+                            slov_new = po_new["answer"][str(po_n["count"])]["msg_id_forwarded"]
+                            count_old = po_n["count"]
+                        po_n["priv_id"] = int(user_id)
+                        po_n["status"] = True
+                        po_n["count"] = int(count_id)
+                        post.save(po_n)
+
+
+                slov = po_new["answer"][str(count_id)]["msg_id_forwarded"]
+                conversation_message_ids = po_new["answer"][str(count_id)]["conversation_message_ids"]
+                msg_id = po_new["answer"][str(count_id)]["msg_id"]
+
+                posts.save(po_new)
+                return flag, slov, msg_id, conversation_message_ids, slov_new, count_old, user_id
+            else:
+                return False
+
+    async def admin_answer_id_check(self, user_id, collections="bots", documents="admin_answer_id"):
+        db = self.client[f"{collections}"]
+        posts = db[f"{documents}"]
+        po_new = posts.find_one({'user_id': int(user_id)})
+        if po_new is not None:
+            return po_new["status"]
+        else:
+            return False

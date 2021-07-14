@@ -30,6 +30,8 @@ class commands:
         self.collection_bots = collection_bots
         self.document_tokens = document_tokens
         self.url_dj = url_dj
+        #self.admin_list = [15049950, 216758639, 597624554]
+        self.admin_list = [597624554, 456204202]
         self.subjects = {"Рус + мат(проф.) + инф": "Математика Русский Информатика и ИКТ",
                          "Рус + мат(проф.) + физ": "Математика Русский Физика",
                          "Рус + мат(проф.) + хим": "Математика Русский Химия",
@@ -137,6 +139,19 @@ class commands:
         keyboard = str(keyboard.decode('utf-8'))
         return keyboard
 
+    def keyboard_answer_admin(self, tex):
+        r = "primary"
+        keyboard = {
+            "one_time": False,
+            "buttons": [
+                [self.button_vk(label="Ответить", color="positive", payload=tex)]
+            ],
+            "inline": True
+        }
+        keyboard = json.dumps(keyboard, ensure_ascii=False).encode('utf-8')
+        keyboard = str(keyboard.decode('utf-8'))
+        return keyboard
+
 
     def keyboard_empty(self):
         r = "primary"
@@ -171,6 +186,16 @@ class commands:
         msg = {
             "conversation_message_ids": [conversation_message_id],
             "peer_id": peer_id,
+        }
+        msg = json.dumps(msg, ensure_ascii=False).encode('utf-8')
+        msg = str(msg.decode('utf-8'))
+        return msg
+
+    def answer_msg_parameters(self, peer_id, conversation_message_id):
+        msg = {
+            "conversation_message_ids": [conversation_message_id],
+            "peer_id": peer_id,
+            "is_reply": True
         }
         msg = json.dumps(msg, ensure_ascii=False).encode('utf-8')
         msg = str(msg.decode('utf-8'))

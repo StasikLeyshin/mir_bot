@@ -9,7 +9,7 @@ from api.methods import methods
 from command_besed import command_list
 from command_ls import command_ls_list
 
-from commands_ls import issuing_directions, choice_conversation
+from commands_ls import issuing_directions, choice_conversation, response_text_admin
 from message_handling import processing
 
 class infinity_bots:
@@ -223,6 +223,14 @@ class infinity_bots:
                                         continue
 
                                     elif them == "tema1":
+                                        if await self.create_mongo.admin_answer_id_check(message["peer_id"]):
+                                            loop.create_task(
+                                                response_text_admin(self.V, club_id, message, apis, them,
+                                                                    self.create_mongo,
+                                                                    self.collection_bots,
+                                                                    self.document_tokens,
+                                                                    self.url_dj).run())
+
                                         chek_nap = self.create_mongo.check_user_nap(message["from_id"])
                                         if chek_nap != "0":
                                             if chek_nap == "bac":

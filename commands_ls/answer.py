@@ -37,7 +37,7 @@ class answer(commands):
 
 answers = command_ls.Command()
 
-answers.keys = ['ответ', '/ответ']
+answers.keys = ['wwww', '/wwww']
 answers.description = 'Ответ'
 answers.process = answer
 answers.topics_blocks = []
