@@ -10,11 +10,10 @@ class response_text_admin(commands):
                                                               f=1)
             if result:
                 for i in result[1]:
-                    if int(i) != int(self.from_id):
-                        await self.apis.api_post("messages.edit", v=self.v, peer_id=int(i),
-                                                 message="Администратор ответил на вопрос.", random_id=0,
-                                                 message_id=result[1][i],
-                                                 keep_forward_messages=1)
+                    await self.apis.api_post("messages.edit", v=self.v, peer_id=int(i),
+                                             message="Администратор ответил на вопрос.", random_id=0,
+                                             message_id=result[1][i],
+                                             keep_forward_messages=1)
 
                 await self.apis.api_post("messages.send", v=self.v, peer_id=int(result[6]),
                                          message=self.text, random_id=0,

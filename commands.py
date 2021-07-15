@@ -2,6 +2,7 @@
 import asyncio
 import json
 import re
+from datetime import datetime
 
 
 from api.methods import methods
@@ -30,8 +31,8 @@ class commands:
         self.collection_bots = collection_bots
         self.document_tokens = document_tokens
         self.url_dj = url_dj
-        #self.admin_list = [15049950, 216758639, 597624554]
-        self.admin_list = [597624554, 456204202]
+        self.admin_list = [15049950, 216758639, 597624554]
+        #self.admin_list = [597624554, 456204202]
         self.subjects = {"Рус + мат(проф.) + инф": "Математика Русский Информатика и ИКТ",
                          "Рус + мат(проф.) + физ": "Математика Русский Физика",
                          "Рус + мат(проф.) + хим": "Математика Русский Химия",
@@ -410,7 +411,39 @@ class commands:
         q = str(q[2]) + "." + str(q[1]) + "." + str(q[0])
         return f"👤 Профиль [id{user_id}|{name}]\n\n📆 Дата регистрации: {q}\n\n{warn}{ban}{awards}"
 
+    async def time_transformation(self, vrem):
+        timestamp = int(vrem)
+        value = datetime.fromtimestamp(timestamp)
+        tim = value.strftime('%d.%m.%Y %H:%M')
+        return tim
 
+    async def info_reputation(self, user_id):
+        await self.create_mongo.profile_users_add(user_id, reputation_minus=self.date, f=2)
+        await self.create_mongo.profile_users_add(user_id, reputation_plus=self.date, f=2)
+        result = await self.create_mongo.profile_users_check(user_id, self.date)
+        plus = []
+        j = 1
+        for i in result["plus"]:
+            res = await self.time_transformation(result["plus"][i])
+            plus.append(f"{j}. +реп станет доступен после {res}")
+            j += 1
+        minus = []
+        j = 1
+        for i in result["minus"]:
+            res = await self.time_transformation(result["minus"][i])
+            minus.append(f"{j}. -реп станет доступен после {res}")
+            j += 1
+        resul = await self.apis.api_post("users.get", v=self.v, user_ids=f"{user_id}", name_case="gen")
+        name = f'{resul[0]["first_name"]} {resul[0]["last_name"]}'
+        minu = ""
+        if result["count_minus"] != 0:
+            minu = f"\n\n😈 Количество доступных -реп: [{result['count_minus_available']}/{result['count_minus']}]\n" \
+                   + "\n".join(minus)
+        msg = f"👤 Доступная репутация [id{user_id}|{name}]\n\n" \
+              f"😇 Количество доступных +реп: [{result['count_plus_available']}/{result['count_plus']}]\n" \
+              + "\n".join(plus) + \
+              f"{minu}"
+        return msg
     '''async def bind(self):
         ad = methods(self.v, self.club_id)
         adm = await ad.admin_chek(self.message)

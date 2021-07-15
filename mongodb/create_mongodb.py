@@ -881,25 +881,41 @@ class create_mongodb:
                                                   "status": False,
                                                   "vrem": reputation_plus
                                               },
+                                              "5": {
+                                                  "status": False,
+                                                  "vrem": reputation_plus
+                                              },
+                                              "6": {
+                                                  "status": False,
+                                                  "vrem": reputation_plus
+                                              },
                                           },
                                       "count_plus": 0,
                                       "reputation_minus":
                                           {
                                               "1": {
-                                                  "status": True,
-                                                  "vrem": reputation_plus
+                                                  "status": False,
+                                                  "vrem": reputation_minus
                                               },
                                               "2": {
-                                                  "status": True,
-                                                  "vrem": reputation_plus
+                                                  "status": False,
+                                                  "vrem": reputation_minus
                                               },
                                               "3": {
                                                   "status": False,
-                                                  "vrem": reputation_plus
+                                                  "vrem": reputation_minus
                                               },
                                               "4": {
                                                   "status": False,
-                                                  "vrem": reputation_plus
+                                                  "vrem": reputation_minus
+                                              },
+                                              "5": {
+                                                  "status": False,
+                                                  "vrem": reputation_minus
+                                              },
+                                              "6": {
+                                                  "status": False,
+                                                  "vrem": reputation_minus
                                               },
                                           },
                                       "count_minus": 0
@@ -925,25 +941,41 @@ class create_mongodb:
                                                   "status": False,
                                                   "vrem": reputation_plus
                                               },
+                                              "5": {
+                                                  "status": False,
+                                                  "vrem": reputation_plus
+                                              },
+                                              "6": {
+                                                  "status": False,
+                                                  "vrem": reputation_plus
+                                              },
                                           },
                                       "count_plus": 0,
                                       "reputation_minus":
                                           {
                                               "1": {
-                                                  "status": True,
-                                                  "vrem": reputation_plus
+                                                  "status": False,
+                                                  "vrem": reputation_minus
                                               },
                                               "2": {
-                                                  "status": True,
-                                                  "vrem": reputation_plus
+                                                  "status": False,
+                                                  "vrem": reputation_minus
                                               },
                                               "3": {
                                                   "status": False,
-                                                  "vrem": reputation_plus
+                                                  "vrem": reputation_minus
                                               },
                                               "4": {
                                                   "status": False,
-                                                  "vrem": reputation_plus
+                                                  "vrem": reputation_minus
+                                              },
+                                              "5": {
+                                                  "status": False,
+                                                  "vrem": reputation_minus
+                                              },
+                                              "6": {
+                                                  "status": False,
+                                                  "vrem": reputation_minus
                                               },
                                           },
                                       "count_minus": 0
@@ -963,6 +995,8 @@ class create_mongodb:
                         pos["reputation_plus"]["2"] = {}
                         pos["reputation_plus"]["3"] = {}
                         pos["reputation_plus"]["4"] = {}
+                        pos["reputation_plus"]["5"] = {}
+                        pos["reputation_plus"]["6"] = {}
                         pos["reputation_plus"]["1"] = {"status": True, "vrem": reputation_plus + 86400}
                         pos["reputation_plus"]["2"] = {"status": True, "vrem": reputation_plus}
                         if pos["scores"] > 35:
@@ -973,6 +1007,14 @@ class create_mongodb:
                             pos["reputation_plus"]["4"] = {"status": True, "vrem": reputation_plus}
                         else:
                             pos["reputation_plus"]["4"] = {"status": False, "vrem": reputation_plus}
+                        if pos["scores"] > 50:
+                            pos["reputation_plus"]["5"] = {"status": True, "vrem": reputation_plus}
+                        else:
+                            pos["reputation_plus"]["5"] = {"status": False, "vrem": reputation_plus}
+                        if pos["scores"] > 60:
+                            pos["reputation_plus"]["6"] = {"status": True, "vrem": reputation_plus}
+                        else:
+                            pos["reputation_plus"]["6"] = {"status": False, "vrem": reputation_plus}
                         #pos["reputation_plus"]["count"] = 2
                         pos["count_plus"] = 1
                         kol_c = pos["count_plus"]
@@ -981,21 +1023,53 @@ class create_mongodb:
                     else:
                         r_3 = True
                         r_4 = True
+                        r_5 = True
+                        r_6 = True
                         if pos["scores"] > 40:
                             pos["reputation_plus"]["3"]["status"] = True
                             r_3 = False
                         if pos["scores"] > 45:
                             pos["reputation_plus"]["4"]["status"] = True
                             r_4 = False
+
+                        if pos["scores"] > 50:
+                            if "5" not in pos["reputation_plus"]:
+                                pos["reputation_plus"]["5"] = {"status": True, "vrem": reputation_plus}
+                            else:
+                                pos["reputation_plus"]["5"]["status"] = True
+                            r_5 = False
+
+                        if pos["scores"] > 60:
+                            if "6" not in pos["reputation_plus"]:
+                                pos["reputation_plus"]["6"] = {"status": True, "vrem": reputation_plus}
+                            else:
+                                pos["reputation_plus"]["6"]["status"] = True
+                            r_6 = False
+
                         if r_3:
                             pos["reputation_plus"]["3"]["status"] = False
                         if r_4:
                             pos["reputation_plus"]["4"]["status"] = False
 
+                        if r_5:
+                            if "5" not in pos["reputation_plus"]:
+                                pos["reputation_plus"]["5"] = {"status": False, "vrem": reputation_plus}
+                            else:
+                                pos["reputation_plus"]["5"]["status"] = False
+
+                        if r_6:
+                            if "6" not in pos["reputation_plus"]:
+                                pos["reputation_plus"]["5"] = {"status": False, "vrem": reputation_plus}
+                            else:
+                                pos["reputation_plus"]["6"]["status"] = False
+
                         for i in pos["reputation_plus"]:
                             if pos["reputation_plus"][str(i)]["status"]:
                                 if reputation_plus >= pos["reputation_plus"][str(i)]["vrem"]:
                                     if f == 1:
+                                        return True
+                                    if f == 2:
+                                        posts.save(pos)
                                         return True
                                     pos["reputation_plus"][str(i)]["vrem"] = reputation_plus + 86400
                                     #pos["reputation_plus"]["count"] = int(i) + 1
@@ -1003,10 +1077,11 @@ class create_mongodb:
                                     kol_c = pos["count_plus"]
                                     posts.save(pos)
                                     return kol_c
+                        posts.save(pos)
                         return False
 
                 if reputation_minus != 0:
-                    if pos["scores"] < 30:
+                    if pos["scores"] < 30 and f != 2:
                         return False
                     if "reputation_minus" not in pos:
                         if f == 1:
@@ -1026,30 +1101,77 @@ class create_mongodb:
                             pos["reputation_minus"]["4"] = {"status": True, "vrem": reputation_minus}
                         else:
                             pos["reputation_minus"]["4"] = {"status": False, "vrem": reputation_minus}
+                        if pos["scores"] > 55:
+                            pos["reputation_minus"]["5"] = {"status": True, "vrem": reputation_minus}
+                        else:
+                            pos["reputation_minus"]["5"] = {"status": False, "vrem": reputation_minus}
+                        if pos["scores"] > 65:
+                            pos["reputation_minus"]["6"] = {"status": True, "vrem": reputation_minus}
+                        else:
+                            pos["reputation_minus"]["6"] = {"status": False, "vrem": reputation_minus}
                         #pos["reputation_minus"]["count"] = 2
                         pos["count_minus"] = 1
                         kol_c = pos["count_minus"]
                         posts.save(pos)
                         return kol_c
                     else:
-                        if pos["scores"] < 30:
+                        if pos["scores"] < 30 and f != 2:
+                            pos["reputation_minus"]["1"]["status"] = False
+                            pos["reputation_minus"]["2"]["status"] = False
+                            posts.save(pos)
                             return False
+                        if pos["scores"] < 30:
+                            pos["reputation_minus"]["1"]["status"] = False
+                            pos["reputation_minus"]["2"]["status"] = False
                         r_3 = True
                         r_4 = True
+                        r_5 = True
+                        r_6 = True
                         if pos["scores"] > 40:
                             pos["reputation_minus"]["3"]["status"] = True
                             r_3 = False
                         if pos["scores"] > 50:
                             pos["reputation_minus"]["4"]["status"] = True
                             r_4 = False
+
+                        if pos["scores"] > 55:
+                            if "5" not in pos["reputation_minus"]:
+                                pos["reputation_minus"]["5"] = {"status": True, "vrem": reputation_minus}
+                            else:
+                                pos["reputation_minus"]["5"]["status"] = True
+                            r_5 = False
+
+                        if pos["scores"] > 65:
+                            if "6" not in pos["reputation_minus"]:
+                                pos["reputation_minus"]["6"] = {"status": True, "vrem": reputation_minus}
+                            else:
+                                pos["reputation_minus"]["6"]["status"] = True
+                            r_6 = False
+
                         if r_3:
-                            pos["reputation_plus"]["3"]["status"] = False
+                            pos["reputation_minus"]["3"]["status"] = False
                         if r_4:
-                            pos["reputation_plus"]["4"]["status"] = False
+                            pos["reputation_minus"]["4"]["status"] = False
+
+                        if r_5:
+                            if "5" not in pos["reputation_minus"]:
+                                pos["reputation_minus"]["5"] = {"status": False, "vrem": reputation_minus}
+                            else:
+                                pos["reputation_minus"]["5"]["status"] = False
+
+                        if r_6:
+                            if "6" not in pos["reputation_minus"]:
+                                pos["reputation_minus"]["5"] = {"status": False, "vrem": reputation_minus}
+                            else:
+                                pos["reputation_minus"]["6"]["status"] = False
+
                         for i in pos["reputation_minus"]:
                             if pos["reputation_minus"][str(i)]["status"]:
                                 if reputation_minus >= pos["reputation_minus"][str(i)]["vrem"]:
                                     if f == 1:
+                                        return True
+                                    if f == 2:
+                                        posts.save(pos)
                                         return True
                                     pos["reputation_minus"][str(i)]["vrem"] = reputation_minus + 86400
                                     #pos["reputation_minus"]["count"] = 2
@@ -1057,6 +1179,7 @@ class create_mongodb:
                                     kol_c = pos["count_minus"]
                                     posts.save(pos)
                                     return kol_c
+                        posts.save(pos)
                         return False
 
 
@@ -1071,7 +1194,8 @@ class create_mongodb:
                         for i in pos["achievements"]:
                             if pos["achievements"][i]["status"]:
                                 ach.append(f'{pos["achievements"][i]["name"]} — {pos["achievements"][i]["scores"]}')
-                        return ach, round(pos["scores"], 3), pos["sms"]
+
+                        return ach, round(pos["scores"], 3), pos["sms"],
                     else:
                         return [achievements], round(pos["scores"], 3), pos["sms"]
 
@@ -1100,6 +1224,31 @@ class create_mongodb:
                 return [achievements], 0 + round(float(scor), 3)
         else:
             return False
+
+    async def profile_users_check(self, user_id, vrem, collections="bots", documents="profile_users"):
+
+        db = self.client[f"{collections}"]
+        posts = db[f"{documents}"]
+        pos = posts.find_one({"user_id": int(user_id)})
+        if pos is not None:
+            slov = {"count_plus": 0, "count_minus": 0, "count_plus_available": 0, "count_minus_available": 0, "plus": {},
+                    "minus": {}}
+            for i in pos["reputation_plus"]:
+                if pos["reputation_plus"][str(i)]["status"]:
+                    slov["count_plus"] += 1
+                    if vrem >= pos["reputation_plus"][str(i)]["vrem"]:
+                        slov["count_plus_available"] += 1
+                    else:
+                        slov["plus"][f"{i}"] = pos["reputation_plus"][str(i)]["vrem"]
+            if "reputation_minus" in pos:
+                for i in pos["reputation_minus"]:
+                    if pos["reputation_minus"][str(i)]["status"]:
+                        slov["count_minus"] += 1
+                        if vrem >= pos["reputation_minus"][str(i)]["vrem"]:
+                            slov["count_minus_available"] += 1
+                        else:
+                            slov["minus"][f"{i}"] = pos["reputation_minus"][str(i)]["vrem"]
+            return slov
 
     #async def profile_users_chek_(self, reputation, collections="bots", documents="profile_users"):
 

@@ -230,6 +230,7 @@ class infinity_bots:
                                                                     self.collection_bots,
                                                                     self.document_tokens,
                                                                     self.url_dj).run())
+                                            continue
 
                                         chek_nap = self.create_mongo.check_user_nap(message["from_id"])
                                         if chek_nap != "0":
