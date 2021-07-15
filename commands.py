@@ -7,6 +7,7 @@ from datetime import datetime
 
 from api.methods import methods
 from api import api_url
+from api.api_execute import inf_lot
 
 class commands:
 
@@ -444,6 +445,33 @@ class commands:
               + "\n".join(plus) + \
               f"{minu}"
         return msg
+
+    async def info_rating(self, size):
+        result = await self.create_mongo.rating_check()
+        li = sorted(result, key=result.get, reverse=True)
+        #li = list(li)
+        li = li[:size]
+        st = ",".join(li)
+        spis = []
+        resul = await self.apis.api_post("execute", code=inf_lot(from_ids=st), v=self.v)
+        k = 1
+        resul = list(reversed(resul))
+
+        for i, j in zip(li, resul):
+            nag = "🏐"
+            if k == 1:
+                nag = "🥇"
+            elif k == 2:
+                nag = "🥈"
+            elif k == 3:
+                nag = "🥉"
+            elif k == 4:
+                nag = "🎖"
+            spis.append(f"{nag} {k}. [id{i}|{j}] ——— {result[str(i)]}")
+            k += 1
+        msg = "👑 ТОП 25 в рейтинге:\n\n" + "\n".join(spis)
+        return msg
+
     '''async def bind(self):
         ad = methods(self.v, self.club_id)
         adm = await ad.admin_chek(self.message)

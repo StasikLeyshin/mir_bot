@@ -47,6 +47,15 @@ def inf(v, id, f, from_id):
     return m
 
 @vkscript
+def inf_lot(from_ids):
+    m = []
+    res = api.users.get(user_ids=from_ids, fields="'first_name, last_name'")
+    for i in res:
+        m.append(i.first_name + "' '" + i.last_name)
+    return m
+
+
+@vkscript
 def kick(users, chat_id):
     #names = []
     #u = users.split(" ")
@@ -61,3 +70,4 @@ def kick(users, chat_id):
         api.messages.removeChatUser(chat_id=chat_id, member_id=i)
         #names.append(user.first_name)
     return 1
+

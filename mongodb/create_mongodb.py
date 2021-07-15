@@ -718,7 +718,6 @@ class create_mongodb:
 
     async def remove_ban_warn(self, vrem, collections="bots"):
         try:
-            print(vrem)
             db = self.client[f"{collections}"]
             posts_peer_ids = db[f"settings"]
             pos_new = posts_peer_ids.find_one({"perv": 1})
@@ -1250,6 +1249,19 @@ class create_mongodb:
                             slov["minus"][f"{i}"] = pos["reputation_minus"][str(i)]["vrem"]
             return slov
 
+    async def rating_check(self, collections="bots", documents="profile_users"):
+        db = self.client[f"{collections}"]
+        posts = db[f"{documents}"]
+        pos = posts.find({})
+        slov = {}
+        spis_id = []
+        #slov_new = {}
+        for i in pos:
+            if i["user_id"] > 0:
+                slov[str(i["user_id"])] = i["scores"]
+            #spis_id.append(i["user_id"])
+        return slov
+
     #async def profile_users_chek_(self, reputation, collections="bots", documents="profile_users"):
 
 
@@ -1402,3 +1414,4 @@ class create_mongodb:
             return po_new["status"]
         else:
             return False
+
