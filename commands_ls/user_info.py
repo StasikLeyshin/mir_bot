@@ -14,6 +14,10 @@ class user_info(commands):
 
             await self.apis.api_post("messages.send", v=self.v, peer_id=self.from_id,
                                      message=msg, random_id=0)
+        else:
+            msg = await self.info_user(self.from_id, f=1, res=res)
+            await self.apis.api_post("messages.send", v=self.v, peer_id=self.from_id,
+                                     message=msg, random_id=0)
 
 
 user_infos = command_ls.Command()
