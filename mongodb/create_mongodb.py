@@ -1258,7 +1258,7 @@ class create_mongodb:
         #slov_new = {}
         for i in pos:
             if i["user_id"] > 0:
-                slov[str(i["user_id"])] = i["scores"]
+                slov[str(i["user_id"])] = round(i["scores"], 3)
             #spis_id.append(i["user_id"])
         return slov
 
