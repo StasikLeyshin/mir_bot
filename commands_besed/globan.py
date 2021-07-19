@@ -12,24 +12,26 @@ class globan(commands):
         if adm:
             user_id = await self.getting_user_id()
             if user_id:
-                cause = await self.txt_warn(self.text)
-                res = await self.create_mongo.globan_add(user_id, self.date, self.from_id, cause)
-                if res[0] == 1:
-                    await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
-                                             message=f"Данный [id{user_id}|пользователь] добавлен в глобальный бан. "
-                                                     f"Оттуда ещё никто не возвращался...", random_id=0)
-                elif res[0] == 2:
-                    await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
-                                             message=f"Данный [id{user_id}|пользователь] уже есть в глобальном бане. "
-                                                     f"И он оттуда скорее всего не вернётся...", random_id=0)
-                loop = asyncio.get_running_loop()
-                for i in res[1]:
-                    try:
-                        loop.create_task(self.apis.api_post("messages.removeChatUser", chat_id=self.chat_id_param(i),
-                                                            member_id=user_id,
-                                                            v=self.v))
-                    except Exception as e:
-                        print(traceback.format_exc())
+                adm = await self.create_mongo.admin_check(user_id, self.peer_id)
+                if not adm:
+                    cause = await self.txt_warn(self.text)
+                    res = await self.create_mongo.globan_add(user_id, self.date, self.from_id, cause)
+                    if res[0] == 1:
+                        await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
+                                                 message=f"Данный [id{user_id}|пользователь] добавлен в глобальный бан. "
+                                                         f"Оттуда ещё никто не возвращался...", random_id=0)
+                    elif res[0] == 2:
+                        await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
+                                                 message=f"Данный [id{user_id}|пользователь] уже есть в глобальном бане. "
+                                                         f"И он оттуда скорее всего не вернётся...", random_id=0)
+                    loop = asyncio.get_running_loop()
+                    for i in res[1]:
+                        try:
+                            loop.create_task(self.apis.api_post("messages.removeChatUser", chat_id=self.chat_id_param(i),
+                                                                member_id=user_id,
+                                                                v=self.v))
+                        except Exception as e:
+                            print(traceback.format_exc())
 
 
 

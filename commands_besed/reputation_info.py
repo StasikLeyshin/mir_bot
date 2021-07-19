@@ -48,7 +48,7 @@ class reputation_info(commands):
 
 reputation_infos = command_besed.Command()
 
-reputation_infos.keys = ['рептайм', 'реп тайм', 'rep time', 'reptime']
+reputation_infos.keys = ['рептайм', 'реп тайм', 'rep time', 'reptime', 'таймреп']
 reputation_infos.description = 'Минус репутация'
 reputation_infos.process = reputation_info
 reputation_infos.topics_blocks = []
