@@ -5,6 +5,7 @@ import datetime as DT
 from bs4 import BeautifulSoup
 import traceback
 import requests
+from time import gmtime, strftime
 
 from date_compare import date_compare
 from api import api_url, api, photo_upload
@@ -123,11 +124,11 @@ class infinity_beskon:
         #txt = await api_url("https://priem.mirea.ru/accepted-entrants-list/#bach").get_html()
         #soup = BeautifulSoup(txt, 'html.parser')
         try:
-            txt = await api_url(f"https://priem.mirea.ru/accepted-entrants-list/personal_code_rating.php?competition={l_id}").get_html()
-            #url = (f'https://priem.mirea.ru/accepted-entrants-list/personal_code_rating.php?competition={l_id}')
-            #page = requests.get(url)
-            #soup = BeautifulSoup(page.content, 'html.parser')
-            soup = BeautifulSoup(txt, 'html.parser')
+            #txt = await api_url(f"https://priem.mirea.ru/accepted-entrants-list/personal_code_rating.php?competition={l_id}").get_html()
+            url = (f'https://priem.mirea.ru/accepted-entrants-list/personal_code_rating.php?competition={l_id}')
+            page = requests.get(url)
+            soup = BeautifulSoup(page.content, 'html.parser')
+            #soup = BeautifulSoup(txt, 'html.parser')
             table = soup.find('table')
             x = (len(table.findAll('tr')) - 1)
             for row in table.findAll('tr')[1:x]:
@@ -183,9 +184,12 @@ class infinity_beskon:
             print(f"Code_directions: {l_id}")
             print(traceback.format_exc())
         try:
-            txt = await api_url(
-                f"https://priem.mirea.ru/accepted-entrants-list/personal_code_rating.php?competition={l_id}").get_html()
-            soup = BeautifulSoup(txt, 'html.parser')
+            # txt = await api_url(
+            #     f"https://priem.mirea.ru/accepted-entrants-list/personal_code_rating.php?competition={l_id}").get_html()
+            url = (f'https://priem.mirea.ru/accepted-entrants-list/personal_code_rating.php?competition={l_id}')
+            page = requests.get(url)
+            soup = BeautifulSoup(page.content, 'html.parser')
+            #soup = BeautifulSoup(txt, 'html.parser')
             table = soup.find('table')
             x = (len(table.findAll('tr')) - 1)
             for row in table.findAll('tr')[1:x]:
@@ -250,7 +254,7 @@ class infinity_beskon:
             print(traceback.format_exc())
 
 
-
+        print(self.slov_directions_general)
 
             #for j in i["count"]:
         for i in self.slov_directions_general:
@@ -273,7 +277,8 @@ class infinity_beskon:
             gen = await self.generate(self.st)
             loop.create_task(self.get_rass(gen))
             loop.create_task(self.withdrawal_warn_ban())
-            if tim == 30: #or tim == 0:
+            if tim == 60 or tim == 0:
+                await self.create_mongo.directions_time(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
                 loop.create_task(self.parsing_mirea_add(loop))
             await asyncio.sleep(60)
             tim += 1

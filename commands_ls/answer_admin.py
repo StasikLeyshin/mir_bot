@@ -10,7 +10,6 @@ class answer_admin(commands):
     async def run(self):
         try:
             if "payload" in self.message and self.from_id in self.admin_list:
-                print("test")
                 spis = self.message["payload"].replace('"', '').split("@")
                 user_id = spis[0]
                 count_id = spis[1]

@@ -178,12 +178,12 @@ class infinity_bots:
 
                             # LS
                             if from_id == peer_id:
-                                print("LS: ", message)
+                                #print("LS: ", message)
                                 text = message["text"].lower()
                                 sel = await self.selection(command_ls_list, text, them)
                                 #print(sel, text, command_ls_list)
                                 blocs = ["target", "consultants", "tema1"]
-                                print("SEL: ", sel)
+                                ##print("SEL: ", sel)
                                 if sel != 0:
                                     loop.create_task(sel.process(self.V, club_id, message, apis, them,
                                                                  self.create_mongo,
@@ -221,7 +221,7 @@ class infinity_bots:
                                                                 self.document_tokens,
                                                                 self.url_dj).run())
                                         continue
-                                    elif chek == 5:
+                                    elif chek == 5 or chek == 6:
                                         loop.create_task(
                                             adding_change_snils(self.V, club_id, message, apis, them,
                                                                 self.create_mongo,
@@ -260,7 +260,7 @@ class infinity_bots:
 
                             # BS
                             if from_id != peer_id:
-                                print("BS: ", message)
+                                #print("BS: ", message)
                                 if them == "zluka":
                                     #if message["from_id"] == 597624554:
                                         #await apis.api_post("messages.send", v=self.V, peer_id=message["peer_id"],
@@ -278,7 +278,7 @@ class infinity_bots:
 
                                     if "action" in message:
                                         sel = await self.selection(command_list, message["action"]["type"], them)
-                                        print("SEL: ", sel)
+                                        ##print("SEL: ", sel)
                                         if sel != 0:
                                             loop.create_task(sel.process(self.V, club_id, message, apis, them,
                                                                          self.create_mongo,
