@@ -102,10 +102,13 @@ class api_url:
 
     async def get_html(self):
         link = f"{self.url}"
-        async with aiohttp.ClientSession() as session:
+        async with aiohttp.ClientSession(headers={'Connection': 'keep-alive'}) as session:
             async with session.get(link) as response:
                 d = await response.text()
-                return d
+            await session.close()
+            return d
+            #session.close()
+
                 #if_error = api_error(club_id, "empty", **d)
                 #check = await if_error.error(self.url)
                 #if check["code"] == 1:

@@ -3,6 +3,7 @@ import asyncio
 import json
 import re
 from datetime import datetime
+import traceback
 
 
 from api.methods import methods
@@ -54,7 +55,8 @@ class commands:
             100: ["Ууф, сотка сообщений, у нас любитель початиться", 2],
             1000: ["Ого, тысяча сообщений, еще не флудер года, но всё впереди", 6],
             2000: ["That's a lot of masseges! How abount a little more? Две тысячи сообщений пройдено!", 9],
-            5000: ["ГЛАВНЫЙ ФЛУДЕР ГОДА НАЙДЕН! ПЯТЬ ТЫСЯЧ СООБЩЕНИЙ ЕСТЬ!", 12]
+            5000: ["ГЛАВНЫЙ ФЛУДЕР ГОДА НАЙДЕН! ПЯТЬ ТЫСЯЧ СООБЩЕНИЙ ЕСТЬ!", 12],
+            10000: ["ДЕСЯТЬ ТЫСЯЧ СООБЩЕНИЙ!!! ДЕСЯЯЯЯЯТЬ! НАСПАМИЛ НА БЕЗБЕДНУЮ ЖИЗНЬ", 15]
         }
         self.reputation_plus_awards = {
             1: ["А вы, я погляжу, хороший малый", 1],
@@ -88,6 +90,7 @@ class commands:
             "one_time": False,
             "buttons": [
                 [self.button_vk(label="Вопросы", color="positive"), self.button_vk(label="Направления", color="positive")],
+                [self.button_vk(label="Конкурс", color="primary")],
                 [self.button_vk(label="Команды", color="negative")]
             ]
         }
@@ -165,6 +168,28 @@ class commands:
         keyboard = str(keyboard.decode('utf-8'))
         return keyboard
 
+    def competition(self, f):
+        if f == 0:
+            spis = [
+                [self.button_vk(label="Добавить СНИЛС/уникальный номер", color="positive")],
+                [self.button_vk(label="Посмотреть анонимно", color="positive")],
+                [self.button_vk(label="Команды", color="negative")]
+            ]
+        elif f == 1:
+            spis = [
+                [self.button_vk(label="Моя ситуация", color="positive")],
+                [self.button_vk(label="Посмотреть анонимно", color="positive")],
+                [self.button_vk(label="Изменить СНИЛС/уникальный номер", color="positive")],
+                [self.button_vk(label="Команды", color="negative")]
+            ]
+        keyboard = {
+            "one_time": False,
+            "buttons": spis
+        }
+        keyboard = json.dumps(keyboard, ensure_ascii=False).encode('utf-8')
+        keyboard = str(keyboard.decode('utf-8'))
+        return keyboard
+
     def answer_msg(self):
         msg = {
             "conversation_message_ids": [self.conversation_message_id],
@@ -202,6 +227,8 @@ class commands:
         msg = json.dumps(msg, ensure_ascii=False).encode('utf-8')
         msg = str(msg.decode('utf-8'))
         return msg
+
+
 
     def chunks(self, l, n):
         for i in range(0, len(l), n):
@@ -476,5 +503,52 @@ class commands:
         ad = methods(self.v, self.club_id)
         adm = await ad.admin_chek(self.message)
         if adm == 1:pass'''
+
+    async def snils_check(self, snils="0", flag=0):
+        try:
+            if not self.is_int(snils.replace("-", "")):
+                return 0, "Введите СНИЛС/уникальный номер в правильном формате"
+
+            res = await self.create_mongo.users_directions_add_finish(self.from_id, self.text, flag=flag)
+            if res[0] == 1:
+                return 0, "Не удалось найти данные по СНИЛСУ/уникальному номеру, повторите попытку."
+            elif res[0] == 2:
+                return 0, "Вы не привязали СНИЛС/уникальный номер."
+            directions_list = []
+            ll = 1
+            vash_new = "Ваша позиция"
+            if flag == 2:
+                vash_new = "Позиция"
+            for i in range(1, res[1]["count"] + 1):
+                comment = ""
+                if len(res[1][str(i)]['note']) > 0:
+                    comment = f"\nКомментарий: {res[1][str(i)]['note']}"
+                directions_list.append(f"{ll}. {res[2][res[1][str(i)]['code_directions']]['title']}\n"
+                                       f"🐈 Код: {res[2][res[1][str(i)]['code_directions']]['code']}\n"
+                                       f"👥 Количество бюджетных мест: {res[2][res[1][str(i)]['code_directions']]['plan']}\n"
+                                       f"🌏 {vash_new}: {res[1][str(i)]['position']}\n"
+                                       f"🌐 {vash_new} с учётом подачи согласия к зачислению: {res[1][str(i)]['position_consent']}\n"
+                                       f"👨‍⚖ Согласие к зачислению: {res[1][str(i)]['consent']}"
+                                       f"{comment}")
+                ll += 1
+            dat = ""
+            vash = "Ваш "
+            vash_new_new = "ваших "
+            if flag == 0:
+                dat = "Данные записаны\n"
+            elif flag == 2:
+                vash = ""
+                vash_new_new = ""
+            msg = f"{dat}⏰ Время последнего обновления: {res[3]}\n💎 {vash}СНИЛС/уникальный номер: {res[1]['snils']}\n" \
+                  f"💿 Сумма баллов с учётом ИД: {res[1]['1']['total_amount']}\n" \
+                  f"📝 Список {vash_new_new}направлений:\n\n"\
+                  +"\n\n".join(directions_list)
+            self.create_mongo.add_user(self.peer_id, 0)
+
+            return 1, msg
+        except Exception as e:
+            print(traceback.format_exc())
+
+
 
 

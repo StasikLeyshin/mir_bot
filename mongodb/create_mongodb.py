@@ -1122,6 +1122,9 @@ class create_mongodb:
                         if pos["scores"] < 30:
                             pos["reputation_minus"]["1"]["status"] = False
                             pos["reputation_minus"]["2"]["status"] = False
+                        if pos["scores"] > 30:
+                            pos["reputation_minus"]["1"]["status"] = True
+                            pos["reputation_minus"]["2"]["status"] = True
                         r_3 = True
                         r_4 = True
                         r_5 = True
@@ -1257,6 +1260,16 @@ class create_mongodb:
         spis_id = []
         #slov_new = {}
         for i in pos:
+            # posts_peer_ids = db[f"settings"]
+            # pos_new = posts_peer_ids.find_one({"perv": 1})
+            # peer_ids = pos_new["peer_ids"].split(", ")
+            # flag = False
+            # #for j in peer_ids:
+            # post_new = db[f"2000000011"]
+            # pos_new = post_new.find_one({"user_id": int(i["user_id"])})
+            # if pos_new is not None:
+            #     if pos_new["admin"]:
+            #             flag = True
             if i["user_id"] > 0:
                 slov[str(i["user_id"])] = round(i["scores"], 3)
             #spis_id.append(i["user_id"])
@@ -1415,3 +1428,94 @@ class create_mongodb:
         else:
             return False
 
+    async def users_directions(self, users, directions, collections="bots", documents="users_directions"):
+        db = self.client[f"{collections}"]
+        posts = db[f"{documents}"]
+        posts.remove({})
+        # pos = posts.find({})
+        # if pos is not None:
+        #     pos_d = list(pos)
+        #     for i in pos_d:pass
+        #         #i[]
+
+        posts.insert_many(users)
+        posts = db[f"decryption_directions"]
+        posts.remove({})
+        posts.insert_many(directions)
+
+        #po_new = posts.find_one({'user_id': int(user_id)})
+
+    async def users_directions_add_start(self, user_id, collections="bots", documents="users_directions_vk"):
+        db = self.client[f"{collections}"]
+        posts = db[f"{documents}"]
+        post = posts.find_one({'user_id': int(user_id)})
+        if post is None:
+            posts.insert_one({"user_id": int(user_id), "snils": "0", "status": True})
+            return False
+        else:
+            post["status"] = True
+            snils = post["snils"]
+            posts.save(post)
+            if snils == "0":
+                return False
+            else:
+                return snils
+
+    async def users_directions_add_finish(self, user_id, snils, flag=0,  collections="bots", documents="users_directions_vk"):
+        try:
+
+            db = self.client[f"{collections}"]
+
+            if flag == 1:
+                posts = db[f"{documents}"]
+                post = posts.find_one({'user_id': int(user_id)})
+                if post is None:
+                    return 2, ""
+                elif post["snils"] == "0":
+                    return 2, ""
+                snils = post["snils"]
+            posts_new = db[f"users_directions"]
+            post_new = posts_new.find_one({"snils": snils})
+            if post_new is None:
+                #await self.users_directions_add_start(user_id)
+                return 1, ""
+            slov = {}
+            posts_new1 = db[f"decryption_directions"]
+            for i in range(1, post_new["count"] + 1):
+
+                post_new1 = posts_new1.find_one({'identifier': post_new[f"{i}"]["code_directions"]})
+                if post_new1 is not None:
+                    slov[post_new[f"{i}"]["code_directions"]] = post_new1
+
+            if flag == 0:
+                posts = db[f"{documents}"]
+                post_n = posts.find_one({'time': 1})
+                vrem = ""
+                if post_n is not None:
+                    vrem = post_n["time_set"]
+                post = posts.find_one({'user_id': int(user_id)})
+                if post is None:
+                    posts.insert_one({"user_id": int(user_id), "snils": snils, "status": False})
+                else:
+                    post["snils"] = snils
+                    post["status"] = False
+                    posts.save(post)
+            else:
+                posts = db[f"{documents}"]
+                post_n = posts.find_one({'time': 1})
+                vrem = ""
+                if post_n is not None:
+                    vrem = post_n["time_set"]
+            return 0, post_new, slov, vrem
+        except Exception as e:
+            print(traceback.format_exc())
+
+    async def directions_time(self, vrem, collections="bots", documents="users_directions_vk"):
+        db = self.client[f"{collections}"]
+        posts = db[f"{documents}"]
+        post = posts.find_one({'time': 1})
+        if post is None:
+            posts.insert_one({"time": 1, "time_set": str(vrem)})
+        else:
+            post["time_set"] = str(vrem)
+            posts.save(post)
