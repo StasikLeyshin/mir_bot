@@ -184,6 +184,16 @@ class infinity_bots:
                                 #print(sel, text, command_ls_list)
                                 blocs = ["target", "consultants", "tema1"]
                                 ##print("SEL: ", sel)
+                                if them == "tema1":
+                                    if await self.create_mongo.admin_answer_id_check(message["peer_id"]):
+                                        loop.create_task(
+                                            response_text_admin(self.V, club_id, message, apis, them,
+                                                                self.create_mongo,
+                                                                self.collection_bots,
+                                                                self.document_tokens,
+                                                                self.url_dj).run())
+                                        continue
+
                                 if sel != 0:
                                     loop.create_task(sel.process(self.V, club_id, message, apis, them,
                                                                  self.create_mongo,
@@ -231,14 +241,6 @@ class infinity_bots:
 
 
                                     elif them == "tema1":
-                                        if await self.create_mongo.admin_answer_id_check(message["peer_id"]):
-                                            loop.create_task(
-                                                response_text_admin(self.V, club_id, message, apis, them,
-                                                                    self.create_mongo,
-                                                                    self.collection_bots,
-                                                                    self.document_tokens,
-                                                                    self.url_dj).run())
-                                            continue
 
                                         chek_nap = self.create_mongo.check_user_nap(message["from_id"])
                                         if chek_nap != "0":

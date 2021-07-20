@@ -277,8 +277,9 @@ class infinity_beskon:
             gen = await self.generate(self.st)
             loop.create_task(self.get_rass(gen))
             loop.create_task(self.withdrawal_warn_ban())
-            if tim == 60 or tim == 0:
-                await self.create_mongo.directions_time(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+            if tim == 90:# or tim == 0:
+                await self.create_mongo.directions_time(strftime("%d.%m.%Y %H:%M:%S", gmtime()))
                 loop.create_task(self.parsing_mirea_add(loop))
+                tim = 0
             await asyncio.sleep(60)
             tim += 1
