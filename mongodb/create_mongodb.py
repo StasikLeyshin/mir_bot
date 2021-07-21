@@ -834,7 +834,7 @@ class create_mongodb:
         return False
 
     async def profile_users_add(self, user_id, achievements="0", scores=0, sms=0, reputation_plus=0, reputation_minus=0,
-                                f=0,
+                                f=0, roulette=0,
                                 collections="bots", documents="profile_users"):
         db = self.client[f"{collections}"]
         posts_peer_ids = db[f"settings"]
@@ -917,7 +917,15 @@ class create_mongodb:
                                                   "vrem": reputation_minus
                                               },
                                           },
-                                      "count_minus": 0
+                                      "count_minus": 0,
+                                      "roulette":
+                                          {
+                                              "1":
+                                                  {
+                                                      "status": True, "vrem": roulette
+                                                  }
+                                          },
+                                      "count_roulette": 0
                                       })
                 elif achievements == "0":
                     posts.insert_one({"user_id": int(user_id), "achievements": {},
@@ -977,7 +985,15 @@ class create_mongodb:
                                                   "vrem": reputation_minus
                                               },
                                           },
-                                      "count_minus": 0
+                                      "count_minus": 0,
+                                      "roulette":
+                                          {
+                                              "1":
+                                                  {
+                                                      "status": True, "vrem": roulette
+                                                  }
+                                      },
+                                      "count_roulette": 0
                                       })
 
                 if sms != 0:
@@ -1184,13 +1200,47 @@ class create_mongodb:
                         posts.save(pos)
                         return False
 
+                if roulette != 0:
+                    if "roulette" not in pos:
+                        if f == 3:
+                            return True, ""
+                        pos["roulette"] = {}
+                        pos["roulette"]["1"] = {"status": True, "vrem": roulette + 86400}
+                        #pos["roulette"]["count"] = 1
+                        if f != 4:
+                            pos["count_roulette"] = 1
+                        else:
+                            pos["count_roulette"] = 0
+                        posts.save(pos)
+                        return True, 1
+                    else:
+                        sp = []
+                        for i in pos["roulette"]:
+                            if pos["roulette"][str(i)]["status"]:
+                                print(roulette, pos["roulette"][str(i)]["vrem"])
+                                if roulette >= pos["roulette"][str(i)]["vrem"]:
+                                    if f == 3:
+                                        return True, ""
+                                    pos["roulette"]["1"]["vrem"] = roulette + 86400
+                                    #pos["roulette"]["count"] += 1
+                                    if f != 4:
+                                        pos["count_roulette"] += 1
+                                    ko = pos["count_roulette"]
+                                    posts.save(pos)
+                                    return True, ko
+                                sp.append(pos["roulette"][str(i)]["vrem"])
+                        if f == 3:
+                            return False, sp
+                        return False
+
 
                 if sms != 0:
                     pos["sms"] += sms
                     kol_sms = pos["sms"]
                     posts.save(pos)
                     return kol_sms
-                if achievements == "0" and scores == 0 and sms == 0 and reputation_plus == 0 and reputation_minus == 0:
+                if achievements == "0" and scores == 0 and sms == 0 and reputation_plus == 0 and reputation_minus == 0\
+                        and roulette == 0:
                     ach = []
                     if len(pos["achievements"]) > 0:
                         for i in pos["achievements"]:
