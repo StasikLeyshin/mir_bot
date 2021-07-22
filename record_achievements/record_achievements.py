@@ -22,12 +22,11 @@ class record_achievements:
             10: "Никаких больше вечеринок. Я отказываюсь давать разбан"
         }
 
-    async def run(self, kol_warn=0, kol_ban=0, achievement=" ", ach_kol=0):
+    async def run(self, kol_warn=0, kol_ban=0, achievement=" ", ach_kol=0, res=0):
         msg = []
         ban = 0
         warn_chek = False
         ban_chek = False
-        res = 0
         if int(kol_warn) in self.warn_awards:
             msg.append(f"🏅 {self.warn_awards[int(kol_warn)]}")
             res = await self.create_mongo.profile_users_add(self.user_id, f"🏅 {self.warn_awards[int(kol_warn)]}", -3)
@@ -53,6 +52,9 @@ class record_achievements:
         if res[1] <= -30:
             ban = 1
             res = await self.create_mongo.profile_users_add(self.user_id, scores=-8)
+            if res[1] <= -50:
+                ban = 2
+
             return ban, msg, res[1]
 
         return ban, msg, res[1]

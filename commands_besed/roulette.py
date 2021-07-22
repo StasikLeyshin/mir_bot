@@ -19,7 +19,7 @@ class roulette(commands):
             adm = await self.create_mongo.admin_check(self.from_id, self.peer_id)
             if adm:
                 await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
-                                         message=f"😎 ВЫ ПОБЕДИЛИ, БЕЗОГАВОРОЧНО ПОБЕДИЛИ, +1000000ККККК ВАМ НА СЧЁТ", random_id=0)
+                                         message=f"😎 ВЫ ПОБЕДИЛИ, БЕЗОГОВОРОЧНО ПОБЕДИЛИ, +1000000ККККК ВАМ НА СЧЁТ", random_id=0)
                 return
 
             res = await self.create_mongo.profile_users_add(self.from_id, roulette=self.date, f=3)
@@ -35,8 +35,8 @@ class roulette(commands):
                 if not txt:
                     txt = 1
                 if self.is_int(txt):
-                    if int(txt) > 0:
-                        if int(txt) < 5:
+                    if int(txt) >= 1:
+                        if int(txt) < 6:
                             ran = random.randint(1, 6)
                             if ran > int(txt):
                                 ach = ""
@@ -49,12 +49,12 @@ class roulette(commands):
                                     ach = f"\n\n👻 [id{self.from_id}|Вы] получили ачивку:\n\n{self.roulette_awards[int(res[1])][0]}\n\n" \
                                           f"📊 Рейтинг: {res_new[1]}"
                                 await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
-                                                         message=f"Сегодня фортуна на вашей стороне, вы победили.{ach}",
+                                                         message=f"🤠 Сегодня фортуна на вашей стороне, вы победили.{ach}",
                                                          random_id=0)
                             else:
                                 res = await self.create_mongo.profile_users_add(self.from_id, roulette=self.date, f=4)
                                 vrem = 86400
-                                cause = "Проиграл в рулетке"
+                                cause = "Проигрыш в рулетке"
                                 ply = await self.display_time(vrem)
                                 result = await ban_give_out(self.v).ban_give(self.apis, self.create_mongo, self.peer_id,
                                                                              cause,
@@ -84,6 +84,10 @@ class roulette(commands):
                             await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
                                                      message=f"😳 Как я столько пуль в барабан заряжу, только если солью или дробью, но так не интересно",
                                                      random_id=0)
+                    elif int(txt) == 0:
+                        await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
+                                                 message=f"Холостой пистолет не заряжаем",
+                                                 random_id=0)
                     else:
                         await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
                                                  message=f"😳 Это куда ж минус то, пуля назад лететь будет??",

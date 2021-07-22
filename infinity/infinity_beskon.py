@@ -129,9 +129,11 @@ class infinity_beskon:
             page = requests.get(url)
             soup = BeautifulSoup(page.content, 'html.parser')
             #soup = BeautifulSoup(txt, 'html.parser')
-            table = soup.find('table')
-            x = (len(table.findAll('tr')) - 1)
-            for row in table.findAll('tr')[1:x]:
+            #table = soup.find('table')
+            #x = (len(table.findAll('tr')) - 1)
+            x = (len(soup.findAll('tr')) - 1)
+            #for row in table.findAll('tr')[1:x]:
+            for row in soup.findAll('tr')[1:x]:
                 col = row.findAll('td')
                 #name = col[1].getText()
                 if col[1].getText() not in self.slov_directions_general:
@@ -190,9 +192,9 @@ class infinity_beskon:
             page = requests.get(url)
             soup = BeautifulSoup(page.content, 'html.parser')
             #soup = BeautifulSoup(txt, 'html.parser')
-            table = soup.find('table')
-            x = (len(table.findAll('tr')) - 1)
-            for row in table.findAll('tr')[1:x]:
+            #table = soup.find('table')
+            x = (len(soup.findAll('tr')) - 1)
+            for row in soup.findAll('tr')[1:x]:
                 col = row.findAll('td')
                 # name = col[1].getText()
                 if col[1].getText() not in self.slov_directions_general:
@@ -254,7 +256,7 @@ class infinity_beskon:
             print(traceback.format_exc())
 
 
-        print(self.slov_directions_general)
+        #print(self.slov_directions_general)
 
             #for j in i["count"]:
         for i in self.slov_directions_general:
@@ -277,8 +279,9 @@ class infinity_beskon:
             gen = await self.generate(self.st)
             loop.create_task(self.get_rass(gen))
             loop.create_task(self.withdrawal_warn_ban())
+            vrem = strftime("%d.%m.%Y %H:%M:%S", gmtime())
             if tim == 90:# or tim == 0:
-                await self.create_mongo.directions_time(strftime("%d.%m.%Y %H:%M:%S", gmtime()))
+                await self.create_mongo.directions_time(vrem)
                 loop.create_task(self.parsing_mirea_add(loop))
                 tim = 0
             await asyncio.sleep(60)
