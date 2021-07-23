@@ -527,19 +527,30 @@ class commands:
     async def snils_check(self, snils="0", flag=0):
         try:
             if not self.is_int(snils.replace("-", "")):
-                return 0, "Введите СНИЛС/уникальный номер в правильном формате"
+                return 0, [["Введите СНИЛС/уникальный номер в правильном формате"]]
 
             res = await self.create_mongo.users_directions_add_finish(self.from_id, self.text, flag=flag)
             if res[0] == 1:
-                return 0, "Не удалось найти данные по СНИЛСУ/уникальному номеру, повторите попытку."
+                return 0, [["Не удалось найти данные по СНИЛСУ/уникальному номеру, повторите попытку."]]
             elif res[0] == 2:
-                return 0, "Вы не привязали СНИЛС/уникальный номер."
+                return 0, [["Вы не привязали СНИЛС/уникальный номер."]]
             directions_list = []
             ll = 1
             vash_new = "Ваша позиция"
             if flag == 2:
                 vash_new = "Позиция"
             bal = 0
+
+            dat = ""
+            vash = "Ваш "
+            vash_new_new = "ваших "
+            if flag == 0:
+                dat = "Данные записаны\n"
+            elif flag == 2:
+                vash = ""
+                vash_new_new = ""
+
+
             for i in range(1, res[1]["count"] + 1):
                 comment = ""
                 if len(res[1][str(i)]['note']) > 0:
@@ -551,24 +562,33 @@ class commands:
                                        f"👥 Количество бюджетных мест: {res[2][res[1][str(i)]['code_directions']]['plan']}\n"
                                        f"🌏 {vash_new}: {res[1][str(i)]['position']}\n"
                                        f"🌐 {vash_new} с учётом подачи согласия к зачислению: {res[1][str(i)]['position_consent']}\n"
-                                       f"👨‍⚖ Согласие к зачислению: {res[1][str(i)]['consent']}"
+                                       f"👨‍⚖ Согласие к зачислению: {res[1][str(i)]['consent']}\n"
+                                       f"👤 Ссылка на список поступающих: "
+                                       f"https://priem.mirea.ru/accepted-entrants-list/personal_code_rating.php?competition="
+                                       f"{res[1][str(i)]['code_directions']}&highlight={res[1][str(i)]['user_id']}"
                                        f"{comment}")
                 ll += 1
-            dat = ""
-            vash = "Ваш "
-            vash_new_new = "ваших "
-            if flag == 0:
-                dat = "Данные записаны\n"
-            elif flag == 2:
-                vash = ""
-                vash_new_new = ""
-            msg = f"{dat}⏰ Время последнего обновления: {res[3]}\n💎 {vash}СНИЛС/уникальный номер: {res[1]['snils']}\n" \
+            msg = f"{dat}⏰ {res[3]}\n💎 {vash}СНИЛС/уникальный номер: {res[1]['snils']}\n" \
                   f"💿 Сумма баллов с учётом ИД: {bal}\n" \
-                  f"📝 Список {vash_new_new}направлений:\n\n"\
-                  +"\n\n".join(directions_list)
+                  f"📝 Список {vash_new_new}направлений:\n\n"
+            directions_list.insert(0, msg)
+            de = self.chunks(directions_list, 5)
+            l = list(de)
+            # dat = ""
+            # vash = "Ваш "
+            # vash_new_new = "ваших "
+            # if flag == 0:
+            #     dat = "Данные записаны\n"
+            # elif flag == 2:
+            #     vash = ""
+            #     vash_new_new = ""
+            # msg = f"{dat}⏰ {res[3]}\n💎 {vash}СНИЛС/уникальный номер: {res[1]['snils']}\n" \
+            #       f"💿 Сумма баллов с учётом ИД: {bal}\n" \
+            #       f"📝 Список {vash_new_new}направлений:\n\n"\
+            #       +"\n\n".join(directions_list)
             self.create_mongo.add_user(self.peer_id, 0)
 
-            return 1, msg
+            return 1, l
         except Exception as e:
             print(traceback.format_exc())
 

@@ -11,7 +11,14 @@ class adding_change_snils(commands):
             flag = 2
         await self.create_mongo.users_directions_add_start(self.from_id)
         msg = await self.snils_check(self.text, flag=flag)
-        await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
-                                 message=msg[1],
-                                 random_id=0,
-                                 keyboard=self.competition(msg[0]))
+        g = 1
+        for i in msg[1]:
+            if g == len(msg[1]):
+                await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
+                                         message="\n\n".join(i),
+                                         random_id=0,
+                                         keyboard=self.competition(msg[0]))
+            else:
+                await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
+                                         message="\n\n".join(i),
+                                         random_id=0)

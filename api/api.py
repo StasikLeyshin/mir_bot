@@ -102,9 +102,10 @@ class api_url:
 
     async def get_html(self):
         link = f"{self.url}"
-        async with aiohttp.ClientSession(headers={'Connection': 'keep-alive'}) as session:
-            async with session.get(link) as response:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(link, headers={'Connection': 'keep-alive'}) as response:
                 d = await response.text()
+                response.close()
             await session.close()
             return d
             #session.close()

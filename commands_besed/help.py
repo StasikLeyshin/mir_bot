@@ -13,7 +13,8 @@ class chance(commands):
                   "рептайм [ссылка|упомянание|пересланное сообщение] — показывает сколько поднятия или опускания репутации у вас доступно\n\n" \
                   "/шанс — создаёт из песка и пыли шанс (при условии набранных баллов)\n\n" \
                   "/рейтинг — показывает топ 25 человек в рейтинге (при условии набранных баллов)\n\n" \
-                  "/команды — показывает все команды "
+                  "/команды — показывает все команды" \
+                  "/рулетка [цифры от 1 до 5] — русская рулетка с револьвером, заряжает в барабан количество указанных патронов, при выстреле банит, если выстрел не произошёл, добавляет репутацию в зависимости от количества заряженных патронов"
             await self.apis.api_post("messages.send", v=self.v, peer_id=self.from_id,
                                      message=msg, random_id=0)
         else:
@@ -30,8 +31,8 @@ class chance(commands):
 
 chances = command_besed.Command()
 
-chances.keys = ['/help', '/chance']
-chances.description = 'Шанс поступления'
+chances.keys = ['/help', '/команды']
+chances.description = 'Команды бота'
 chances.process = chance
 chances.topics_blocks = []
 chances.topics_resolution = ["tema1"]
