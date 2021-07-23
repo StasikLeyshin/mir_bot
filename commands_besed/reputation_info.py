@@ -19,7 +19,7 @@ class reputation_info(commands):
                 return
             res = await self.create_mongo.profile_users_add(self.from_id)
             if res[1] > 30:
-                if self.ls_open_check(self.from_id):
+                if await self.ls_open_check(self.from_id):
                     user_id = await self.getting_user_id()
                     if not user_id:
                         user_id = self.from_id

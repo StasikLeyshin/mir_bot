@@ -1096,7 +1096,7 @@ class create_mongodb:
                         return False
 
                 if reputation_minus != 0:
-                    if pos["scores"] < 30:
+                    if pos["scores"] < 30 and f != 2:
                         return False
                     if "reputation_minus" not in pos:
                         if f == 1:

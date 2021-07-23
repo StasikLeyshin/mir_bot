@@ -11,6 +11,7 @@ from command_ls import command_ls_list
 
 from commands_ls import issuing_directions, choice_conversation, response_text_admin, adding_change_snils
 from message_handling import processing
+from api.api_execute import add_friends
 
 class infinity_bots:
 
@@ -27,6 +28,10 @@ class infinity_bots:
             return int(number)
         except:
             return False
+
+    def chunks(self, l, n):
+        for i in range(0, len(l), n):
+            yield l[i:i + n]
 
     # async def selection(self, command_list, text, them):
     #     flag = False
@@ -317,3 +322,77 @@ class infinity_bots:
             await api_url(f"{self.url_dj}").post_json(club_id=club_id, status=1)
             return
         #print(asd)
+
+    async def main_user(self, apis, user_id): #  8eeeba5ca7ebdaed6fa6163a6053722bbfe9eaca70be274d024dcac817010305e267eb749b28d6f0bd54d
+        while True:
+            try:
+                result = await apis.api_post("friends.getRequests", v=self.V, count=100)
+                #for i in result["items"]:
+                if result["items"]:
+                    de = self.chunks(result["items"], 5)
+                    l = list(de)
+                    for i in l:
+                        await apis.api_post("execute", code=add_friends(users=i), v=self.V)
+                await asyncio.sleep(60)
+            except Exception as e:
+                print(traceback.format_exc())
+                continue
+
+
+
+        # print("TYT")
+        # asd = await apis.api_get("messages.getLongPollServer", v=self.V, need_pts=1, lp_version=3)
+        # print(asd)
+        # # print(asd)
+        # if "error" not in asd:
+        #     # print(asd)
+        #     server = asd['server']
+        #     key = asd['key']
+        #     ts = asd['ts']
+        #
+        #     while True:
+        #         try:
+        #             otvet = await api_url(f"http://{server}?act=a_check&key={key}&ts={ts}&wait=25&mode=2").get_json(1)
+        #             if "failed" in otvet:
+        #                 if otvet["failed"] == 2 or otvet["failed"] == 3:
+        #                     asd = await apis.api_get("messages.getLongPollServer", v=self.V, need_pts=1, lp_version=3)
+        #                     if "error" not in asd:
+        #                         server = asd['server']
+        #                         key = asd['key']
+        #                         ts = asd['ts']
+        #                         continue
+        #
+        #                 else:
+        #                     continue
+        #
+        #             updates = otvet["updates"]
+        #             print(updates)
+        #             if "ts" in otvet:
+        #                 ts = otvet['ts']
+        #
+        #             for i1 in range(0, len(updates)):
+        #                 # time.sleep(0.03)
+        #                 await asyncio.sleep(0.03)
+        #                 if updates[i1][0] == 4 and updates[i1][7].get('from', None):
+        #                     if updates[i1][7].get("from", None):
+        #                         uid = updates[i1][7]["from"]
+        #                         groupChat = True
+        #                     else:
+        #                         uid = updates[i1][3]
+        #                         groupChat = False
+        #                     if groupChat:
+        #                         group_id = abs(2000000000 - updates[i1][3])
+        #                         chat_id = group_id
+        #                     args = updates[i1][6].split()
+        #
+        #                     if args != []:pass
+        #                         #print(updates)
+        #                 # if len(updates) > 0:
+        #             #     slovar = updates[0]
+        #             #     if "type" in slovar and slovar["type"] == "message_new":
+        #             #         message = slovar["object"]["message"]
+        #             #         from_id = message["from_id"]
+        #             #         peer_id = message["peer_id"]
+        #         except Exception as e:
+        #             print(traceback.format_exc())
+        #             continue

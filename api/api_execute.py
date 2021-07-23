@@ -71,3 +71,8 @@ def kick(users, chat_id):
         #names.append(user.first_name)
     return 1
 
+@vkscript
+def add_friends(users):
+    for i in users:
+        api.friends.add(user_id=i)
+    return 1

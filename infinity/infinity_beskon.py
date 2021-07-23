@@ -298,7 +298,7 @@ class infinity_beskon:
             loop.create_task(self.get_rass(gen))
             loop.create_task(self.withdrawal_warn_ban())
             #vrem = strftime("%d.%m.%Y %H:%M:%S", gmtime())
-            if tim == 90 or tim == 0:
+            if tim == 90: #or tim == 0:
                 #await self.create_mongo.directions_time(vrem)
                 loop.create_task(self.parsing_mirea_add(loop))
                 tim = 0
