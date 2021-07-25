@@ -32,7 +32,7 @@ class api:
         result = "&".join(strings)
         result1 = ", ".join(strings)
         #result = '='.join([f'{key.capitalize()}: {value}' for key, value in kwargs[0].items()])
-        link = f"https://api.vk.com/method/{method}?{result}&access_token={self.token}"
+        link = f"https://api.vk.com/method/{method}?{result}&access_token={self.token}&lang=ru"
         async with aiohttp.ClientSession() as session:
             async with session.get(link) as response:
 
@@ -49,6 +49,7 @@ class api:
 
     async def api_post(self, method, **kwargs):
         kwargs["access_token"] = self.token
+        kwargs["lang"] = "ru"
         link = f"https://api.vk.com/method/{method}?"
         connector = aiohttp.TCPConnector(limit_per_host=500)
         async with aiohttp.ClientSession(connector=connector) as session:

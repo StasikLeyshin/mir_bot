@@ -9,6 +9,7 @@ import traceback
 from api.methods import methods
 from api import api_url
 from api.api_execute import inf_lot
+from record_achievements import record_achievements
 
 class commands:
 
@@ -594,4 +595,32 @@ class commands:
 
 
 
+    async def ban_rating(self, user_id, from_id, bal, peer_id, cause, vrem):
+        if bal <= -30:
+            timestamp = 604800 + int(vrem)
+            value = datetime.fromtimestamp(timestamp)
+            time = value.strftime('%d.%m.%Y %H:%M')
+            res_ban = await self.create_mongo.ban_check(user_id, peer_id, cause, 604800 + vrem, vrem, from_id)
+            res = await record_achievements(self.create_mongo, user_id).run(kol_ban=res_ban)
+            msg_n = ""
+            if res[1]:
+                msg_n = "\n\n👻 Полученные ачивки:\n" + "\n".join(res[1])
+            ply = await self.display_time(604800)
+            result = await self.apis.api_post("users.get", v=self.v, user_ids=f"{user_id}", name_case="gen")
+            name = f'{result[0]["first_name"]} {result[0]["last_name"]}'
+            msg = f"{name}, вам бан на {ply}\n📝 Причина: Рейтинг достиг отметки ниже -30\n⏰ Время окончания: {time}\n\n" \
+                  f"🎁 У вас есть одна попытка разбана на одну беседу. Напишите в мои личные сообщения 'разбан' без кавычек.{msg_n}\n\n📊 Рейтинг: {bal}"
+            return True, msg
 
+        elif bal <= -50:
+            res_new = await self.create_mongo.globan_add(user_id, vrem, from_id, "Рейтинг достиг отметки ниже -50")
+            if res_new[0] == 1:
+                msg = f"Данный [id{user_id}|пользователь] добавлен в глобальный бан.\n\n" \
+                      f"📝 Причина: Рейтинг достиг отметки ниже -50.\n\n" \
+                      f"P.S. Оттуда ещё никто не возвращался..."
+                return True, msg, res_new[1]
+            elif res_new[0] == 2:
+                msg = f"Данный [id{user_id}|пользователь] уже есть в глобальном бане.\n\n" \
+                      f"P.S. И он оттуда скорее всего не вернётся..."
+                return True, msg, res_new[1]
+        return False

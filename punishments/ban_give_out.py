@@ -69,7 +69,7 @@ class ban_give_out:
             timestamp = 604800 + int(result[0])
             value = datetime.fromtimestamp(timestamp)
             time = value.strftime('%d.%m.%Y %H:%M')
-            await create_mongo.ban_check(user_id, peer_id, cause, 604800 + result[0], result[0], from_id)
+            await create_mongo.ban_check(user_id, peer_id, "Рейтинг достиг отметки ниже -30", 604800 + result[0], result[0], from_id)
             ply = await self.display_time(604800)
             msg = f"{name}, вам бан на {ply}\n📝 Причина: Рейтинг достиг отметки ниже -30\n⏰ Время окончания: {time}\n\n" \
                   f"🎁 У вас есть одна попытка разбана на одну беседу. Напишите в мои личные сообщения 'разбан' без кавычек.{msg_n}\n\n📊 Рейтинг: {res[2]}"
