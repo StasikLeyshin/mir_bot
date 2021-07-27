@@ -16,7 +16,8 @@ class warn(commands):
             adm = await self.create_mongo.admin_check(self.from_id, self.peer_id)
             if adm:
                 user_id = await self.getting_user_id()
-                if user_id:pass
+                if user_id:
+                    pass
 
 
         except Exception as e:

@@ -5,6 +5,11 @@ import os
 
 class text_photo:
 
+    async def image_txt(self, filename):
+        text = pytesseract.image_to_string(Image.open(filename), lang='rus')
+        os.remove(filename)
+        return text
+
 
     async def run(self, image):
         # image = '5.jpg'
@@ -32,6 +37,7 @@ class text_photo:
         # загрузка изображения в виде объекта image Pillow, применение OCR, а затем удаление временного файла
         #pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
         #"C:\Users\Zett\AppData\Local\Programs\Python\Python38 - 32\Scripts"
-        text = pytesseract.image_to_string(Image.open(filename), lang='rus')
-        os.remove(filename)
+        #text = pytesseract.image_to_string(Image.open(filename), lang='rus')
+        #os.remove(filename)
+        text = await self.image_txt(filename)
         return text

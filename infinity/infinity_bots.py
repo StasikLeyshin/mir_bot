@@ -118,7 +118,7 @@ class infinity_bots:
                 return 0
         return 0
 
-    async def main(self, apis, club_id, them, control):
+    async def main(self, apis, club_id, them, control, loop1):
         #apis = api(club_id, token)
         print("-" * 40)
         print(f"Start group ID: [{club_id}] Them: [{them}]")
@@ -143,7 +143,7 @@ class infinity_bots:
                                         message="Привязать", random_id=0)
                 except:pass
 
-        loop = asyncio.get_running_loop()
+        #loop = asyncio.get_running_loop()
         asd = await apis.api_get("groups.getLongPollServer", v=self.V, group_id=club_id)
         #print(asd)
         if "error" not in asd:
@@ -154,6 +154,7 @@ class infinity_bots:
 
             while True:
                 try:
+                    loop = asyncio.get_running_loop()
                     if control[club_id] != them:
                         print(f"Close {club_id}")
                         return
@@ -310,6 +311,12 @@ class infinity_bots:
                                                                 self.collection_bots,
                                                                 self.document_tokens,
                                                                 self.url_dj).run(bad_words))
+                                    # await processing(self.V, club_id, message, apis, them,
+                                    #                             self.create_mongo,
+                                    #                             self.collection_bots,
+                                    #                             self.document_tokens,
+                                    #                             self.url_dj).run(bad_words)
+                                    print("OBRABOTAL")
                                 continue
 
 

@@ -55,13 +55,13 @@ class roulette(commands):
                                                          random_id=0)
                             else:
                                 res = await self.create_mongo.profile_users_add(self.from_id, roulette=self.date, f=4)
-                                bal = await self.create_mongo.profile_users_add(self.from_id, scores=int(txt) * 2)
+                                bal = await self.create_mongo.profile_users_add(self.from_id, scores=-8)
                                 # await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
                                 #                          message=f"К сожалению вы проиграли.{ach}",
                                 #                          random_id=0)
 
-                                result = self.ban_rating(self.from_id, "-5411326", bal[1], self.peer_id,
-                                                         "Рейтинг достиг отметки ниже -30", self.date)
+                                result = await self.ban_rating(self.from_id, "-5411326", bal[1], self.peer_id,
+                                                               "Рейтинг достиг отметки ниже -30", self.date)
                                 if not result:
                                     ach = f"\n\n📊 Рейтинг: {bal[1]}"
                                     await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,

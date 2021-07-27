@@ -52,7 +52,7 @@ class infinity_beskon:
             #print(kwargs)
             image = kwargs[f"image_{i+1}"]
             if image != "0":
-                res = await photo_upload(self.apis[int(club_id)], self.V, peer_id, kwargs[f"image_{i+1}"],
+                res = await photo_upload(self.apis[int(club_id)], self.V, 0, kwargs[f"image_{i+1}"],
                                          '/home/stas/mir_bot/media/').upload()
                 #res = await photo_upload(self.apis[int(club_id)], self.V, peer_id, "2021/06/29/28ae1abb0bcacd6e81ad2de947ba86da.jpg",
                                          #"/home/stas/mir_bot/media/").upload()
@@ -120,6 +120,10 @@ class infinity_beskon:
         tek = await self.current_time()
         await self.create_mongo.remove_ban_warn(tek)
 
+    async def get_soup(self, txt):
+        soup = BeautifulSoup(txt, 'html.parser')
+        return soup
+
     async def parsing_mirea(self, l_id):
 
         #txt = await api_url("https://priem.mirea.ru/accepted-entrants-list/#bach").get_html()
@@ -129,7 +133,11 @@ class infinity_beskon:
             #url = (f'https://priem.mirea.ru/accepted-entrants-list/personal_code_rating.php?competition={l_id}')
             #page = requests.get(url)
             #soup = BeautifulSoup(page.content, 'html.parser')
-            soup = BeautifulSoup(txt, 'html.parser')
+            #loop = asyncio.get_event_loop()
+            #soup = loop.run_in_executor(None, BeautifulSoup, txt, 'html.parser')
+            #print(soup)
+            #soup = BeautifulSoup(txt, 'html.parser')
+            soup = await self.get_soup(txt)
             #table = soup.find('table')
             #x = (len(table.findAll('tr')) - 1)
             if not self.time_old_status:
@@ -252,11 +260,13 @@ class infinity_beskon:
         #     print(traceback.format_exc())
         return
 
-    async def parsing_mirea_add(self, loop):
+    async def parsing_mirea_add(self, loop1):
+        #loop = asyncio.get_running_loop()
         self.slov_directions_general = {}
         for i in self.list_directions:
             #await self.parsing_mirea(i)
-            loop.create_task(self.parsing_mirea(i['identifier']))
+            await self.parsing_mirea(i['identifier'])
+            #loop.create_task(self.parsing_mirea(i['identifier']))
         await asyncio.sleep(60)
         try:
             for i in self.slov_directions_general:
@@ -298,9 +308,10 @@ class infinity_beskon:
             loop.create_task(self.get_rass(gen))
             loop.create_task(self.withdrawal_warn_ban())
             #vrem = strftime("%d.%m.%Y %H:%M:%S", gmtime())
-            if tim == 90: #or tim == 0:
+            if tim == 90:# or tim == 0:
                 #await self.create_mongo.directions_time(vrem)
-                loop.create_task(self.parsing_mirea_add(loop))
+                await self.parsing_mirea_add(loop)
+                #loop.create_task(self.parsing_mirea_add(loop))
                 tim = 0
             await asyncio.sleep(60)
             tim += 1

@@ -82,6 +82,10 @@ class RegexpProc(object):
 
 class processing(commands):
 
+    async def downland_photo(self, g_url, rand_name):
+        urllib.request.urlretrieve(g_url, rand_name)
+
+
     async def run(self, bad_words):
         if self.peer_id == 2000000024:
             return
@@ -113,7 +117,8 @@ class processing(commands):
                             rand_name = f"{self.peer_id}_{self.from_id}_{self.date}_{rand}.jpg"
                             g = await self.photo_r_json(i["photo"]["sizes"])
                             g_url = g["url"]
-                            urllib.request.urlretrieve(g_url, rand_name)
+                            await self.downland_photo(g_url, rand_name)
+                            #urllib.request.urlretrieve(g_url, rand_name)
                             txt = await text_photo().run(rand_name)
                             os.remove(rand_name)
                             for i in bad_words:
