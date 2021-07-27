@@ -319,13 +319,15 @@ if __name__ == "__main__":
     inf_b = infinity_beskon(V, create_mongo, collection_django, apps, collection_bots, document_tokens, apis, spis, url_dj)
     #tasks = []
     #loop1 = asyncio.get_running_loop()
+    #loop.close()
+    #loop = asyncio.get_running_loop()
     tasks = []
     loop_control = {}
     for i in spis:
         loop_control[i["id"]] = i["them"]
         #loop_control[spis[i]["id"]] = 0
 
-    #tasks = [loop.create_task(inf.main(apis[i["id"]], i["id"], i["them"], loop_control)) for i in spis]
+    tasks = [loop.create_task(inf.main(apis[i["id"]], i["id"], i["them"], loop_control, loop)) for i in spis]
 
     tasks.append(loop.create_task(inf_b.beskon()))
     #print(tasks)
