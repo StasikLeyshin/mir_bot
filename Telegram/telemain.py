@@ -14,7 +14,7 @@ from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, InlineKeyb
 from Telegram.bot_setting import bot
 from Telegram.user import users
 from sql import pol_js
-from generating_questions import questions, questions_col
+from generating_questions import questions, questions_col, loop_new
 
 # from aiogram import Bot, types
 # from aiogram.dispatcher import Dispatcher
@@ -139,6 +139,7 @@ def gen_menu(f):
     markup.add(InlineKeyboardButton("Вопросы", callback_data="questions"))
     if f:
         markup.add(InlineKeyboardButton("Выбор направления", callback_data="choice"))
+        markup.add(InlineKeyboardButton("Конкурс", callback_data="competition"))
     return markup
 
 def gen_menu_one(f):
@@ -178,6 +179,12 @@ def gen_choice_pod(slov):
     for i in slov["programs"]:
         markup.add(InlineKeyboardButton(i["name"], callback_data="1"))
 
+def gen_competition(f):
+    markup = InlineKeyboardMarkup()
+    markup.add(InlineKeyboardButton("Добавить СНИЛС/уникальный номер", callback_data="questions"))
+    markup.add(InlineKeyboardButton("Посмотреть анонимно", callback_data="questions"))
+    markup.add(InlineKeyboardButton("Меню", callback_data="menu"))
+    return markup
 
 def gen_markup(vopr, n):
     markup = InlineKeyboardMarkup()
@@ -256,6 +263,13 @@ def callback_query(call):
         #                  reply_markup=gen_markup(0, len(questions["spis_nom"])))
         # bot.edit_message_text("Выберете номер интересуещего вас вопроса", call.message.chat.id, call.message.message_id,
         #                       reply_markup=gen_markup(0, len(questions["spis_nom"])))
+
+    elif call.data == "competition":
+        if call.message.chat.type == "private":
+            bot.send_message(call.message.chat.id, "🗳 Выберите интересующий вас вопрос",
+                             reply_markup=gen_menu(True))
+
+
     elif call.data == "menu":
         if call.message.chat.type == "private":
             check = check_users(call.from_user.id, call.message.chat.id)
@@ -412,9 +426,10 @@ def message_handler(message):
     #bot.send_photo(message.chat.id, open('C:/Users/Zett/Desktop/mir_bot/generating_questions/img/test1.png', 'rb'))
     if message.chat.type == "private":
         bot.send_message(message.chat.id, "🌐 Команды бота:\n\n"
-                     "📝 Вопросы — покажет список часто задаваемых вопросов.\n\n"
-                     "📈 Направления — подберёт перспективные направления по проходным баллам",
-                     reply_markup=gen_menu(True))
+                                          "📝 Вопросы — покажет список часто задаваемых вопросов.\n\n"
+                                          "📈 Направления — подберёт перспективные направления по проходным баллам\n\n"
+                                          "📊 Конкурс — покажет текущее положение в списке",
+                         reply_markup=gen_menu(True))
     else:
         bot.send_message(message.chat.id, "🌐 Команды бота:\n\n"
                                           "📝 Вопросы — покажет список часто задаваемых вопросов.\n\n",
