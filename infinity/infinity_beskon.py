@@ -301,17 +301,17 @@ class infinity_beskon:
         #loop.run_until_complete(asyncio.wait(tasks))
         #await self.peer_ids_add()
         #gen = await self.generate(self.st)
-        loop = asyncio.get_running_loop()
         tim = 0
         while True:
+            loop = asyncio.get_running_loop()
             gen = await self.generate(self.st)
             loop.create_task(self.get_rass(gen))
             loop.create_task(self.withdrawal_warn_ban())
             #vrem = strftime("%d.%m.%Y %H:%M:%S", gmtime())
-            if tim == 90:# or tim == 0:
+            ##if tim == 90:# or tim == 0:
                 #await self.create_mongo.directions_time(vrem)
-                await self.parsing_mirea_add(loop)
+                ##await self.parsing_mirea_add(loop)
                 #loop.create_task(self.parsing_mirea_add(loop))
-                tim = 0
+                ##tim = 0
             await asyncio.sleep(60)
-            tim += 1
+            ##tim += 1

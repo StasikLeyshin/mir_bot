@@ -9,12 +9,13 @@ from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, InlineKeyb
 # from aiogram.dispatcher import Dispatcher
 # from aiogram.utils import executor
 # #import keyboards as kb
+import traceback
 
 
 from Telegram.bot_setting import bot
 from Telegram.user import users
 from sql import pol_js
-from generating_questions import questions, questions_col, loop_new
+from generating_questions import questions, questions_col, loop_new, create_mongo
 
 # from aiogram import Bot, types
 # from aiogram.dispatcher import Dispatcher
@@ -134,6 +135,67 @@ def chunks(l, n):
         yield l[i:i + n]
 
 
+def snils_check(from_id, txt, snils="0", flag=0):
+    try:
+        if not if_int(snils.replace("-", "")):
+            return 0, [["Введите СНИЛС/уникальный номер в правильном формате"]]
+
+        res = loop_new.run_until_complete(
+                create_mongo["create_mongo"].users_directions_add_finish(from_id, txt, flag=flag))
+        if res[0] == 1:
+            return 0, [["Не удалось найти данные по СНИЛСУ/уникальному номеру, повторите попытку."]]
+        elif res[0] == 2:
+
+            return 0, [["Вы не привязали СНИЛС/уникальный номер."]]
+        directions_list = []
+        ll = 1
+        vash_new = "Ваша позиция"
+        if flag == 2:
+            vash_new = "Позиция"
+        bal = 0
+
+        dat = ""
+        vash = "Ваш "
+        vash_new_new = "ваших "
+        if flag == 0:
+            dat = "Данные записаны\n"
+        elif flag == 2:
+            vash = ""
+            vash_new_new = ""
+
+        for i in range(1, res[1]["count"] + 1):
+            comment = ""
+            if len(res[1][str(i)]['note']) > 0:
+                comment = f"\nКомментарий: {res[1][str(i)]['note']}"
+            if int(res[1][str(i)]['total_amount']) > bal:
+                bal = int(res[1][str(i)]['total_amount'])
+            directions_list.append(f"{ll}. {res[2][res[1][str(i)]['code_directions']]['title']}\n"
+                                   f"🐈 Код: {res[2][res[1][str(i)]['code_directions']]['code']}\n"
+                                   f"👥 Количество бюджетных мест: {res[2][res[1][str(i)]['code_directions']]['plan']}\n"
+                                   f"🌏 {vash_new}: {res[1][str(i)]['position']}\n"
+                                   f"🌐 {vash_new} с учётом подачи согласия к зачислению: {res[1][str(i)]['position_consent']}\n"
+                                   f"👨‍⚖ Согласие к зачислению: {res[1][str(i)]['consent']}\n"
+                                   f"👤 Ссылка на список поступающих: "
+                                   f"https://priem.mirea.ru/accepted-entrants-list/personal_code_rating.php?competition="
+                                   f"{res[1][str(i)]['code_directions']}&highlight={res[1][str(i)]['user_id']}"
+                                   f"{comment}")
+            ll += 1
+        msg = f"{dat}⏰ {res[3]}\n💎 {vash}СНИЛС/уникальный номер: {res[1]['snils']}\n" \
+              f"💿 Сумма баллов с учётом ИД: {bal}\n" \
+              f"📝 Список {vash_new_new}направлений:\n\n"
+        directions_list.insert(0, msg)
+        de = chunks(directions_list, 5)
+        l = list(de)
+        create_mongo["create_mongo"].add_user(from_id, 0)
+
+        return 1, l
+    except Exception as e:
+        print(traceback.format_exc())
+
+
+def set_create_mongo(create_mongo_new):
+    create_mongo["create_mongo"] = create_mongo_new
+
 def gen_menu(f):
     markup = InlineKeyboardMarkup()
     markup.add(InlineKeyboardButton("Вопросы", callback_data="questions"))
@@ -141,6 +203,12 @@ def gen_menu(f):
         markup.add(InlineKeyboardButton("Выбор направления", callback_data="choice"))
         markup.add(InlineKeyboardButton("Конкурс", callback_data="competition"))
     return markup
+
+# def gen_menu_only_one():
+#     markup = InlineKeyboardMarkup()
+#     markup.add(InlineKeyboardButton("Меню", callback_data="menu"))
+#     return markup
+
 
 def gen_menu_one(f):
     markup = InlineKeyboardMarkup()
@@ -181,8 +249,14 @@ def gen_choice_pod(slov):
 
 def gen_competition(f):
     markup = InlineKeyboardMarkup()
-    markup.add(InlineKeyboardButton("Добавить СНИЛС/уникальный номер", callback_data="questions"))
-    markup.add(InlineKeyboardButton("Посмотреть анонимно", callback_data="questions"))
+    if f == 0:
+        markup.add(InlineKeyboardButton("Добавить СНИЛС/уникальный номер", callback_data="competition_add"))
+        markup.add(InlineKeyboardButton("Посмотреть анонимно", callback_data="competition_anonymous"))
+    elif f == 1:
+        markup.add(InlineKeyboardButton("Моя ситуация", callback_data="comp"))
+        markup.add(InlineKeyboardButton("Посмотреть анонимно", callback_data="competition_anonymous"))
+        markup.add(InlineKeyboardButton("Изменить СНИЛС/уникальный номер", callback_data="competition_add"))
+
     markup.add(InlineKeyboardButton("Меню", callback_data="menu"))
     return markup
 
@@ -266,8 +340,38 @@ def callback_query(call):
 
     elif call.data == "competition":
         if call.message.chat.type == "private":
-            bot.send_message(call.message.chat.id, "🗳 Выберите интересующий вас вопрос",
-                             reply_markup=gen_menu(True))
+            create_mongo["create_mongo"].add_user(call.message.chat.id, 0)
+            res = loop_new.run_until_complete(create_mongo["create_mongo"].users_directions_add_start(call.message.chat.id))
+            f = 0
+            if res:
+                f = 1
+            bot.edit_message_text("🧩 Выберите нужную функцию",
+                                  call.message.chat.id, call.message.message_id,
+                                  reply_markup=gen_competition(f))
+    elif call.data == "competition_add":
+        if call.message.chat.type == "private":
+            create_mongo["create_mongo"].add_user(call.message.chat.id, 5)
+            res = loop_new.run_until_complete(
+                create_mongo["create_mongo"].users_directions_add_start(call.message.chat.id))
+            f = 0
+            if res:
+                f = 1
+            bot.edit_message_text("Введите ваш СНИЛС/уникальный номер",
+                                  call.message.chat.id, call.message.message_id,
+                                  reply_markup=gen_competition(f))
+
+    elif call.data == "competition_anonymous":
+        if call.message.chat.type == "private":
+            create_mongo["create_mongo"].add_user(call.message.chat.id, 6)
+            res = loop_new.run_until_complete(
+                create_mongo["create_mongo"].users_directions_add_start(call.message.chat.id))
+            f = 0
+            if res:
+                f = 1
+            bot.edit_message_text("Введите СНИЛС/уникальный номер",
+                                  call.message.chat.id, call.message.message_id,
+                                  reply_markup=gen_competition(f))
+
 
 
     elif call.data == "menu":
@@ -463,6 +567,29 @@ def message_handler_empty(message):
             bot.send_message(message.chat.id, questions_col["vopr"][message.text])
 
     if message.chat.type == "private":
+        chek = create_mongo["create_mongo"].check_user(message.chat.id)
+        if chek == 5 or chek == 6:
+            bot.delete_message(message.chat.id, message.message_id)
+            flag = 0
+            if chek == 6:
+                flag = 2
+            loop_new.run_until_complete(
+                create_mongo["create_mongo"].users_directions_add_start(message.chat.id))
+            msg = snils_check(message.chat.id, message.text, snils=message.text, flag=flag)
+            g = 1
+            for i in msg[1]:
+                if flag != 2:
+                    if g == len(msg[1]):
+                        res = loop_new.run_until_complete(
+                            create_mongo["create_mongo"].users_directions_add_start(message.chat.id))
+                        f = 0
+                        if res:
+                            f = 1
+                        bot.send_message(message.chat.id, "\n\n".join(i), reply_markup=gen_competition(f))
+                else:
+                    bot.send_message(message.chat.id, "\n\n".join(i))
+            return
+
         number = if_int(message.text)
         if number:
             if 310 >= number >= 0:
@@ -572,9 +699,10 @@ def message_handler_empty(message):
                 #                               reply_markup=gen_choice(check[2], pol_sql["quantity"]))
 
 
-def test1():
+def test1(create_mongo_new):
     generating_q("FAQ_T")
     generating_col("FAQ_T_col")
+    set_create_mongo(create_mongo_new)
 
     bot.polling(none_stop=True)
 

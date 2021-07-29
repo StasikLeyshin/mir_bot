@@ -327,7 +327,7 @@ if __name__ == "__main__":
         loop_control[i["id"]] = i["them"]
         #loop_control[spis[i]["id"]] = 0
 
-    tasks = [loop.create_task(inf.main(apis[i["id"]], i["id"], i["them"], loop_control, loop)) for i in spis]
+    #tasks = [loop.create_task(inf.main(apis[i["id"]], i["id"], i["them"], loop_control, loop)) for i in spis]
 
     tasks.append(loop.create_task(inf_b.beskon()))
     #print(tasks)
@@ -336,7 +336,7 @@ if __name__ == "__main__":
     tasks.append(loop.create_task(inf.main_user(api(1 ,"8eeeba5ca7ebdaed6fa6163a6053722bbfe9eaca70be274d024dcac817010305e267eb749b28d6f0bd54d"), 1)))
 
     #tasks.append(test1())
-    x = threading.Thread(target=test1)
+    x = threading.Thread(target=test1, args=(create_mongo,))
     x.start()
 
     #tasks.append(loop.create_task(add_group(spis_new)))
