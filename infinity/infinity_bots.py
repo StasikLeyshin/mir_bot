@@ -316,7 +316,6 @@ class infinity_bots:
                                     #                             self.collection_bots,
                                     #                             self.document_tokens,
                                     #                             self.url_dj).run(bad_words)
-                                    print("OBRABOTAL")
                                 continue
 
 
