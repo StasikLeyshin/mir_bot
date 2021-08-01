@@ -135,9 +135,9 @@ def chunks(l, n):
         yield l[i:i + n]
 
 
-def snils_check(from_id, txt, snils="0", flag=0):
+def snils_check(from_id, txt="0", snils="0", flag=0):
     try:
-        if not if_int(snils.replace("-", "")):
+        if not if_int(snils.replace("-", "")) and flag != 1:
             return 0, [["Введите СНИЛС/уникальный номер в правильном формате"]]
 
         res = loop_new.run_until_complete(
@@ -253,7 +253,7 @@ def gen_competition(f):
         markup.add(InlineKeyboardButton("Добавить СНИЛС/уникальный номер", callback_data="competition_add"))
         markup.add(InlineKeyboardButton("Посмотреть анонимно", callback_data="competition_anonymous"))
     elif f == 1:
-        markup.add(InlineKeyboardButton("Моя ситуация", callback_data="comp"))
+        markup.add(InlineKeyboardButton("Моя ситуация", callback_data="my_situation"))
         markup.add(InlineKeyboardButton("Посмотреть анонимно", callback_data="competition_anonymous"))
         markup.add(InlineKeyboardButton("Изменить СНИЛС/уникальный номер", callback_data="competition_add"))
 
@@ -372,6 +372,18 @@ def callback_query(call):
                                   call.message.chat.id, call.message.message_id,
                                   reply_markup=gen_competition(f))
 
+    elif call.data == "my_situation":
+        if call.message.chat.type == "private":
+            loop_new.run_until_complete(
+                create_mongo["create_mongo"].users_directions_add_start(call.message.chat.id))
+            msg = snils_check(call.message.chat.id, flag=1)
+            g = 1
+            for i in msg[1]:
+                if g == len(msg[1]):
+                    bot.send_message(call.message.chat.id, "\n\n".join(i), reply_markup=gen_competition(msg[0]))
+                else:
+                    bot.send_message(call.message.chat.id, "\n\n".join(i))
+                g += 1
 
 
     elif call.data == "menu":
@@ -587,7 +599,17 @@ def message_handler_empty(message):
                             f = 1
                         bot.send_message(message.chat.id, "\n\n".join(i), reply_markup=gen_competition(f))
                 else:
+                    if flag == 2:
+                        if g == len(msg[1]):
+                            res = loop_new.run_until_complete(
+                                create_mongo["create_mongo"].users_directions_add_start(message.chat.id))
+                            f = 0
+                            if res:
+                                f = 1
+                            bot.send_message(message.chat.id, "\n\n".join(i), reply_markup=gen_competition(f))
+                            continue
                     bot.send_message(message.chat.id, "\n\n".join(i))
+                g += 1
             return
 
         number = if_int(message.text)
