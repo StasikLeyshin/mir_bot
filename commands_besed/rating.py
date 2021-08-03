@@ -15,7 +15,7 @@ class rating(commands):
                                          message=msg, random_id=0)
                 return
             if res[1] > 35:
-                if self.ls_open_check(self.from_id):
+                if await self.ls_open_check(self.from_id):
                     msg = await self.info_rating(25)
                     await self.apis.api_post("messages.send", v=self.v, peer_id=self.from_id,
                                              message=msg, random_id=0)

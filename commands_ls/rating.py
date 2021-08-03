@@ -37,7 +37,7 @@ class rating(commands):
 
 ratings = command_ls.Command()
 
-ratings.keys = ['/рейтинг', '/рет', 'рейтинг']
+ratings.keys = ['/рейтинг13232', '/рет3323', 'рейтинг2323']
 ratings.description = 'Рейтинг'
 ratings.process = rating
 ratings.topics_blocks = []
