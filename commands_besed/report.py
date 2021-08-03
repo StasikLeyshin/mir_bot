@@ -27,9 +27,9 @@ class report(commands):
                                                      f"👥 Беседа: '{name}'\n\n"
                                                      f"Заварнить?",
                                              random_id=0, keyboard=self.keyboard_warn(
-                            f"{self.from_id}@{self.date}@{self.conversation_message_id}"),
+                            f"{user_id}@{self.date}@{self.conversation_message_id}"),
                                              forward=self.answer_msg_other())
-                    await self.create_mongo.add_users_zawarn(self.from_id, self.date, self.peer_id)
+                    await self.create_mongo.add_users_zawarn(user_id, self.date, self.peer_id)
                     await self.apis.api_post("messages.delete", v=self.v, peer_id=self.peer_id,
                                              conversation_message_ids=self.conversation_message_id,
                                              delete_for_all=1)

@@ -799,7 +799,7 @@ class create_mongodb:
         """
         db = self.client[f"{collections}"]
         posts = db[f"users_warn"]
-        posts.insert_one({"user_id": user_id, "peer_id": peer_id, "vrem": vrem, "status": False})
+        posts.insert_one({"user_id": int(user_id), "peer_id": int(peer_id), "vrem": vrem, "status": False})
         return 1
 
     async def chek_zawarn(self, user_id, vrem, collections="bots"):
