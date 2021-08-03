@@ -64,7 +64,8 @@ class commands:
             1: ["А вы, я погляжу, хороший малый", 1],
             5: ["Добрый чел, позитивный", 3],
             10: ["Поднял репутацию уже десяти Си-Джеям!", 6],
-            50: ["Репутация не палка: в руки не возьмёшь, а вы взяли... 50 раз", 9]
+            50: ["Репутация не палка: в руки не возьмёшь, а вы взяли... 50 раз", 9],
+            200: ["ТЫ ПОТРЯСАЮЩИЙ 👉🏻👈🏻", 12]
         }
         self.reputation_minus_awards = {
             1: ["Токсик обнаружен", -0.001],
@@ -373,6 +374,18 @@ class commands:
                 else:
                     return False
         return False
+
+    async def getting_user_id_fwd(self):
+        if "reply_message" in self.message or self.fwd_messages != []:
+            if "reply_message" in self.message:
+                user_id = self.message["reply_message"]["from_id"]
+            else:
+                user_id = self.fwd_messages[0]["from_id"]
+            if self.is_int(user_id):
+                user_id = str(user_id)
+                return user_id
+            else:
+                return False
 
     # получение текста ачивки и количества баллов
     async def txt_achievement(self, txt):

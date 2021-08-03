@@ -271,7 +271,12 @@ class infinity_beskon_competition:
                             break
                         if k["consent"] == "да":
                             ll += 1
-            print(self.slov_directions_general)
+            #print(self.slov_directions_general)
+            for i in self.slov_directions_general:
+                # print(i, self.slov_directions_general[i])
+                self.list_directions_general.append(self.slov_directions_general[i])
+            # print(self.list_directions_general)
+            await self.create_mongo.users_directions(self.list_directions_general, self.list_directions)
         except Exception as e:
             print(traceback.format_exc())
 

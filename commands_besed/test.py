@@ -31,7 +31,7 @@ class test(commands):
 
 tests = command_besed.Command()
 
-tests.keys = ['тест', 'test']
+tests.keys = ['тест22222222', 'test333333333']
 tests.description = 'Для тестов'
 tests.process = test
 tests.topics_blocks = []
