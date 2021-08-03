@@ -7,7 +7,9 @@ class add_snils(commands):
     async def run(self):
         self.create_mongo.add_user(self.peer_id, 5)
         await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
-                                 message="Введите ваш СНИЛС/уникальный номер",
+                                 message="👁‍🗨 Введите ваш СНИЛС/уникальный номер"
+                                         "💍 В таком формате: XXX-XXX-XXX-XX\n"
+                                         "💡 Пример: 111-111-111-11",
                                  random_id=0)
 
 

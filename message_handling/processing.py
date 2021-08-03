@@ -110,28 +110,30 @@ class processing(commands):
                         break
         if not flag:
             try:
-                if len(self.message["attachments"]) != 0:
-                    for i in self.message["attachments"]:
-                        if "photo" in i:
-                            rand = randint(0, 9999999999)
-                            rand_name = f"{self.peer_id}_{self.from_id}_{self.date}_{rand}.jpg"
-                            g = await self.photo_r_json(i["photo"]["sizes"])
-                            g_url = g["url"]
-                            await self.downland_photo(g_url, rand_name)
-                            #urllib.request.urlretrieve(g_url, rand_name)
-                            txt = await text_photo().run(rand_name)
-                            os.remove(rand_name)
-                            for i in bad_words:
-                                for j in txt.lower().split(" "):
-                                    if not flag_new:
-                                        if RegexpProc.test(j):
-                                            flag_new = True
-                                    if i in txt.lower():
-                                        if i == j:
-                                            flag = True
-                                            break
-                            if flag:
-                                break
+                adm = await self.create_mongo.admin_check(self.from_id, self.peer_id)
+                if not adm:
+                    if len(self.message["attachments"]) != 0:
+                        for i in self.message["attachments"]:
+                            if "photo" in i:
+                                rand = randint(0, 9999999999)
+                                rand_name = f"{self.peer_id}_{self.from_id}_{self.date}_{rand}.jpg"
+                                g = await self.photo_r_json(i["photo"]["sizes"])
+                                g_url = g["url"]
+                                await self.downland_photo(g_url, rand_name)
+                                #urllib.request.urlretrieve(g_url, rand_name)
+                                txt = await text_photo().run(rand_name)
+                                os.remove(rand_name)
+                                for i in bad_words:
+                                    for j in txt.lower().split(" "):
+                                        if not flag_new:
+                                            if RegexpProc.test(j):
+                                                flag_new = True
+                                        if i in txt.lower():
+                                            if i == j:
+                                                flag = True
+                                                break
+                                if flag:
+                                    break
             except Exception as e:
                 print(traceback.format_exc())
         if flag:

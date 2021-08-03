@@ -167,6 +167,9 @@ class infinity_bots:
                                 key = asd['key']
                                 ts = asd['ts']
                                 continue
+                        elif otvet["failed"] == 1:
+                            ts = otvet['ts']
+                            continue
 
                         else:
                             continue
@@ -260,11 +263,11 @@ class infinity_bots:
                                                 await apis.api_post("messages.send", v=self.V, peer_id=message["peer_id"],
                                                                     message=otvet, random_id=0)
                                                 continue
-                                        else:
-                                            await apis.api_post("messages.send", v=self.V, peer_id=message["peer_id"],
-                                                                message="Для получения ответа, выберите интересующий уровень образования.",
-                                                                random_id=0,
-                                                                keyboard=self.level_education())
+                                        # else:
+                                        #     await apis.api_post("messages.send", v=self.V, peer_id=message["peer_id"],
+                                        #                         message="Для получения ответа, выберите интересующий уровень образования.",
+                                        #                         random_id=0,
+                                        #                         keyboard=self.level_education())
 
                             # BS
                             if from_id != peer_id:
