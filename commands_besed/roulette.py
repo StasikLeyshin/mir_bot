@@ -68,6 +68,10 @@ class roulette(commands):
                                                              message=f"😭 К сожалению вы проиграли.{ach}",
                                                              random_id=0)
                                     return
+                                else:
+                                    await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
+                                                             message=f"{result[1]}",
+                                                             random_id=0)
                                 # vrem = 86400
                                 # cause = "Проигрыш в рулетке"
                                 # ply = await self.display_time(vrem)
