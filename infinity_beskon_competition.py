@@ -109,7 +109,6 @@ class infinity_beskon_competition:
              'code': '46.03.02', 'general_plan': 14},
             {'identifier': '1700641902061202742', 'title': 'Дизайн (ФТИ)', 'plan': '3', 'code': '54.03.01',
              'general_plan': 5}]
-        self.time_old_status = False
 
     async def get_soup(self, txt):
         soup = BeautifulSoup(txt, 'html.parser')
@@ -256,6 +255,9 @@ class infinity_beskon_competition:
     async def parsing_mirea_add(self):
         # loop = asyncio.get_running_loop()
         self.slov_directions_general = {}
+        self.list_directions_general = []
+        self.list_direction_dop = {}
+        self.time_old_status = False
         for i in self.list_directions:
             # await self.parsing_mirea(i)
             await self.parsing_mirea(i['identifier'])
