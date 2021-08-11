@@ -286,7 +286,7 @@ class infinity_beskon_competition:
         print("Start infinity_beskon_competition")
         tim = 0
         while True:
-            if tim == 90 or tim == 0:
+            if tim == 60 or tim == 0:
                 #await self.create_mongo.directions_time(vrem)
                 await self.parsing_mirea_add()
                 #loop.create_task(self.parsing_mirea_add(loop))
