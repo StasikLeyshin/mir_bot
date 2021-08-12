@@ -102,7 +102,7 @@ class commands:
             "one_time": False,
             "buttons": [
                 [self.button_vk(label="Вопросы", color="positive"), self.button_vk(label="Направления", color="positive")],
-                [self.button_vk(label="Конкурс", color="primary")],
+                #[self.button_vk(label="Конкурс", color="primary")],
                 [self.button_vk(label="Команды", color="negative")]
             ]
         }
@@ -638,3 +638,4 @@ class commands:
                       f"P.S. И он оттуда скорее всего не вернётся..."
                 return True, msg, res_new[1]
         return False
+

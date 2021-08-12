@@ -1569,3 +1569,20 @@ class create_mongodb:
         else:
             post["time_set"] = str(vrem)
             posts.save(post)
+
+    async def get_users_released(self, peer_id, collections="bots"):
+        db = self.client[f"{collections}"]
+        posts = db[f"{peer_id}"]
+        pos = posts.find({"output": True, "kicked": False})
+        slov = {}
+        spis_id = []
+        for i in pos:
+            spis_id.append(str(i["user_id"]))
+        return spis_id
+        # posts_peer_ids = db[f"settings"]
+        # pos_new = posts_peer_ids.find_one({"perv": 1})
+        # peer_ids = pos_new["peer_ids"].split(", ")
+        # # print(peer_ids)
+        # k = 1
+        # for i in peer_ids:
+        #     posts = db[f"{i}"]
