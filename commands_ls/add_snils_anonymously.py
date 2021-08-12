@@ -13,7 +13,7 @@ class add_snils_anonymously(commands):
 
 add_snils_anonymouslys = command_ls.Command()
 
-add_snils_anonymouslys.keys = ['посмотреть анонимно']
+add_snils_anonymouslys.keys = ['посмотреть анонимно3555453']
 add_snils_anonymouslys.description = 'посмотреть анонимно по снилсу'
 add_snils_anonymouslys.process = add_snils_anonymously
 add_snils_anonymouslys.topics_blocks = []

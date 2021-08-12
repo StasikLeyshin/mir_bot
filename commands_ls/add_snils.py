@@ -15,7 +15,7 @@ class add_snils(commands):
 
 add_snilss = command_ls.Command()
 
-add_snilss.keys = ['Добавить СНИЛС/уникальный номер', 'Изменить СНИЛС/уникальный номер']
+add_snilss.keys = ['Добавить СНИЛС/уникальный номер3555', 'Изменить СНИЛС/уникальный номер34534535']
 add_snilss.description = 'Ответ на конкурс'
 add_snilss.process = add_snils
 add_snilss.topics_blocks = []

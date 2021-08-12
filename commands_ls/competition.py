@@ -19,7 +19,7 @@ class competition(commands):
 
 competitions = command_ls.Command()
 
-competitions.keys = ['конкурс', '/конкурс']
+competitions.keys = ['конкурс544545', '/конкурс454545']
 competitions.description = 'Ответ на конкурс'
 competitions.process = competition
 competitions.topics_blocks = []

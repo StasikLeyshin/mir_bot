@@ -30,7 +30,7 @@ class competitive_situation(commands):
 
 competitive_situations = command_ls.Command()
 
-competitive_situations.keys = ['моя ситуация', 'ситуация']
+competitive_situations.keys = ['моя ситуация122331', 'ситуация23423']
 competitive_situations.description = 'Моя ситуация'
 competitive_situations.process = competitive_situation
 competitive_situations.topics_blocks = []
