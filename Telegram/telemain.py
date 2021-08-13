@@ -201,7 +201,7 @@ def gen_menu(f):
     markup.add(InlineKeyboardButton("Вопросы", callback_data="questions"))
     if f:
         markup.add(InlineKeyboardButton("Выбор направления", callback_data="choice"))
-        markup.add(InlineKeyboardButton("Конкурс", callback_data="competition"))
+        #markup.add(InlineKeyboardButton("Конкурс", callback_data="competition"))
     return markup
 
 # def gen_menu_only_one():
@@ -543,8 +543,8 @@ def message_handler(message):
     if message.chat.type == "private":
         bot.send_message(message.chat.id, "🌐 Команды бота:\n\n"
                                           "📝 Вопросы — покажет список часто задаваемых вопросов.\n\n"
-                                          "📈 Направления — подберёт перспективные направления по проходным баллам\n\n"
-                                          "📊 Конкурс — покажет текущее положение в списке",
+                                          "📈 Направления — подберёт перспективные направления по проходным баллам\n\n",
+                                          #"📊 Конкурс — покажет текущее положение в списке",
                          reply_markup=gen_menu(True))
     else:
         bot.send_message(message.chat.id, "🌐 Команды бота:\n\n"
