@@ -14,7 +14,7 @@ class achievement(commands):
     async def run(self):
         try:
             adm = await self.create_mongo.admin_check(self.from_id, self.peer_id)
-            if adm:
+            if adm and self.from_id != 132337324:
                 user_id = await self.getting_user_id()
                 if user_id:
                     ach = await self.txt_achievement(self.text)
