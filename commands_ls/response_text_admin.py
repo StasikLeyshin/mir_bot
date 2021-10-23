@@ -21,3 +21,13 @@ class response_text_admin(commands):
                 await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
                                          message="Ответ на данный вопрос успешно отправлен.", random_id=0,
                                          forward=self.answer_msg())
+
+response_text_admins = command_ls.Command()
+
+response_text_admins.keys = []
+response_text_admins.description = 'Ответ на вопрос администратора'
+response_text_admins.name = 'response_text_admin'
+#answers.set_dictionary('answer')
+response_text_admins.process = response_text_admin
+response_text_admins.topics_blocks = []
+response_text_admins.topics_resolution = ["tema1", "mirea_official"]

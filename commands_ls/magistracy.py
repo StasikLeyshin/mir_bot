@@ -14,7 +14,7 @@ class magistracy(commands):
 
 magistracys = command_ls.Command()
 
-magistracys.keys = ['магистратура']
+magistracys.keys = ['магистратураtrg']
 magistracys.description = 'Магистратура'
 magistracys.process = magistracy
 magistracys.topics_blocks = ["target", "consultants"]

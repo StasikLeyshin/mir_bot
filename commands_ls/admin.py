@@ -31,7 +31,8 @@ class admin(commands):
 admins = command_ls.Command()
 
 admins.keys = ['админ', '/админ', '?']
+admins.fully = True
 admins.description = 'Перессылка сообщений админу'
 admins.process = admin
 admins.topics_blocks = []
-admins.topics_resolution = ["tema1"]
+admins.topics_resolution = ["tema1", "mirea_official"]

@@ -16,7 +16,7 @@ class college(commands):
 
 colleges = command_ls.Command()
 
-colleges.keys = ['колледж']
+colleges.keys = ['колледжпкупу']
 colleges.description = 'Колледж'
 colleges.process = college
 colleges.topics_blocks = ["target", "consultants"]

@@ -15,7 +15,7 @@ class undergraduate_specialty(commands):
 
 undergraduate_specialtys = command_ls.Command()
 
-undergraduate_specialtys.keys = ['бакалавриат / специалитет', 'бакалавриат', 'специалитет']
+undergraduate_specialtys.keys = ['бакалавриат / специалитетенр', 'бакалавриатенрнр', 'специалитетерр']
 undergraduate_specialtys.description = 'бакалавриат / специалитет'
 undergraduate_specialtys.process = undergraduate_specialty
 undergraduate_specialtys.topics_blocks = ["target", "consultants"]

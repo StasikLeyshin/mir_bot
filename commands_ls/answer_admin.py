@@ -48,4 +48,4 @@ answer_admins.keys = ['ответить', '/ответить']
 answer_admins.description = 'Ответ админа на вопрос'
 answer_admins.process = answer_admin
 answer_admins.topics_blocks = []
-answer_admins.topics_resolution = ["tema1"]
+answer_admins.topics_resolution = ["tema1", "mirea_official"]

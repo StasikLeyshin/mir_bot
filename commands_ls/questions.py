@@ -41,7 +41,7 @@ class answers_img(commands):
             #                          random_id=0,
             #                          attachment=vopr)
             await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
-                                     message=f"📚 Выберите интересующий уровень образования.",
+                                     message=f"📚 Выбери свой статус.",
                                      random_id=0,
                                      keyboard=self.level_education())
         else:
@@ -55,7 +55,7 @@ class answers_img(commands):
 
 answers_imgs = command_ls.Command()
 
-answers_imgs.keys = ['вопросы', 'вопр']
+answers_imgs.keys = ['частые вопросы3443', 'вопросы2324']
 answers_imgs.description = 'Вопросы'
 answers_imgs.process = answers_img
 answers_imgs.topics_blocks = ["target", "consultants"]

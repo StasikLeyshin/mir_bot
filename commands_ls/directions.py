@@ -15,7 +15,7 @@ class directions(commands):
 
 direction = command_ls.Command()
 
-direction.keys = ['напр', 'направления', 'направление']
+direction.keys = ['напркер', 'направленияер', 'направлениенер']
 direction.description = 'Направления'
 direction.process = directions
 direction.topics_blocks = []
