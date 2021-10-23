@@ -76,3 +76,7 @@ def add_friends(users):
     for i in users:
         api.friends.add(user_id=i)
     return 1
+
+if __name__ == "__main__":
+    print(1)
+    #print(kick(users=["121"], chat_id=34))

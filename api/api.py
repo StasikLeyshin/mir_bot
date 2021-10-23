@@ -78,13 +78,15 @@ class api_url:
         async with aiohttp.ClientSession() as session:
             async with session.get(link) as response:
                 d = await response.json(loads=ujson.loads)
-                if_error = api_error(club_id, "empty", **d)
-                check = await if_error.error(self.url)
-                if check["code"] == 1:
-                    return d
+                if club_id != 0:
+                    if_error = api_error(club_id, "empty", **d)
+                    check = await if_error.error(self.url)
+                    if check["code"] == 1:
+                        return d
 
-                elif check["code"] == 0:
-                    return check
+                    elif check["code"] == 0:
+                        return check
+                return d
 
     async def post_json(self, **kwargs):
         link = f"{self.url}"
