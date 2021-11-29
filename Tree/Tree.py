@@ -231,6 +231,21 @@ def tree_distribution_root():
 	open_day = Node('open_day', parent=root, process=command_ls_dictionary['open_day'])
 	command_ls_dictionary['open_day'].append(open_day)
 
+	online_open_day = Node('online_open_day', parent=open_day, process=command_ls_dictionary['online_open_day'])
+	command_ls_dictionary['online_open_day'].append(online_open_day)
+
+	offline_open_day = Node('offline_open_day', parent=open_day, process=command_ls_dictionary['offline_open_day'])
+	command_ls_dictionary['offline_open_day'].append(offline_open_day)
+
+	all_open_day = Node('all_open_day', parent=open_day, process=command_ls_dictionary['all_open_day'])
+	command_ls_dictionary['all_open_day'].append(all_open_day)
+
+	focus_open_day = Node('focus_open_day', parent=open_day, process=command_ls_dictionary['focus_open_day'])
+	command_ls_dictionary['focus_open_day'].append(focus_open_day)
+
+	choice_focus_open_day = Node('choice_focus_open_day', parent=focus_open_day, process=command_ls_dictionary['choice_focus_open_day'])
+	command_ls_dictionary['choice_focus_open_day'].append(choice_focus_open_day)
+
 
 	# answer = Node('answer', process=command_ls_dictionary['answer'])
 	# command_ls_dictionary['answer'].append(answer)
