@@ -6,10 +6,23 @@ class interest(commands):
 
     async def run(self):
 
-        await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
-                                 message="📚 Выбери, что тебя интересует, чему бы ты хотел учиться.",
-                                 random_id=0,
-                                 keyboard=self.level_select_interests())
+        msg = await self.strategic_directions()
+
+        if msg[1]:
+
+            await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
+                                     message="\n\n".join(msg[0]),
+                                     random_id=0,
+                                     keyboard=self.level_interest_event(f"10&{msg[2]}"))
+        else:
+            await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
+                                     message="\n\n".join(msg[0]),
+                                     random_id=0)
+        await self.step_back_bool()
+        # await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
+        #                          message="📚 Выбери, что тебя интересует, чему бы ты хотел учиться.",
+        #                          random_id=0,
+        #                          keyboard=self.level_select_interests())
 
 
 interests = command_ls.Command()
