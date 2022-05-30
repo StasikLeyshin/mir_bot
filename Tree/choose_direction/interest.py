@@ -6,7 +6,13 @@ class interest(commands):
 
     async def run(self):
 
-        msg = await self.strategic_directions()
+        await self.create_mongo.setting_value_profile_ls(self.from_id, directions="finish",
+                                                         interest=self.text)
+        res = await self.create_mongo.get_value_profile_ls(self.from_id, directions="finish")
+
+        #print(res)
+
+        msg = await self.strategic_directions(res['place'], level=res['level'])
 
         if msg[1]:
 
@@ -19,6 +25,8 @@ class interest(commands):
                                      message="\n\n".join(msg[0]),
                                      random_id=0)
         await self.step_back_bool()
+        #await self.step_back_bool()
+
         # await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
         #                          message="📚 Выбери, что тебя интересует, чему бы ты хотел учиться.",
         #                          random_id=0,

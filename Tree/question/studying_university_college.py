@@ -20,4 +20,4 @@ studying_university_colleges.description = 'Уже учусь в вузе/кол
 studying_university_colleges.set_dictionary('studying_university_college')
 studying_university_colleges.process = studying_university_college
 studying_university_colleges.topics_blocks = []
-studying_university_colleges.topics_resolution = ["tema1"]
+studying_university_colleges.topics_resolution = ["tema1", "mirea_official"]

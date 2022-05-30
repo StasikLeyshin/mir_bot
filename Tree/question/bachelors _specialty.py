@@ -21,4 +21,4 @@ bachelors_specialtys.description = 'Показать вопросы бакала
 bachelors_specialtys.set_dictionary('bachelors_specialty')
 bachelors_specialtys.process = bachelors_specialty
 bachelors_specialtys.topics_blocks = []
-bachelors_specialtys.topics_resolution = ["tema1"]
+bachelors_specialtys.topics_resolution = ["tema1", "mirea_official"]

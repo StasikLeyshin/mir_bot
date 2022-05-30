@@ -19,4 +19,4 @@ questions.description = 'Вопросы'
 questions.set_dictionary('question')
 questions.process = question
 questions.topics_blocks = []
-questions.topics_resolution = ["tema1"]
+questions.topics_resolution = ["tema1", "mirea_official"]

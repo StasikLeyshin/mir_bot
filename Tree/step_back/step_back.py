@@ -33,4 +33,4 @@ step_backs.description = 'Шаг назад'
 #step_backs.set_dictionary('question')
 step_backs.process = step_back
 step_backs.topics_blocks = []
-step_backs.topics_resolution = ["tema1"]
+step_backs.topics_resolution = ["tema1", "mirea_official"]

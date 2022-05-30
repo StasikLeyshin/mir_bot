@@ -21,4 +21,4 @@ magistracys.description = 'Показать вопросы магистрату�
 magistracys.set_dictionary('magistracy')
 magistracys.process = magistracy
 magistracys.topics_blocks = []
-magistracys.topics_resolution = ["tema1"]
+magistracys.topics_resolution = ["tema1", "mirea_official"]

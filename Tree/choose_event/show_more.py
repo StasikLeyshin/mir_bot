@@ -24,7 +24,11 @@ class type_event(commands):
                     flag = True
                 msg = await self.get_open_day_online_offline(is_online=flag, offset=int(list_payload[0]))
             elif list_payload[1] == "strategic":
-                msg = await self.strategic_directions(strategic_id=list_payload[2], offset=int(list_payload[0]))
+                msg = await self.strategic_directions(place=list_payload[3], level=list_payload[4], strategic_id=list_payload[2],
+                                                      offset=int(list_payload[0]))
+            elif list_payload[1] == "strategic_exam":
+                msg = await self.strategic_directions_exam(place=list_payload[3], level=list_payload[4], exam=list_payload[2],
+                                                           offset=int(list_payload[0]))
             else:
                 return
             if msg[1]:

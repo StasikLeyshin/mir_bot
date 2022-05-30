@@ -1,6 +1,7 @@
 
 
 from command_ls import command_ls_dictionary, command_ls_list
+from command_besed import command_bs_dictionary
 from .Node import Node
 
 
@@ -193,10 +194,17 @@ def tree_distribution_root():
 	choose_direction = Node('choose_direction', parent=root, process=command_ls_dictionary['choose_direction'])
 	command_ls_dictionary['choose_direction'].append(choose_direction)
 
-	select_exam = Node('select_exam', parent=choose_direction, process=command_ls_dictionary['select_exam'])
+	where_study_level = Node('where_study_level', parent=choose_direction,
+							 process=command_ls_dictionary['where_study_level'])
+	command_ls_dictionary['where_study_level'].append(where_study_level)
+
+	where_study_place = Node('where_study_place', parent=where_study_level, process=command_ls_dictionary['where_study_place'])
+	command_ls_dictionary['where_study_place'].append(where_study_place)
+
+	select_exam = Node('select_exam', parent=where_study_place, process=command_ls_dictionary['select_exam'])
 	command_ls_dictionary['select_exam'].append(select_exam)
 
-	select_interests = Node('select_interests', parent=choose_direction, process=command_ls_dictionary['select_interests'])
+	select_interests = Node('select_interests', parent=where_study_place, process=command_ls_dictionary['select_interests'])
 	command_ls_dictionary['select_interests'].append(select_interests)
 
 	interest = Node('interest', parent=select_interests, process=command_ls_dictionary['interest'])
@@ -247,6 +255,12 @@ def tree_distribution_root():
 	command_ls_dictionary['choice_focus_open_day'].append(choice_focus_open_day)
 
 
+	survey = Node('survey', parent=root, process=command_ls_dictionary['survey'])
+	command_ls_dictionary['survey'].append(survey)
+
+	questions_survey = Node('questions_survey', parent=survey, process=command_ls_dictionary['questions_survey'])
+	command_ls_dictionary['questions_survey'].append(questions_survey)
+
 	# answer = Node('answer', process=command_ls_dictionary['answer'])
 	# command_ls_dictionary['answer'].append(answer)
 
@@ -256,7 +270,15 @@ def tree_distribution_root():
 	# rig = Node("C", parent=root, test=Te)
 	return root
 
+def tree_distribution_root_bs():
+	root = Node('help', process=command_bs_dictionary['help'])
+	command_ls_dictionary['help'].append(root)
 
+	ban = Node('ban', parent=root, process=command_bs_dictionary['ban'])
+	command_ls_dictionary['ban'].append(ban)
+
+	warn = Node('warn', parent=root, process=command_bs_dictionary['warn'])
+	command_ls_dictionary['warn'].append(warn)
 
 # def Tree_distribution():
 #
