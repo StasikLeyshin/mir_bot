@@ -79,7 +79,7 @@ class ban(commands):
 
 bans = command_besed.Command()
 
-bans.keys = ['/бан', '/ban', '/Бан', '/Ban']
+bans.keys = ['/бан', '/punishments', '/Бан', '/Ban']
 bans.description = 'Выдача бана'
 bans.process = ban
 bans.topics_blocks = []

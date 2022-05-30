@@ -15,7 +15,7 @@ class reputation_plus(commands):
                     res = await self.create_mongo.profile_users_add(user_id, scores=0.25)
                     await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
                                              message=f"✅ Уважение оказано ([id{user_id}|+0.25])",
-                                             random_id=0, forward=self.answer_msg())
+                                             random_id=0, forward=self.answer_msg(), keyboard=self.pusto())
                     return
             res = await self.create_mongo.profile_users_add(self.from_id, reputation_plus=self.date, f=1)
             if res:

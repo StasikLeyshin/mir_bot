@@ -22,6 +22,8 @@ class start(commands):
 
 
 
+
+
 starts = command_besed.Command()
 
 starts.keys = ['старт', 'стартуем']

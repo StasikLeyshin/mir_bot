@@ -171,7 +171,7 @@ class chance(commands):
 
 chances = command_besed.Command()
 
-chances.keys = ['/шанс', '/chance']
+chances.keys = ['/шан5ggrс', '/chargrrnce']
 chances.description = 'Шанс поступления'
 chances.process = chance
 chances.topics_blocks = []

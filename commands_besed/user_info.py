@@ -56,11 +56,11 @@ class user_info(commands):
                 # res = await self.create_mongo.profile_users_add(self.from_id)
                 #
                 # warn = ""
-                # ban = ""
+                # punishments = ""
                 # if "count_old" in info["warn"]:
                 #     warn = f"☢ Варны: [{info['warn']['count']}/3]\n🤡 Количество варнов: {info['warn']['count_old']}\n\n"
-                # if "count" in info["ban"]:
-                #     ban = f"🤡 Количество банов: {info['ban']['count']}\n\n"
+                # if "count" in info["punishments"]:
+                #     punishments = f"🤡 Количество банов: {info['punishments']['count']}\n\n"
                 #
                 # awards = ""
                 # if len(res[0]) >= 1:
@@ -82,7 +82,7 @@ class user_info(commands):
                 #     await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
                 #                              message=f"👤 Профиль [id{self.from_id}|{name}]\n\n"
                 #                                      f"📆 Дата регистрации: {q}\n\n"
-                #                                      f"{warn}{ban}{awards}",
+                #                                      f"{warn}{punishments}{awards}",
                 #                              random_id=0)
 
                 # msg = await self.info_user(self.from_id)

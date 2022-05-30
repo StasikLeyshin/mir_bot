@@ -32,7 +32,7 @@ class warn(commands):
 
 warns = command_besed.Command()
 
-warns.keys = ['/warn', '/варн', '/Варн', '/Warn']
+warns.keys = ['/warfffn', '/варнfff', '/Варнfff', '/Warfffn']
 warns.description = 'Выдача варна'
 warns.process = warn
 warns.topics_blocks = []

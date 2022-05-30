@@ -117,7 +117,7 @@ class show(commands):
 
 shows = command_besed.Command()
 
-shows.keys = ['/шоу', 'начать шоу', 'закрыть беседу']
+shows.keys = ['/шtrtrtt45g4оу', 'начаtrrttrtть шоу', 'закрыть бrrrtrrеседу']
 shows.description = 'Привязка беседы'
 shows.process = show
 shows.topics_blocks = []
