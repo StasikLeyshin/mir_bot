@@ -166,100 +166,115 @@ class Tree(dict):
 
 
 def tree_distribution_root():
+	# root = Node('endless_questions', process=command_ls_dictionary['endless_questions'])
+	# command_ls_dictionary['endless_questions'].append(root)
+
+
 	root = Node('help', process=command_ls_dictionary['help'])
 	command_ls_dictionary['help'].append(root)
 
+	endless_questions = Node('endless_questions', parent=root, process=command_ls_dictionary['endless_questions'])
+	command_ls_dictionary['endless_questions'].append(endless_questions)
 
-	question = Node('question', parent=root, process=command_ls_dictionary['question'])
-	command_ls_dictionary['question'].append(question)
-
-	want_university = Node('want_university', parent=question, process=command_ls_dictionary['want_university'])
-	command_ls_dictionary['want_university'].append(want_university)
-
-	bachelors_specialty = Node('bachelors_specialty', parent=want_university,
-							   process=command_ls_dictionary['bachelors_specialty'])
-	command_ls_dictionary['bachelors_specialty'].append(bachelors_specialty)
-
-	magistracy = Node('magistracy', parent=want_university, process=command_ls_dictionary['magistracy'])
-	command_ls_dictionary['magistracy'].append(magistracy)
-
-	want_college = Node('want_college', parent=question, process=command_ls_dictionary['want_college'])
-	command_ls_dictionary['want_college'].append(want_college)
-
-	studying_university_college = Node('studying_university_college', parent=question,
-									   process=command_ls_dictionary['studying_university_college'])
-	command_ls_dictionary['studying_university_college'].append(studying_university_college)
+	unban_ls = Node('unban_ls', parent=root, process=command_ls_dictionary['unban_ls'])
+	command_ls_dictionary['unban_ls'].append(unban_ls)
 
 
-	choose_direction = Node('choose_direction', parent=root, process=command_ls_dictionary['choose_direction'])
-	command_ls_dictionary['choose_direction'].append(choose_direction)
+	automatic_unban = Node('automatic_unban', parent=unban_ls, process=command_ls_dictionary['automatic_unban'])
+	command_ls_dictionary['automatic_unban'].append(automatic_unban)
 
-	where_study_level = Node('where_study_level', parent=choose_direction,
-							 process=command_ls_dictionary['where_study_level'])
-	command_ls_dictionary['where_study_level'].append(where_study_level)
-
-	where_study_place = Node('where_study_place', parent=where_study_level, process=command_ls_dictionary['where_study_place'])
-	command_ls_dictionary['where_study_place'].append(where_study_place)
-
-	select_exam = Node('select_exam', parent=where_study_place, process=command_ls_dictionary['select_exam'])
-	command_ls_dictionary['select_exam'].append(select_exam)
-
-	select_interests = Node('select_interests', parent=where_study_place, process=command_ls_dictionary['select_interests'])
-	command_ls_dictionary['select_interests'].append(select_interests)
-
-	interest = Node('interest', parent=select_interests, process=command_ls_dictionary['interest'])
-	command_ls_dictionary['interest'].append(interest)
-
-	scores = Node('scores', parent=select_exam, process=command_ls_dictionary['scores'])
-	command_ls_dictionary['scores'].append(scores)
-
-
-	choose_event = Node('choose_event', parent=root, process=command_ls_dictionary['choose_event'])
-	command_ls_dictionary['choose_event'].append(choose_event)
-
-	select_interest_event = Node('select_interest_event', parent=choose_event, process=command_ls_dictionary['select_interest_event'])
-	command_ls_dictionary['select_interest_event'].append(select_interest_event)
-
-	interest_event = Node('interest_event', parent=select_interest_event, process=command_ls_dictionary['interest_event'])
-	command_ls_dictionary['interest_event'].append(interest_event)
-
-	offline_event = Node('offline_event', parent=choose_event, process=command_ls_dictionary['offline_event'])
-	command_ls_dictionary['offline_event'].append(offline_event)
-
-	online_event = Node('online_event', parent=choose_event, process=command_ls_dictionary['online_event'])
-	command_ls_dictionary['online_event'].append(online_event)
-
-	type_event = Node('type_event', parent=choose_event, process=command_ls_dictionary['type_event'])
-	command_ls_dictionary['type_event'].append(type_event)
-
-	format_type_event = Node('format_type_event', parent=type_event, process=command_ls_dictionary['format_type_event'])
-	command_ls_dictionary['format_type_event'].append(format_type_event)
-
-
-	open_day = Node('open_day', parent=root, process=command_ls_dictionary['open_day'])
-	command_ls_dictionary['open_day'].append(open_day)
-
-	online_open_day = Node('online_open_day', parent=open_day, process=command_ls_dictionary['online_open_day'])
-	command_ls_dictionary['online_open_day'].append(online_open_day)
-
-	offline_open_day = Node('offline_open_day', parent=open_day, process=command_ls_dictionary['offline_open_day'])
-	command_ls_dictionary['offline_open_day'].append(offline_open_day)
-
-	all_open_day = Node('all_open_day', parent=open_day, process=command_ls_dictionary['all_open_day'])
-	command_ls_dictionary['all_open_day'].append(all_open_day)
-
-	focus_open_day = Node('focus_open_day', parent=open_day, process=command_ls_dictionary['focus_open_day'])
-	command_ls_dictionary['focus_open_day'].append(focus_open_day)
-
-	choice_focus_open_day = Node('choice_focus_open_day', parent=focus_open_day, process=command_ls_dictionary['choice_focus_open_day'])
-	command_ls_dictionary['choice_focus_open_day'].append(choice_focus_open_day)
-
-
-	survey = Node('survey', parent=root, process=command_ls_dictionary['survey'])
-	command_ls_dictionary['survey'].append(survey)
-
-	questions_survey = Node('questions_survey', parent=survey, process=command_ls_dictionary['questions_survey'])
-	command_ls_dictionary['questions_survey'].append(questions_survey)
+	#
+	#
+	# question = Node('question', parent=root, process=command_ls_dictionary['question'])
+	# command_ls_dictionary['question'].append(question)
+	#
+	# want_university = Node('want_university', parent=question, process=command_ls_dictionary['want_university'])
+	# command_ls_dictionary['want_university'].append(want_university)
+	#
+	# bachelors_specialty = Node('bachelors_specialty', parent=want_university,
+	# 						   process=command_ls_dictionary['bachelors_specialty'])
+	# command_ls_dictionary['bachelors_specialty'].append(bachelors_specialty)
+	#
+	# magistracy = Node('magistracy', parent=want_university, process=command_ls_dictionary['magistracy'])
+	# command_ls_dictionary['magistracy'].append(magistracy)
+	#
+	# want_college = Node('want_college', parent=question, process=command_ls_dictionary['want_college'])
+	# command_ls_dictionary['want_college'].append(want_college)
+	#
+	# studying_university_college = Node('studying_university_college', parent=question,
+	# 								   process=command_ls_dictionary['studying_university_college'])
+	# command_ls_dictionary['studying_university_college'].append(studying_university_college)
+	#
+	#
+	# choose_direction = Node('choose_direction', parent=root, process=command_ls_dictionary['choose_direction'])
+	# command_ls_dictionary['choose_direction'].append(choose_direction)
+	#
+	# where_study_level = Node('where_study_level', parent=choose_direction,
+	# 						 process=command_ls_dictionary['where_study_level'])
+	# command_ls_dictionary['where_study_level'].append(where_study_level)
+	#
+	# where_study_place = Node('where_study_place', parent=where_study_level, process=command_ls_dictionary['where_study_place'])
+	# command_ls_dictionary['where_study_place'].append(where_study_place)
+	#
+	# select_exam = Node('select_exam', parent=where_study_place, process=command_ls_dictionary['select_exam'])
+	# command_ls_dictionary['select_exam'].append(select_exam)
+	#
+	# select_interests = Node('select_interests', parent=where_study_place, process=command_ls_dictionary['select_interests'])
+	# command_ls_dictionary['select_interests'].append(select_interests)
+	#
+	# interest = Node('interest', parent=select_interests, process=command_ls_dictionary['interest'])
+	# command_ls_dictionary['interest'].append(interest)
+	#
+	# scores = Node('scores', parent=select_exam, process=command_ls_dictionary['scores'])
+	# command_ls_dictionary['scores'].append(scores)
+	#
+	#
+	# choose_event = Node('choose_event', parent=root, process=command_ls_dictionary['choose_event'])
+	# command_ls_dictionary['choose_event'].append(choose_event)
+	#
+	# select_interest_event = Node('select_interest_event', parent=choose_event, process=command_ls_dictionary['select_interest_event'])
+	# command_ls_dictionary['select_interest_event'].append(select_interest_event)
+	#
+	# interest_event = Node('interest_event', parent=select_interest_event, process=command_ls_dictionary['interest_event'])
+	# command_ls_dictionary['interest_event'].append(interest_event)
+	#
+	# offline_event = Node('offline_event', parent=choose_event, process=command_ls_dictionary['offline_event'])
+	# command_ls_dictionary['offline_event'].append(offline_event)
+	#
+	# online_event = Node('online_event', parent=choose_event, process=command_ls_dictionary['online_event'])
+	# command_ls_dictionary['online_event'].append(online_event)
+	#
+	# type_event = Node('type_event', parent=choose_event, process=command_ls_dictionary['type_event'])
+	# command_ls_dictionary['type_event'].append(type_event)
+	#
+	# format_type_event = Node('format_type_event', parent=type_event, process=command_ls_dictionary['format_type_event'])
+	# command_ls_dictionary['format_type_event'].append(format_type_event)
+	#
+	#
+	# open_day = Node('open_day', parent=root, process=command_ls_dictionary['open_day'])
+	# command_ls_dictionary['open_day'].append(open_day)
+	#
+	# online_open_day = Node('online_open_day', parent=open_day, process=command_ls_dictionary['online_open_day'])
+	# command_ls_dictionary['online_open_day'].append(online_open_day)
+	#
+	# offline_open_day = Node('offline_open_day', parent=open_day, process=command_ls_dictionary['offline_open_day'])
+	# command_ls_dictionary['offline_open_day'].append(offline_open_day)
+	#
+	# all_open_day = Node('all_open_day', parent=open_day, process=command_ls_dictionary['all_open_day'])
+	# command_ls_dictionary['all_open_day'].append(all_open_day)
+	#
+	# focus_open_day = Node('focus_open_day', parent=open_day, process=command_ls_dictionary['focus_open_day'])
+	# command_ls_dictionary['focus_open_day'].append(focus_open_day)
+	#
+	# choice_focus_open_day = Node('choice_focus_open_day', parent=focus_open_day, process=command_ls_dictionary['choice_focus_open_day'])
+	# command_ls_dictionary['choice_focus_open_day'].append(choice_focus_open_day)
+	#
+	#
+	# survey = Node('survey', parent=root, process=command_ls_dictionary['survey'])
+	# command_ls_dictionary['survey'].append(survey)
+	#
+	# questions_survey = Node('questions_survey', parent=survey, process=command_ls_dictionary['questions_survey'])
+	# command_ls_dictionary['questions_survey'].append(questions_survey)
 
 	# answer = Node('answer', process=command_ls_dictionary['answer'])
 	# command_ls_dictionary['answer'].append(answer)
@@ -270,15 +285,37 @@ def tree_distribution_root():
 	# rig = Node("C", parent=root, test=Te)
 	return root
 
+
 def tree_distribution_root_bs():
 	root = Node('help', process=command_bs_dictionary['help'])
-	command_ls_dictionary['help'].append(root)
+	command_bs_dictionary['help'].append(root)
 
 	ban = Node('ban', parent=root, process=command_bs_dictionary['ban'])
-	command_ls_dictionary['ban'].append(ban)
+	command_bs_dictionary['ban'].append(ban)
 
 	warn = Node('warn', parent=root, process=command_bs_dictionary['warn'])
-	command_ls_dictionary['warn'].append(warn)
+	command_bs_dictionary['warn'].append(warn)
+
+	binding = Node('binding', parent=root, process=command_bs_dictionary['binding'])
+	command_bs_dictionary['binding'].append(binding)
+
+	startnew = Node('startnew', parent=root, process=command_bs_dictionary['startnew'])
+	command_bs_dictionary['startnew'].append(startnew)
+
+	user_profile_info = Node('user_profile_info', parent=root, process=command_bs_dictionary['user_profile_info'])
+	command_bs_dictionary['user_profile_info'].append(user_profile_info)
+
+	rep_plus = Node('rep_plus', parent=root, process=command_bs_dictionary['rep_plus'])
+	command_bs_dictionary['rep_plus'].append(rep_plus)
+
+	rep_minus = Node('rep_minus', parent=root, process=command_bs_dictionary['rep_minus'])
+	command_bs_dictionary['rep_minus'].append(rep_minus)
+
+	roulette_new = Node('roulette_new', parent=root, process=command_bs_dictionary['roulette_new'])
+	command_bs_dictionary['roulette_new'].append(roulette_new)
+
+	kick = Node('kick', parent=root, process=command_bs_dictionary['roulette_new'])
+	command_bs_dictionary['kick'].append(kick)
 
 # def Tree_distribution():
 #

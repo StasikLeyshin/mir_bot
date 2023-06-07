@@ -21,8 +21,13 @@ class api_error:
         if "error" in self.kwargs:
             #logging.basicConfig(level=logging.DEBUG, format='%(levelname)s - [%(name)s] - %(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
             #logger = logging.getLogger(__name__)
-            logger.error(f'club_id: {self.club_id} | error_code: {self.kwargs["error"]["error_code"]} | {self.kwargs["error"]["error_msg"]} | method: {self.kwargs["error"]["request_params"][1]["value"]} | link: {link}')
-            return {"code": 0, "errcode": self.kwargs["error"]["error_code"], "error": self.kwargs["error"]["error_msg"]}
+            try:
+                logger.error(f'club_id: {self.club_id} | error_code: {self.kwargs["error"]["error_code"]} | {self.kwargs["error"]["error_msg"]} | method: {self.kwargs["error"]["request_params"][1]["value"]} | link: {link}')
+                return {"code": 0, "errcode": self.kwargs["error"]["error_code"], "error": self.kwargs["error"]["error_msg"]}
+            except:
+                logger.error(
+                    f'unexpected error')
+                return {"code": 0, "errcode": "unexpected error", "error": "unexpected error"}
         elif "failed" in self.kwargs:
             logger.error(f'club_id: {self.club_id} | error_code: {self.kwargs["failed"]} | failed | method: failed | link: {link}')
             return {"code": 0, "errcode": self.kwargs["failed"], "failed": self.kwargs["failed"]}

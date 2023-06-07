@@ -100,7 +100,7 @@ class user_info(commands):
 
 user_infos = command_besed.Command()
 
-user_infos.keys = ['/профиль']
+user_infos.keys = ['/профильgtrhwtrrg']
 user_infos.description = 'Для тестов'
 user_infos.process = user_info
 user_infos.topics_blocks = []

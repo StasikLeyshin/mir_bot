@@ -191,8 +191,8 @@ class create_mongodb:
                                              "generating_questions/img/").upload()"""
                         # print(res)
                         if len(post) > 1:
-                            # post = f"{res}," + post
-                            post = post + f",{res}"
+                            post = f"{res}," + post
+                            #post = post + f",{res}"
                         else:
                             post += f"{res}"
 
@@ -530,6 +530,7 @@ class create_mongodb:
             elif f == 0:
                 posts = db[f"{peer_id}"]
             pos = posts.find_one({"user_id": int(user_id)})
+            #print(pos)
             if pos is not None:
                 return pos["admin"]
             else:
@@ -727,21 +728,29 @@ class create_mongodb:
                 posts = db[f"{i}"]
                 pos = posts.find({})
                 for j in pos:
-                    if "count" in j["ban"]:
-                        if j["ban"][str(j["ban"]["count"])]["status"]:
-                            if int(j["ban"][str(j["ban"]["count"])]["time"]) <= int(vrem):
-                                j["ban"][str(j["ban"]["count"])]["status"] = False
-                                posts.save(j)
-                    if "count" in j["warn"]:
-                        if j['warn']['count'] > 0:
-                            for g in range(1, 3):
-                                if f'{j["warn"]["count_old"] - g}' in j['warn']:
-                                    if j['warn'][f'{j["warn"]["count_old"] - g}']["status"]:
-                                        if int(j['warn'][f'{j["warn"]["count_old"] - g}']["time"]) <= int(vrem):
-                                            j["warn"][str(j["warn"]["count_old"] - g)]["status"] = False
-                                            j["warn"]["count"] = j["warn"]["count"] - 1
-                                            # j["warn"]["count_old"] = j["warn"]["count_old"] - 1
-                                            posts.save(j)
+                    if "ban" in j:
+                        if "count" in j["ban"]:
+                            if j["ban"][str(j["ban"]["count"])]["status"]:
+                                if "time" in j["ban"][str(j["ban"]["count"])]:
+                                    if int(j["ban"][str(j["ban"]["count"])]["time"]) <= int(vrem):
+                                        j["ban"][str(j["ban"]["count"])]["status"] = False
+                                        posts.save(j)
+                    if "warn" in j:
+                        if "count" in j["warn"]:
+                            if j['warn']['count'] > 0:
+                                for g in range(1, 3):
+                                    if f'{j["warn"]["count_old"] - g}' in j['warn']:
+                                        if j['warn'][f'{j["warn"]["count_old"] - g}']["status"]:
+                                            if "time" in j['warn'][f'{j["warn"]["count_old"] - g}']:
+                                                if int(j['warn'][f'{j["warn"]["count_old"] - g}']["time"]) <= int(vrem):
+                                                    j["warn"][str(j["warn"]["count_old"] - g)]["status"] = False
+                                                    j["warn"]["count"] = j["warn"]["count"] - 1
+                                                    # j["warn"]["count_old"] = j["warn"]["count_old"] - 1
+                                                    posts.save(j)
+            posts = db[f"statistics_bs"]
+            poss = posts.find({})
+            for i in poss:
+                pass
             return 1
         except Exception as e:
             print(traceback.format_exc())
@@ -1570,10 +1579,13 @@ class create_mongodb:
             post["time_set"] = str(vrem)
             posts.save(post)
 
-    async def get_users_released(self, peer_id, collections="bots"):
+    async def get_users_released(self, peer_id, flag=False, collections="bots"):
         db = self.client[f"{collections}"]
         posts = db[f"{peer_id}"]
-        pos = posts.find({"output": True, "kicked": False})
+        if flag == True:
+            pos = posts.find({"kicked": False, "admin": False})
+        else:
+            pos = posts.find({"output": True, "kicked": False})
         slov = {}
         spis_id = []
         for i in pos:
@@ -1586,3 +1598,313 @@ class create_mongodb:
         # k = 1
         # for i in peer_ids:
         #     posts = db[f"{i}"]
+
+    async def get_users_ls_status(self, user_id, nap=False, collections="bots", documents="users_ls"):
+        db = self.client[f"{collections}"]
+        posts = db[f"{documents}"]
+        post = posts.find_one({'user_id': str(user_id)})
+        if post is None:
+            return False
+        else:
+            if nap:
+                return post["question"]
+            return post["status"]
+
+    async def add_users_ls_status(self, user_id, status=None, nap=None, collections="bots", documents="users_ls"):
+        db = self.client[f"{collections}"]
+        posts = db[f"{documents}"]
+        post = posts.find_one({'user_id': str(user_id)})
+        if post is None:
+            posts.insert_one({"user_id": str(user_id), "status": str(status), "question": ""})
+            return True
+        else:
+            if nap:
+                post["question"] = nap
+            if status:
+                post["status"] = status
+            posts.save(post)
+            return True
+
+
+
+
+    async def get_users_ls_status_questions(self, user_id, collections="bots", documents="users_ls_questions"):
+        db = self.client[f"{collections}"]
+        posts = db[f"{documents}"]
+        post = posts.find_one({'user_id': str(user_id)})
+        if post is None:
+            return False
+        else:
+            return post["status"]
+
+    async def add_users_ls_status_questions(self, user_id, status=None, collections="bots", documents="users_ls_questions"):
+        db = self.client[f"{collections}"]
+        posts = db[f"{documents}"]
+        post = posts.find_one({'user_id': str(user_id)})
+        if post is None:
+            posts.insert_one({"user_id": str(user_id), "status": str(status)})
+            return True
+        else:
+            if status:
+                #post["status"] = status
+                posts.update_one({"user_id": str(user_id)}, {"$set": {"status": str(status)}})
+            #posts.save(post)
+            return True
+
+
+    async def add_value_profile_ls(self, user_id, collections="bots", documents="profile_ls"):
+        db = self.client[f"{collections}"]
+        posts = db[f"{documents}"]
+        post = posts.find_one({'user_id': str(user_id)})
+        if post is None:
+            posts.insert_one({"user_id": str(user_id)})
+            return True, posts.find_one({'user_id': str(user_id)}), posts
+        else:
+            #posts.save(post)
+            return False, post, posts
+
+    async def setting_value_profile_ls(self, user_id, **kwargs):
+        result = await self.add_value_profile_ls(user_id)
+        #print(result, kwargs)
+        if result[0]:
+            if "directions" in kwargs:
+                result[1]["directions"] = {"1": {"place": kwargs.get("place"),
+                                                 "level": kwargs.get("level"),
+                                                 "exams": kwargs.get("exams"),
+                                                 "interest": kwargs.get("interest"),
+                                                 "finish": True
+                                                 }
+                                           }
+                result[1]["directions_kol"] = "1"
+                result[1]["directions_place"] = kwargs.get("place")
+                result[1]["directions_level"] = kwargs.get("level")
+            result[2].save(result[1])
+            # 5208
+
+        else:
+            if "directions" in kwargs:
+                #l = str(len(result[1]["directions"]) + 1)
+                #l_old = str(len(result[1]["directions"]))
+                # for i in result[1]["directions"][l_old]:
+                #     if result[1]["directions"][l_old][i]:
+                #         continue
+                if kwargs["directions"] == "finish":
+
+                    l = result[1]["directions_kol"]
+                    #print(l)
+                    result[1]["directions_kol"] = str(int(result[1]["directions_kol"]) + 1)
+                    #l = result[1]["directions_kol"]
+                    result[1]["directions"][str(result[1]["directions_kol"])] = {}
+                    result[1]["directions"][l]["place"] = result[1]["directions_place"]
+                    result[1]["directions"][l]["level"] = result[1]["directions_level"]
+                    #print(l)
+                    #l = str(len(result[1]["directions"]))
+                else:
+                    if kwargs.get("place"):
+                        result[1]["directions_place"] = kwargs.get("place")
+                    if kwargs.get("level"):
+                        result[1]["directions_level"] = kwargs.get("level")
+                    if "directions_kol" not in result[1]:
+                        result[1]["directions_kol"] = "1"
+                        result[1]["directions"] = {}
+                        result[1]["directions"]["1"] = {}
+                        l = "1"
+                    else:
+                        l = result[1]["directions_kol"]
+                    #l = str(len(result[1]["directions"]) + 1)
+                    #l = result[1]["directions_kol"]
+                    #result[1]["directions"][l] = {str(len(result[1]["directions"]) + 1): {}}
+                del kwargs["directions"]
+                for pet, name in kwargs.items():
+                    result[1]["directions"][l][pet] = name
+                result[2].save(result[1])
+
+                # result[1]["directions"][str(len(result[1]["directions"]) + 1)] = \
+                #     {
+                #         str(len(result[1]["directions"]) + 1):
+                #             {
+                #                 "place": kwargs.get("place"),
+                #                 "exams": kwargs.get("exams"),
+                #                 "interest": kwargs.get("interest")
+                #             }
+                #     }
+
+        #"directions": {"0": {"place":}
+    async def get_value_profile_ls(self, user_id, **kwargs):
+        result = await self.add_value_profile_ls(user_id)
+        if result[0]:
+            #if "directions" in kwargs:
+            return False
+        else:
+            if "directions" in kwargs:
+                try:
+                    #print(kwargs)
+                    if kwargs["directions"] == "finish":
+                        return result[1]["directions"].get(str(int(result[1]["directions_kol"]) - 1))
+                    if result[1]["directions"].get(str(result[1]["directions_kol"])):
+
+                        return result[1]["directions"][str(result[1]["directions_kol"])]
+                    elif result[1]["directions"].get(str(int(result[1]["directions_kol"]) - 1)):
+                        return result[1]["directions"].get(str(int(result[1]["directions_kol"]) - 1))
+                except:
+                    return False
+                # result[1]["directions"][str(len(result[1]["directions"]) + 1)] = \
+                #     {str(len(result[1]["directions"]) + 1): {}}
+                # del kwargs["directions"]
+                # for pet, name in kwargs.items():
+                #     result[1]["directions"][str(len(result[1]["directions"]) + 1)][pet] = name
+
+
+    async def questions_survey_profile_ls(self, user_id, **kwargs):
+        result = await self.add_value_profile_ls(user_id)
+        if result[0]:
+            if "survey" in kwargs:
+                result[1]["survey"] = {"1": {"place": kwargs.get("place"),
+                                                 "level": kwargs.get("level"),
+                                                 "exams": kwargs.get("exams"),
+                                                 "interest": kwargs.get("interest"),
+                                                 "finish": True
+                                                 }
+                                           }
+                result[1]["survey_kol"] = "1"
+                #result[1]["directions_place"] = kwargs.get("place")
+                #result[1]["directions_level"] = kwargs.get("level")
+            result[2].save(result[1])
+            # 5208
+
+        else:
+            if "directions" in kwargs:
+                #l = str(len(result[1]["directions"]) + 1)
+                #l_old = str(len(result[1]["directions"]))
+                # for i in result[1]["directions"][l_old]:
+                #     if result[1]["directions"][l_old][i]:
+                #         continue
+                if kwargs["directions"] == "finish":
+
+                    l = result[1]["directions_kol"]
+                    #print(l)
+                    result[1]["directions_kol"] = str(int(result[1]["directions_kol"]) + 1)
+                    #l = result[1]["directions_kol"]
+                    result[1]["directions"][str(result[1]["directions_kol"])] = {}
+                    result[1]["directions"][l]["place"] = result[1]["directions_place"]
+                    result[1]["directions"][l]["level"] = result[1]["directions_level"]
+                    #print(l)
+                    #l = str(len(result[1]["directions"]))
+                else:
+                    if kwargs.get("place"):
+                        result[1]["directions_place"] = kwargs.get("place")
+                    if kwargs.get("level"):
+                        result[1]["directions_level"] = kwargs.get("level")
+                    if "directions_kol" not in result[1]:
+                        result[1]["directions_kol"] = "1"
+                        result[1]["directions"] = {}
+                        result[1]["directions"]["1"] = {}
+                        l = "1"
+                    else:
+                        l = result[1]["directions_kol"]
+                    #l = str(len(result[1]["directions"]) + 1)
+                    #l = result[1]["directions_kol"]
+                    #result[1]["directions"][l] = {str(len(result[1]["directions"]) + 1): {}}
+                del kwargs["directions"]
+                for pet, name in kwargs.items():
+                    result[1]["directions"][l][pet] = name
+                result[2].save(result[1])
+
+
+
+
+    async def get_users_bs_status(self, user_id, collections="bots", documents="users_bs"):
+        db = self.client[f"{collections}"]
+        posts = db[f"{documents}"]
+        post = posts.find_one({'user_id': str(user_id)})
+        if post is None:
+            return False
+        else:
+            return post["status"]
+
+    async def add_users_bs_status(self, user_id, status=None, collections="bots", documents="users_bs"):
+        db = self.client[f"{collections}"]
+        posts = db[f"{documents}"]
+        post = posts.find_one({'user_id': str(user_id)})
+        if post is None:
+            posts.insert_one({"user_id": str(user_id), "status": str(status), "question": ""})
+            return True
+        else:
+            if status:
+                post["status"] = status
+            posts.save(post)
+            return True
+
+    async def add_value_bs_profile(self, user_id, collections="bots", documents="profile_bs"):
+        db = self.client[f"{collections}"]
+        posts = db[f"{documents}"]
+        post = posts.find_one({'user_id': str(user_id)})
+        if post is None:
+            posts.insert_one({"user_id": str(user_id)})
+            return True, posts.find_one({'user_id': str(user_id)}), posts
+        else:
+            # posts.save(post)
+            return False, post, posts
+
+
+    async def score_change_bs_profile(self, user_id, score: int, flag=False):
+        result = await self.add_value_bs_profile(user_id)
+        sl = "score"
+        if flag:
+            sl = ""
+        if result[0]:
+            if result[1].get(sl):
+                result[1][sl] += score
+                total_score = result[1][sl]
+            else:
+                result[1][sl] = score
+                total_score = result[1][sl]
+            result[2].save(result[1])
+            return total_score
+        return False
+
+
+
+    async def get_value_bs_profile(self, user_id, **kwargs):
+        result = await self.add_value_bs_profile(user_id)
+        if result[0]:
+            #if "directions" in kwargs:
+            return False
+
+    async def get_all_profile(self, collections="bots", documents="profile_ls"):
+        db = self.client[f"{collections}"]
+        posts = db[f"{documents}"]
+        pos = posts.find({})
+        return pos
+        # post = posts.find_one({'user_id': str(user_id)})
+        # if post is None:
+        #     posts.insert_one({"user_id": str(user_id)})
+        #     return True, posts.find_one({'user_id': str(user_id)}), posts
+        # else:
+        #     #posts.save(post)
+        #     return False, post, posts
+
+
+    async def rating_sms(self, collections="bots", documents="profile_bs"):
+        db = self.client[f"{collections}"]
+        posts = db[f"{documents}"]
+        pos = posts.find({})
+        slov = {}
+        spis_id = []
+        #slov_new = {}
+        for i in pos:
+            # posts_peer_ids = db[f"settings"]
+            # pos_new = posts_peer_ids.find_one({"perv": 1})
+            # peer_ids = pos_new["peer_ids"].split(", ")
+            # flag = False
+            # #for j in peer_ids:
+            # post_new = db[f"2000000011"]
+            # pos_new = post_new.find_one({"user_id": int(i["user_id"])})
+            # if pos_new is not None:
+            #     if pos_new["admin"]:
+            #             flag = True
+            if i["user_id"] > 0:
+                if 'spam' in i:
+                    slov[str(i["user_id"])] = round(i["spam"], 3)
+            #spis_id.append(i["user_id"])
+        return slov

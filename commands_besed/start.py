@@ -26,7 +26,7 @@ class start(commands):
 
 starts = command_besed.Command()
 
-starts.keys = ['старт', 'стартуем']
+starts.keys = ['старткупиуерепик', 'стартуемсауакикаам']
 starts.description = 'Привязка беседы'
 starts.process = start
 starts.topics_blocks = []

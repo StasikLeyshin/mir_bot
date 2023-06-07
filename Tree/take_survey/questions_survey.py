@@ -22,8 +22,8 @@ class questions_survey(commands):
 
 questions_surveys = command_ls.Command()
 
-questions_surveys.keys = ['']
-questions_surveys.mandatory = True
+questions_surveys.keys = ['gjfjgjgf']
+questions_surveys.mandatory = False
 questions_surveys.description = 'Ответы на вопросы опроса'
 questions_surveys.set_dictionary('questions_survey')
 questions_surveys.process = questions_survey

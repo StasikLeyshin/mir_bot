@@ -23,7 +23,7 @@ class coming(commands):
 
 comings = command_besed.Command()
 
-comings.keys = ['chat_invite_user_by_link']
+comings.keys = ['chat_invite_user_by_link_thgeffffff']
 comings.description = 'Приход пользователя по ссылке'
 comings.process = coming
 comings.topics_blocks = []

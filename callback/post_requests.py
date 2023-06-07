@@ -17,28 +17,61 @@ async def executor_post(request: web.Request):
         if event['type'] == "confirmation":
             return web.Response(text="9d5be991")
         if event['type'] == "message_new":
-
             #LS
             if event['object']["message"]["from_id"] == event['object']["message"]["peer_id"]:
                 #LS
                 loop.create_task(
                     SimpleHandler(V, event['group_id'], event['object']["message"], apis[event['group_id']],
                                   loop_control[event['group_id']],
-                                  create_mongo, collection_bots, document_tokens, url_dj, loop).middleware_ls())
+                                  create_mongo, collection_bots, document_tokens, url_dj, loop, client,
+                                  tree_questions=tree_questions,
+                                  mongo_manager=mongo_manager, settings_info=settings_info).middleware_ls())
 
             elif event['object']["message"]["from_id"] != event['object']["message"]["peer_id"]:
                 #BS
                 loop.create_task(
                     SimpleHandler(V, event['group_id'], event['object']["message"], apis[event['group_id']],
                                   loop_control[event['group_id']],
-                                  create_mongo, collection_bots, document_tokens, url_dj, loop).middleware_ls(True))
+                                  create_mongo, collection_bots, document_tokens, url_dj, loop, client, mongo_manager=mongo_manager, settings_info=settings_info).middleware_ls(True))
+        return web.Response(text="ok")
+    elif "channelType" in event:
+        print(event)
+        from_id = event["userId"]
+        try:
+            number = int(event["queryText"])
+        except:
+            data = {"response": "Повторите ваш запрос"}
+            return web.json_response(data)
+
+        #print(event)
+
+        res = await create_mongo.get_users_ls_status_questions(from_id)
+        if not res:
+            await create_mongo.add_users_ls_status_questions(from_id, 11)
+            res = 11
+        text_new = tree_questions.search(number=number, level=int(res))
+        #print(res, text_new)
+        #keyboard = self.generations_keyboard(text_new[2])
+        await create_mongo.add_users_ls_status_questions(from_id, int(text_new[0]))
+        # await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
+        #                          message=text_new[1],
+        #                          random_id=0,
+        #                          keyboard=keyboard)
+        data = {
+            "response": text_new[1]
+        }
+        return web.json_response(data)
+        # data = {
+        #     "response": "Повторите ваш запрос"
+        # }
+        # return web.json_response(data)
 
 
         # if loop_control[event['group_id']] == "tema1":
         #     if event['type'] == "message_new":
         #             # loop.create_task(processing(V, event['group_id'], event['object']["message"], apis[event['group_id']], "tema1",
         #             #                             create_mongo,
-        #             #                             collection_bots,
+        #             #                              collection_bots,
         #             #                             document_tokens,
         #             #                             url_dj).run(bad_words))
         #         if event['object']["message"]["from_id"] == event['object']["message"]["peer_id"]:

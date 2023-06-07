@@ -51,11 +51,9 @@ class addition(commands):
                 return
 
 
-
-
 additions = command_besed.Command()
 
-additions.keys = ['chat_invite_user']
+additions.keys = ['chat_invite_user_dffgfgfdfghgfdfg']
 additions.description = 'Возвращение или приход пользователя'
 additions.process = addition
 additions.topics_blocks = []

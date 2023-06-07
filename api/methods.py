@@ -28,22 +28,38 @@ class methods:
     async def users_chek(self, peer_id, apis):
         response = await apis.api_get("messages.getConversationMembers", peer_id=peer_id, v=self.v)
         if "error" not in response:
-            users = {}
+            users = []
             users_vse = []
             users_adm = []
             for element in response["items"]:
-                if "is_admin" in element:
-                    if element["is_admin"] is True:
-                        users[element["member_id"]] = {"admin": True}
-                        users_adm.append(element["member_id"])
-                        #users.append({"user_id": element["member_id"], "admin": True})
-                        users_vse.append(element["member_id"])
-                else:
-                    users[element["member_id"]] = {"admin": False}
-                    #users.append({"user_id": element["member_id"], "admin": False})
+                if element.get("is_admin"):
+                    users.append({"user_id": element["member_id"], "admin": True})
+                    # users[element["member_id"]] = {"admin": True}
+                    users_adm.append(element["member_id"])
+                    # users.append({"user_id": element["member_id"], "admin": True})
                     users_vse.append(element["member_id"])
-
+                else:
+                    users.append({"user_id": element["member_id"], "admin": False})
+                    # users[element["member_id"]] = {"admin": False}
+                    # users.append({"user_id": element["member_id"], "admin": False})
+                    users_vse.append(element["member_id"])
             return users, users_vse, users_adm
+            # users = {}
+            # users_vse = []
+            # users_adm = []
+            # for element in response["items"]:
+            #     if "is_admin" in element:
+            #         if element["is_admin"] is True:
+            #             users[element["member_id"]] = {"admin": True}
+            #             users_adm.append(element["member_id"])
+            #             #users.append({"user_id": element["member_id"], "admin": True})
+            #             users_vse.append(element["member_id"])
+            #     else:
+            #         users[element["member_id"]] = {"admin": False}
+            #         #users.append({"user_id": element["member_id"], "admin": False})
+            #         users_vse.append(element["member_id"])
+            #
+            # return users, users_vse, users_adm
         return False
 
 

@@ -15,6 +15,7 @@ class Converter:
 
     def __call__(self, for_definition: typing.Union[typing.Type[ast.AST], ast.AST]):
         def decorator(func):
+            #print("DECORATOR", self.definitions)
             self.definitions[for_definition] = func
             return func
 
@@ -25,6 +26,7 @@ class Converter:
             raise ConverterError(
                 f"Definition for {d.__class__} is undefined. Maybe vkscript doesn't support it"
             )
+        #print("Class: ", d.__class__)
         return self.definitions[d.__class__](d)
 
     def scriptify(self, func: typing.Callable, **values) -> str:

@@ -10,3 +10,8 @@ ujson==3.0.0
 djangorestframework==3.12.2
 sqlparse==0.2.4
 pyTelegramBotAPI==3.7.7
+openpyxl
+xlsxwriter
+xlrd
+aiofiles==0.8.0
+motor==3.1.2

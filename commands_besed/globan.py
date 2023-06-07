@@ -37,7 +37,7 @@ class globan(commands):
 
 globans = command_besed.Command()
 
-globans.keys = ['/globan', '/глобан']
+globans.keys = ['/globan34qr34r', '/глобанr34r3rr']
 globans.description = 'Глобальный бан'
 globans.process = globan
 globans.topics_blocks = []

@@ -30,7 +30,7 @@ class admin(commands):
 
 admins = command_ls.Command()
 
-admins.keys = ['админ', '/админ', '?']
+admins.keys = ['админ5аккпкпку', '/админк45пр65654е', '?еп45пкекеп']
 admins.fully = True
 admins.description = 'Перессылка сообщений админу'
 admins.process = admin

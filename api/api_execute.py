@@ -6,6 +6,7 @@ import ujson
 from vkscript_converter.definitions import vkscript
 
 
+
 @vkscript
 def api_one_run(v, group_id):
     d = api.groups.getLongPollSettings(v=v, group_id=group_id)
@@ -71,12 +72,76 @@ def kick(users, chat_id):
         #names.append(user.first_name)
     return 1
 
+
+@vkscript
+def kick_bs(user, chat_ids):
+    #names = []
+    #u = users.split(" ")
+    #u = ['363434084', '454049560']
+    #if flag == 1:
+        #api.messages.send(peer_id = peer_id, random_id = 0, message = "Сейчас вас кикну. Если хотите вернуться, напишите кикнувшему администратору https://vk.com/id"+ from_id)
+    for i in chat_ids:
+        #while i < l:
+        #if u[i][0] == "-":
+        #api.messages.removeChatUser(chat_id = chat_id, member_id = u[i])
+        #else:
+        api.messages.removeChatUser(chat_id=i, member_id=user)
+        #names.append(user.first_name)
+    return 1
+
 @vkscript
 def add_friends(users):
     for i in users:
         api.friends.add(user_id=i)
     return 1
 
-if __name__ == "__main__":
-    print(1)
+@vkscript
+def tes(r):
+    r_new = []
+    for i in r:
+        r_new.append(i)
+        for j in r:
+            r_new.append(i)
+    return r_new
+
+@vkscript
+def tes_new(r):
+    s = 1
+    s += 1
+    print(s)
+    return 1
+
+@vkscript
+def te(r):
+    nums = ["5", "2", "1", "8", "4"]
+    for i in range(len(nums) - 1):
+        for j in range(len(nums) - i - 1):
+            if nums[j] > nums[j + 1]:
+                buff = nums[j]
+                nums[j] = nums[j + 1]
+                nums[j + 1] = buff
+    print(nums)
+    for i in range(len(nums)):
+        lowest_value_index = i
+        for j in range(i + 1, len(nums)):
+            if nums[j] < nums[lowest_value_index]:
+                lowest_value_index = j
+        buff = nums[i]
+        nums[i] = nums[lowest_value_index]
+        nums[lowest_value_index] = buff
+    print(nums)
+    for i in range(1, len(nums)):
+        item_to_insert = nums[i]
+        j = i - 1
+        while j >= 0 and nums[j] > item_to_insert:
+            nums[j + 1] = nums[j]
+            j -= 1
+        nums[j + 1] = item_to_insert
+    print(nums)
+
+if __name__ == "__main__":pass
+    #print(1)
+    #print(tes(r=[1, 2, 3, 4, 5, 6, 7, 8]))
     #print(kick(users=["121"], chat_id=34))
+    #print(tes_new(r=1))
+    #print(te(r=1))

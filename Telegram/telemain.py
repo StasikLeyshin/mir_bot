@@ -1,5 +1,6 @@
+import asyncio
 import telebot
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
 # import asyncio
 # import configparser
 # from pymongo import MongoClient
@@ -9,13 +10,17 @@ from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, InlineKeyb
 # from aiogram.dispatcher import Dispatcher
 # from aiogram.utils import executor
 # #import keyboards as kb
+
 import traceback
+import re
 
 
 from Telegram.bot_setting import bot
 from Telegram.user import users
 from sql import pol_js
 from generating_questions import questions, questions_col, loop_new, create_mongo
+from api import api_url
+from edite_text import URL_REGEX
 
 # from aiogram import Bot, types
 # from aiogram.dispatcher import Dispatcher
@@ -299,7 +304,7 @@ def gen_markup(vopr, n):
     markup.add(InlineKeyboardButton("Меню", callback_data="menu"))
     return markup
 
-@bot.callback_query_handler(func=lambda call: True)
+#@bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
     # if call.data == "cb_yes":
     #     print(call.data)
@@ -537,7 +542,7 @@ def callback_query(call):
                               call.message.chat.id, call.message.message_id,
                               reply_markup=gen_markup(int(call.data), len(questions["spis_nom"])))
 
-@bot.message_handler(commands=['start', 'help'])
+#@bot.message_handler(commands=['start', 'help'])
 def message_handler(message):
     #bot.send_photo(message.chat.id, open('C:/Users/Zett/Desktop/mir_bot/generating_questions/img/test1.png', 'rb'))
     if message.chat.type == "private":
@@ -547,9 +552,14 @@ def message_handler(message):
                                           #"📊 Конкурс — покажет текущее положение в списке",
                          reply_markup=gen_menu(True))
     else:
-        bot.send_message(message.chat.id, "🌐 Команды бота:\n\n"
-                                          "📝 Вопросы — покажет список часто задаваемых вопросов.\n\n",
-                         reply_markup=gen_menu(False))
+        # markup = ReplyKeyboardMarkup()
+        # markup.add(KeyboardButton({}))
+        # bot.send_message(message.chat.id, message.chat.id, reply_markup=markup)
+        bot.send_message(message.chat.id, '_', reply_markup=ReplyKeyboardRemove())
+                         #reply_markup=gen_menu(False))
+        # bot.send_message(message.chat.id, "🌐 Команды бота:\n\n"
+        #                                   "📝 Вопросы — покажет список часто задаваемых вопросов.\n\n",
+        #                  reply_markup=gen_menu(False))
 
     #bot.send_message(message.chat.id, "Выберете номер интересуещего вас вопроса", reply_markup=gen_markup(0))
 
@@ -559,121 +569,152 @@ def message_handler(message):
 
 @bot.message_handler()
 def message_handler_empty(message):
+    #print(message)
+    if message.text.lower() == "привязать":
+        print(message.chat.id, message.chat.title)
+        # post = await api_url(f"http://45.155.207.247/api/").post_json(club_id=message.chat.title,
+        #                                                               Conver=message.chat.id, create_bs=2)
+        # loop = asyncio.get_event_loop()
+        # post = loop.run_until_complete(api_url(f"http://45.155.207.247/api/").post_json(club_id=message.chat.title,
+        #                                                               Conver=message.chat.id, create_bs=2))
 
-    if message.text == "Меню":
-        if message.chat.type == "private":
-            bot.send_message(message.chat.id, "🌐 Команды бота:\n\n"
-                                              "📝 Вопросы — покажет список часто задаваемых вопросов.\n\n"
-                                              "📈 Направления — подберёт перспективные направления по проходным баллам",
-                             reply_markup=gen_menu(True))
+        import requests
+
+        post = requests.post("http://45.155.207.247/api/", data={"name": message.chat.title,
+                                                                 "Conver": message.chat.id,
+                                                                 "create_bs": 2})
+        #print(post.json())
+        if "error" in post.json():
+            bot.send_message(message.chat.id, "☢ Беседа уже была привязана")
         else:
-            bot.send_message(message.chat.id, "🌐 Команды бота:\n\n"
-                                              "📝 Вопросы — покажет список часто задаваемых вопросов.\n\n",
-                             reply_markup=gen_menu(False))
+            bot.send_message(message.chat.id, "✅ Беседа успешно привязана")
 
-    if message.chat.id != -1001290867279:
-        if message.text in questions["spis_vop"]:
-            bot.send_message(message.chat.id, questions["vopr"][message.text])
-    else:
-        if message.text in questions_col["spis_vop"]:
-            bot.send_message(message.chat.id, questions_col["vopr"][message.text])
-
-    if message.chat.type == "private":
-        chek = create_mongo["create_mongo"].check_user(message.chat.id)
-        if chek == 5 or chek == 6:
-            bot.delete_message(message.chat.id, message.message_id)
-            flag = 0
-            if chek == 6:
-                flag = 2
-            loop_new.run_until_complete(
-                create_mongo["create_mongo"].users_directions_add_start(message.chat.id))
-            msg = snils_check(message.chat.id, message.text, snils=message.text, flag=flag)
-            g = 1
-            for i in msg[1]:
-                if flag != 2:
-                    if g == len(msg[1]):
-                        res = loop_new.run_until_complete(
-                            create_mongo["create_mongo"].users_directions_add_start(message.chat.id))
-                        f = 0
-                        if res:
-                            f = 1
-                        bot.send_message(message.chat.id, "\n\n".join(i), reply_markup=gen_competition(f))
-                else:
-                    if flag == 2:
-                        if g == len(msg[1]):
-                            res = loop_new.run_until_complete(
-                                create_mongo["create_mongo"].users_directions_add_start(message.chat.id))
-                            f = 0
-                            if res:
-                                f = 1
-                            bot.send_message(message.chat.id, "\n\n".join(i), reply_markup=gen_competition(f))
-                            continue
-                    bot.send_message(message.chat.id, "\n\n".join(i))
-                g += 1
-            return
-
-        number = if_int(message.text)
-        if number:
-            if 310 >= number >= 0:
-                number = number - 10
-                subjects = {"math&rus&info": "Математика Русский Информатика и ИКТ",
-                            "math&rus&phys": "Математика Русский Физика",
-                            "math&rus&chem": "Математика Русский Химия",
-                            "math&rus&soc": "Математика Русский Обществознание",
-                            "rus&soc&hist": "Русский Обществознание История",
-                            "math&rus&art": "Математика Русский Творческий экзамен",
-                            "rus&soc&art": "Русский Обществознание Творческий экзамен", "reduction": "rus&soc&art"}
-                check = check_users(message.from_user.id, message.chat.id)
-                if check:
-                    predmets = check[2].split("&")
-                    #print(check, predmets)
-                    pol_sql = pol_js(predmets[0], predmets[1], predmets[2], str(number), 1)
-                    if pol_sql["quantity"] != 0:
-                        spis = []
-                        for i in pol_sql["programs"]:
-                            spis.append(
-                                f"🔮 <a href='{i['link']}'>{i['name']} {i['code']}</a>\n📊 Прошлогодний проходной балл на бюджет: {i['bal']}\n"
-                                f"👥 Количество бюджетных мест: {i['places']}")
-                        de = chunks(spis, 10)
-                        l = list(de)
-                        #print(len(l))
-                        #print(l)
-
-                        ff = 1
-                        bot.delete_message(message.chat.id, message.message_id)
-                        perv = "🔎 Высокие шансы поступления:\n\n"
-                        if pol_sql["quantity"] == -1:
-                            perv = "🔎 Гарантированное поступление на платное обучение, но на бюджет в прошлом году баллы были выше.\n\n"
-
-                        add_users(message.message_id, message.from_user.id, message.chat.id, subjects=check[2], f=0, spis=l,
-                                  perv=perv)
-
-                        if len(l) > 1:
-                        #for i in l:
-                            #if ff == 1:
-                            # m = bot.send_message(message.chat.id, "🔎 Высокие шансы поступления:\n\n" + "\n\n".join(l[0]),
-                            #                      parse_mode='HTML',
-                            #                      reply_markup=gen_menu_one())
-                            bot.edit_message_text(perv + "\n\n".join(l[0]),
-                                                  message.chat.id, check[1],
-                                                  parse_mode='HTML',
-                                                  reply_markup=gen_menu_one(1)
-                                                  )
-                        elif len(l) == 1:
-
-                            bot.edit_message_text(perv + "\n\n".join(l[0]),
-                                                  message.chat.id, check[1],
-                                                  parse_mode='HTML',
-                                                  reply_markup=gen_menu_one(3)
-                                                  )
-                    else:
-                        bot.edit_message_text("🏤 В РТУ МИРЭА много разных программ и не всегда стоит ориентироваться на проходные баллы прошлого года. Со всеми программами можно ознакомиться на сайте: https://priem.mirea.ru/guide/?level=bach-spec\n\n"
-                                              "📖 А ещё у нас очень доступное платное образование, а при оплате до 18 августа можно получить скидку на обучение: ссылка.\n\n"
-                                              "💰Кстати, если вы поступите на бюджет мы вам вернём всю сумму.",
-                                              message.chat.id, check[1],
-                                              parse_mode='HTML',
-                                              reply_markup=gen_menu_one(3)
-                                              )
+    if message.text.lower() == "/start":
+        text = '<div>На какие мероприятия от РТУ МИРЭА сходить в ближайшую неделю.</div><div><br></div><div>Регистрация на все мероприятия доступна в личном кабинете школьника на сайте приёмной комиссии https://vk.cc/cds2zi.</div><div><br></div><div>Дни открытых дверей</div><div><br></div><div>25 марта, суббота, 11:00 — День открытых дверей всех образовательных программ, онлайн. Регистрация https://vk.cc/cluy5V</div><div><br></div><div>26 марта, воскресенье, 11:00 — День открытых дверей Колледжа программирования и кибербезопасности, проспект Вернадского, 78. Регистрация https://vk.cc/cluyjc</div><div><br></div><div>2 апреля, воскресенье — День открытых дверей всех образовательных программ, проспект Вернадского, 78.&nbsp;</div><div><br></div><div>Регистрация 11:00 https://vk.cc/cluyrZ</div><div><br></div><div>Регистрация 13:00 https://vk.cc/cluyy7</div><div><br></div><div>(Программы для Дня открытых дверей с началом в 11:00 и с началом в 13:00 идентичны).</div><div><br></div><div>Важное&nbsp;</div><div><br></div><div>Московский конкурс межпредметных навыков и знаний «Интеллектуальный мегаполис. Потенциал». Участвовать https://vk.cc/cluwtq</div><div><br></div><div>Другие олимпиады и конкурсы, которые могут помочь в поступлении https://vk.cc/cjmsgx</div><div><br></div><div>Онлайн отборочный тур «Кибербиатлон-2023». Участвовать https://vk.cc/clZ5pP</div><div><br></div><div>29 марта, среда, 13:00-18:00 — День абитуриента Роскосмоса. Адрес:пр-т Мира, 119, ВДНХ, павильон №34</div><div><br></div><div>Лучшие мероприятия</div><div><br></div><div>Меганаправление «Информационные технологии и анализ данных»</div><div><br></div><div>23 марта, четверг, 17:00 — очная экскурсия в локацию Института информационных технологий. Адрес: проспект Вернадского, 78. Регистрация https://vk.cc/cm9GBg</div><div><br></div><div>28 марта, вторник, 16:20 — онлайн лекция «Цифровая трансформация процессов и организаций». Регистрация https://vk.cc/cmmzR7</div><div><br></div><div>Все мероприятия меганаправления https://vk.cc/cjmskK</div><div><br></div><div>Меганаправление «Химия и биотехнологиях»</div><div><br></div><div>23 марта, четверг, 17:00 — онлайн встреча «100 вопросов представителю Института тонких химических технологий им. М.В. Ломоносова». Регистрация https://vk.cc/clZ6a9</div><div>27 марта, понедельник, 16:00 — один день с Институтом перспективных технологий и индустриального программирования. Знакомство с направлением подготовки «Материаловедение и технологии материалов». Адрес: улица Стромынка, 20. Регистрация https://vk.cc/cmmA7t</div><div><br></div><div>Все мероприятия меганаправления https://vk.cc/cjmsoh</div><div><br></div><div>Меганаправление «Радиоэлектроника»</div><div><br></div><div>23 марта, четверг, 16:30 — онлайн лекция «Структура и принцип работы радиолокатора». Регистрация https://vk.cc/cm9GZw</div><div><br></div><div>24 марта, пятница, 16:30 — очная экскурсия по учебно-научным лабораториям кафедры радиоволновых процессов и технологий. Адрес: проспект Вернадского, 78. Регистрация https://vk.cc/cmmAA5</div><div><br></div><div>Все мероприятия меганаправления https://vk.cc/ciAL8K</div><div><br></div><div>Меганаправление «Робототехника и автоматизация производств»</div><div><br></div><div>23 марта, четверг, 16:30 — очный мастер-класс «Сквозной монтаж компонентов на печатные платы». Адрес: проспект Вернадского, 78. Регистрация https://vk.cc/clZ7xb</div><div><br></div><div>Все мероприятия меганаправления https://vk.cc/ciALTZ</div><div><br></div><div>Меганаправление «Экономика и управление»</div><div><br></div><div>21 марта, вторник, 16:30 — онлайн встреча с представителем направления Управление персоналом. Регистрация https://vk.cc/cm9HjI</div><div><br></div><div>27 марта, понедельник, 18:00 — онлайн мастер-класс «Урок финансовой грамотности: триггеры маркетинга или как управляют покупателями». Регистрация https://vk.cc/cmmAVy</div><div><br></div><div>Все мероприятия меганаправления https://vk.cc/ciAMcy</div><div><br></div><div>Меганаправление «Юриспруденция»</div><div><br></div><div>22 марта, среда, 16:00 — очная лекция «Проблемы защиты государства от промышленного шпионажа». Адрес: улица Стромынка, 20. Регистрация https://vk.cc/cm9HRo</div><div><br></div><div>27 марта, понедельник, 16:00 — очная экскурсия на кафедру Правовое обеспечение национальной безопасности. Адрес: улица Стромынка, 20. Регистрация https://vk.cc/cmmB4E</div><div><br></div><div>Все мероприятия меганаправления https://vk.cc/cjmsLe</div><div><br></div><div>Меганаправление «Дизайн»</div><div><br></div><div>23 марта, четверг, 16:30 — очный мастер-класс «Изготовление небольшого керамического изделия». Адрес: улица Стромынка, 20. Регистрация https://vk.cc/cm9I6v</div><div><br></div><div>27 марта, понедельник, 17:10 — очная экскурсия по лабораториям кафедры компьютерного дизайна. Адрес: 5-я улица Соколиной Горы, 22. Регистрация https://vk.cc/cmmBkt</div><div><br></div><div>Все мероприятия меганаправления https://vk.cc/cm9HZ3</div>'
+        text = text.replace("<div>", "").replace("</div>", "").replace("<br>", "\n\n").replace("&nbsp;", "")
+        #bot.send_message(message.chat.id, '[inline URL](http://www.example.com/)', parse_mode='Markdown')
+        bot.send_message(message.chat.id, text,
+                         parse_mode='HTML')
+    # if message.from_user.id != 777000 and message.from_user.id != 57923444 and message.from_user.id != 447019454\
+    #         and message.from_user.id != 1087968824:
+    #     if message.chat.type != "private":
+    #         res = re.findall(URL_REGEX, f'{message.text}')
+    #         if res:
+    #             bot.delete_message(message.chat.id, message.message_id)
+    # if message.text == "Меню":
+    #     if message.chat.type == "private":
+    #         bot.send_message(message.chat.id, "🌐 Команды бота:\n\n"
+    #                                           "📝 Вопросы — покажет список часто задаваемых вопросов.\n\n"
+    #                                           "📈 Направления — подберёт перспективные направления по проходным баллам",
+    #                          reply_markup=gen_menu(True))
+    #     else:
+    #         bot.send_message(message.chat.id, "🌐 Команды бота:\n\n"
+    #                                           "📝 Вопросы — покажет список часто задаваемых вопросов.\n\n",
+    #                          reply_markup=gen_menu(False))
+    #
+    # if message.chat.id != -1001290867279:
+    #     if message.text in questions["spis_vop"]:
+    #         bot.send_message(message.chat.id, questions["vopr"][message.text])
+    # else:
+    #     if message.text in questions_col["spis_vop"]:
+    #         bot.send_message(message.chat.id, questions_col["vopr"][message.text])
+    #
+    # if message.chat.type == "private":
+    #     chek = create_mongo["create_mongo"].check_user(message.chat.id)
+    #     if chek == 5 or chek == 6:
+    #         bot.delete_message(message.chat.id, message.message_id)
+    #         flag = 0
+    #         if chek == 6:
+    #             flag = 2
+    #         loop_new.run_until_complete(
+    #             create_mongo["create_mongo"].users_directions_add_start(message.chat.id))
+    #         msg = snils_check(message.chat.id, message.text, snils=message.text, flag=flag)
+    #         g = 1
+    #         for i in msg[1]:
+    #             if flag != 2:
+    #                 if g == len(msg[1]):
+    #                     res = loop_new.run_until_complete(
+    #                         create_mongo["create_mongo"].users_directions_add_start(message.chat.id))
+    #                     f = 0
+    #                     if res:
+    #                         f = 1
+    #                     bot.send_message(message.chat.id, "\n\n".join(i), reply_markup=gen_competition(f))
+    #             else:
+    #                 if flag == 2:
+    #                     if g == len(msg[1]):
+    #                         res = loop_new.run_until_complete(
+    #                             create_mongo["create_mongo"].users_directions_add_start(message.chat.id))
+    #                         f = 0
+    #                         if res:
+    #                             f = 1
+    #                         bot.send_message(message.chat.id, "\n\n".join(i), reply_markup=gen_competition(f))
+    #                         continue
+    #                 bot.send_message(message.chat.id, "\n\n".join(i))
+    #             g += 1
+    #         return
+    #
+    #     number = if_int(message.text)
+    #     if number:
+    #         if 310 >= number >= 0:
+    #             number = number - 10
+    #             subjects = {"math&rus&info": "Математика Русский Информатика и ИКТ",
+    #                         "math&rus&phys": "Математика Русский Физика",
+    #                         "math&rus&chem": "Математика Русский Химия",
+    #                         "math&rus&soc": "Математика Русский Обществознание",
+    #                         "rus&soc&hist": "Русский Обществознание История",
+    #                         "math&rus&art": "Математика Русский Творческий экзамен",
+    #                         "rus&soc&art": "Русский Обществознание Творческий экзамен", "reduction": "rus&soc&art"}
+    #             check = check_users(message.from_user.id, message.chat.id)
+    #             if check:
+    #                 predmets = check[2].split("&")
+    #                 #print(check, predmets)
+    #                 pol_sql = pol_js(predmets[0], predmets[1], predmets[2], str(number), 1)
+    #                 if pol_sql["quantity"] != 0:
+    #                     spis = []
+    #                     for i in pol_sql["programs"]:
+    #                         spis.append(
+    #                             f"🔮 <a href='{i['link']}'>{i['name']} {i['code']}</a>\n📊 Прошлогодний проходной балл на бюджет: {i['bal']}\n"
+    #                             f"👥 Количество бюджетных мест: {i['places']}")
+    #                     de = chunks(spis, 10)
+    #                     l = list(de)
+    #                     #print(len(l))
+    #                     #print(l)
+    #
+    #                     ff = 1
+    #                     bot.delete_message(message.chat.id, message.message_id)
+    #                     perv = "🔎 Высокие шансы поступления:\n\n"
+    #                     if pol_sql["quantity"] == -1:
+    #                         perv = "🔎 Гарантированное поступление на платное обучение, но на бюджет в прошлом году баллы были выше.\n\n"
+    #
+    #                     add_users(message.message_id, message.from_user.id, message.chat.id, subjects=check[2], f=0, spis=l,
+    #                               perv=perv)
+    #
+    #                     if len(l) > 1:
+    #                     #for i in l:
+    #                         #if ff == 1:
+    #                         # m = bot.send_message(message.chat.id, "🔎 Высокие шансы поступления:\n\n" + "\n\n".join(l[0]),
+    #                         #                      parse_mode='HTML',
+    #                         #                      reply_markup=gen_menu_one())
+    #                         bot.edit_message_text(perv + "\n\n".join(l[0]),
+    #                                               message.chat.id, check[1],
+    #                                               parse_mode='HTML',
+    #                                               reply_markup=gen_menu_one(1)
+    #                                               )
+    #                     elif len(l) == 1:
+    #
+    #                         bot.edit_message_text(perv + "\n\n".join(l[0]),
+    #                                               message.chat.id, check[1],
+    #                                               parse_mode='HTML',
+    #                                               reply_markup=gen_menu_one(3)
+    #                                               )
+    #                 else:
+    #                     bot.edit_message_text("🏤 В РТУ МИРЭА много разных программ и не всегда стоит ориентироваться на проходные баллы прошлого года. Со всеми программами можно ознакомиться на сайте: https://priem.mirea.ru/guide/?level=bach-spec\n\n"
+    #                                           "📖 А ещё у нас очень доступное платное образование, а при оплате до 18 августа можно получить скидку на обучение: ссылка.\n\n"
+    #                                           "💰Кстати, если вы поступите на бюджет мы вам вернём всю сумму.",
+    #                                           message.chat.id, check[1],
+    #                                           parse_mode='HTML',
+    #                                           reply_markup=gen_menu_one(3)
+    #                                           )
                     #del l[0]
                     # add_users(m.message_id, message.from_user.id, message.chat.id, subjects=check[2], bal=check[3],
                     #           f=1,
@@ -722,10 +763,9 @@ def message_handler_empty(message):
 
 
 def test1(create_mongo_new):
-    generating_q("FAQ_T")
-    generating_col("FAQ_T_col")
+    #generating_q("FAQ_T")
+    #generating_col("FAQ_T_col")
     set_create_mongo(create_mongo_new)
-
     bot.polling(none_stop=True)
 
 # @dp.message_handler(commands=['start'])

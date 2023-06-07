@@ -17,7 +17,8 @@ class bind(commands):
         if adm == 1:
 
             #post = self.create_mongo.update(self.collection_bots, self.document_tokens, self.club_id, self.peer_id)
-            post = await api_url(f"{self.url_dj}").post_json(club_id=self.club_id, peer_id=self.peer_id, status=2)
+            #post = await api_url(f"{self.url_dj}").post_json(club_id=self.club_id, peer_id=self.peer_id, status=2)
+            #post = await api_url(f"{self.url_dj}").post_json(create_bs=self.peer_id)
             print(post)
             if "peer_id" in post:
                 if post["peer_id"] == 1:

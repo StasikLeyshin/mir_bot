@@ -21,7 +21,12 @@ class roulette(commands):
                 await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
                                          message=f"😎 ВЫ ПОБЕДИЛИ, БЕЗОГОВОРОЧНО ПОБЕДИЛИ, +1000000ККККК ВАМ НА СЧЁТ", random_id=0)
                 return
-
+            res = await self.create_mongo.profile_users_add(self.from_id)
+            if res[1] < -10:
+                await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
+                                         message=f"⛔ Вам запрещено участие в рулетке. Слишком мало баллов.",
+                                         random_id=0)
+                return
             res = await self.create_mongo.profile_users_add(self.from_id, roulette=self.date, f=3)
             if not res[0]:
                 timestamp = res[1][0]

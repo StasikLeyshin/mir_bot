@@ -195,17 +195,20 @@ def call(d: ast.Call):
         elif calls[0] == "format":
             raise ConverterError("Use f-strings instead of str.format")
         raise ConverterError("String formatter")
-
+    print(calls, func.id)
     if func.id.lower() == "api":
         params = dispatch_keywords(d.keywords)
         return "API." + ".".join(calls[::-1]) + "({" + params + "})"
     elif func.id == "len":
         return f"{find(d.args[0])}.length"
+    elif func.id == "print":
+        return f"console.log({find(d.args[0])})"
     elif calls and calls[0] in CALL_REPLACEMENTS:
         args = ",".join(find(arg) for arg in d.args)
         return find(d.func.value) + "." + CALL_REPLACEMENTS[calls[0]] + "(" + args + ")"
-    elif calls[0] in CALL_STRING:
+    elif len(calls) > 0 and calls[0] in CALL_STRING:
         return find(func) + "." + calls[0] + "(" + find(d.args[0]) + ")"
+
     raise ConverterError(f"Call for {getattr(d.func, 'attr', d.func.__dict__)} is not referenced")
 
 
@@ -315,6 +318,7 @@ def name_constant_type(d: ast.NameConstant):
 
 def vkscript(func: typing.Callable) -> typing.Callable[[], str]:
     def decorator(**context):
+        #print(1111111111)
         return converter.scriptify(func, **context)
 
     return decorator

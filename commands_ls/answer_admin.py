@@ -27,12 +27,14 @@ class answer_admin(commands):
                     if result[4]:
                         for j in result[4]:
                             await self.apis.api_post("messages.edit", v=self.v, peer_id=int(j),
-                                                     message="👤 Пользователь задал вопрос, чтобы ответить на вопрос нажмите на кнопку и напишите текст ответа.", random_id=0,
+                                                     message="👤 Пользователь задал вопрос, чтобы ответить на вопрос нажмите на кнопку и напишите текст ответа.",
+                                                     random_id=0,
                                                      message_id=result[4][j],
                                                      keyboard=self.keyboard_answer_admin(f"{self.from_id}@{result[5]}"),
                                                      keep_forward_messages=1)
                     await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
-                                             message="Вы начали отвечать на данный вопрос, напишите ответ.", random_id=0,
+                                             message="Вы начали отвечать на данный вопрос, напишите ответ.",
+                                             random_id=0,
                                              forward=self.answer_msg_other_parameters(user_id, result[3]))
 
         except Exception as e:
@@ -44,7 +46,7 @@ class answer_admin(commands):
 
 answer_admins = command_ls.Command()
 
-answer_admins.keys = ['ответить', '/ответить']
+answer_admins.keys = ['ответитьrtgtwtgwtg', '/ответитьgrqrgrgqrg']
 answer_admins.description = 'Ответ админа на вопрос'
 answer_admins.process = answer_admin
 answer_admins.topics_blocks = []

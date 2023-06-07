@@ -62,7 +62,7 @@ class zawarn(commands):
 
 zawarns = command_besed.Command()
 
-zawarns.keys = ['заварнить']
+zawarns.keys = ['заварнитьfrethnytgrgegge']
 zawarns.description = 'Выдача варна по кнопке'
 zawarns.process = zawarn
 zawarns.topics_blocks = []

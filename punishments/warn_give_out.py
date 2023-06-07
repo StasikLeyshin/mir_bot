@@ -4,6 +4,8 @@ from datetime import datetime
 from api.api_execute import inf
 from record_achievements import record_achievements
 
+from mongodb import user_profile
+
 class warn_give_out:
 
     def __init__(self, v):
@@ -121,3 +123,38 @@ class warn_give_out:
 
 
     def ban_out(self): pass
+
+
+class warn_on:
+
+    def __init__(self, v):
+        self.v = v
+
+    async def display_time(self, seconds, granularity=2):
+        intervals = (
+            ('weeks', 604800),  # 60 * 60 * 24 * 7
+            ('days', 86400),  # 60 * 60 * 24
+            ('hours', 3600),  # 60 * 60
+            ('minutes', 60),
+            ('seconds', 1),
+        )
+        result = []
+
+        for name, count in intervals:
+            value = seconds // count
+            if value:
+                seconds -= value * count
+                if value == 1:
+                    name = name.rstrip('s')
+                result.append("{} {}".format(value, name))
+        return ', '.join(result[:granularity])
+
+    def add_warn(self, user_id, peer_id, start_time, end_time, admin_id, cause=-1):
+
+        us = user_profile(user_id, peer_id)
+
+        if us.admin:
+            return False, "admin"
+
+        us.add_warn_bs_profile(start_time, end_time, cause, admin_id)
+        return us

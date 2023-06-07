@@ -1,5 +1,6 @@
 
 import re
+import spacy
 
 async def opredel_skreen(g, text):
     if "vk.com/" in str(text):
@@ -26,3 +27,13 @@ async def opredel_skreen(g, text):
 async def chunks(l, n):
     n = max(1, n)
     return (l[i:i+n] for i in range(0, len(l), n))
+
+
+
+async def positive_negative_comment_check(text):
+    trained_nlp = spacy.load("training/model-best")
+    doc = trained_nlp(text)
+    print(doc.cats)
+    if doc.cats["neg"] > doc.cats["pos"] and doc.cats["neg"] > 0.8:
+        return True
+    return False

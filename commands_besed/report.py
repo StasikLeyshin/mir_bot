@@ -22,12 +22,17 @@ class report(commands):
                     result = await self.apis.api_post("messages.getConversationsById", v=self.v,
                                                       peer_ids=str(self.peer_id))
                     name = result["items"][0]['chat_settings']['title']
+                    conversation_message_ids = ""
+                    if self.fwd_messages:
+                        conversation_message_ids = self.fwd_messages[0]["conversation_message_id"]
+                    elif "reply_message" in self.message:
+                        conversation_message_ids = self.message["reply_message"]["conversation_message_id"]
                     await self.apis.api_post("messages.send", v=self.v, peer_id=2000000024,
                                              message=f"🗣 Репорт от данного [id{self.from_id}|пользователя] на [id{user_id}|этого пользователя]\n\n"
                                                      f"👥 Беседа: '{name}'\n\n"
                                                      f"Заварнить?",
                                              random_id=0, keyboard=self.keyboard_warn(
-                            f"{user_id}@{self.date}@{self.conversation_message_id}"),
+                            f"{user_id}@{self.date}@{conversation_message_ids}"),
                                              forward=self.answer_msg_other())
                     await self.create_mongo.add_users_zawarn(user_id, self.date, self.peer_id)
                     await self.apis.api_post("messages.delete", v=self.v, peer_id=self.peer_id,
@@ -50,7 +55,7 @@ class report(commands):
 
 reports = command_besed.Command()
 
-reports.keys = ['/report', '/репорт']
+reports.keys = ['/report45trgttr', '/репорт54t4g54wrtgw']
 reports.description = 'Для тестов'
 reports.process = report
 reports.topics_blocks = []

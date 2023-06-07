@@ -15,7 +15,7 @@ class outgoing(commands):
 
 outgoings = command_besed.Command()
 
-outgoings.keys = ['chat_kick_user']
+outgoings.keys = ['chat_kick_user_rttrggrgrg']
 outgoings.description = 'Исключение или выход пользователя'
 outgoings.process = outgoing
 outgoings.topics_blocks = []

@@ -7,8 +7,8 @@
 import pymysql
 from pymysql.cursors import DictCursor
 
-from flask import Flask
-app = Flask(__name__)
+# from flask import Flask
+# app = Flask(__name__)
 
 
 
@@ -60,23 +60,23 @@ def pol_js(u1, u2=0, u3=0, u4=0, f=0):
 
 
 
-@app.route("/api/<u>", methods=['GET'])
-def index(u):
-	spis = u.split("&")
-	h = 0
-	if len(spis) == 4:
-		bal = str(int(spis[3])-10)
-		h = pol_js(spis[0], spis[1], spis[2], bal)
-	elif len(spis) == 3:
-		bal = str(int(spis[2])-10)
-		h = pol_js(spis[0], spis[1], bal)
-	elif len(spis) == 2:
-		bal = str(int(spis[1])-10)
-		h = pol_js(spis[0], bal)
-	if h != 0 and h != {}:
-		return h
-	else:
-		return "-1"
+# @app.route("/api/<u>", methods=['GET'])
+# def index(u):
+# 	spis = u.split("&")
+# 	h = 0
+# 	if len(spis) == 4:
+# 		bal = str(int(spis[3])-10)
+# 		h = pol_js(spis[0], spis[1], spis[2], bal)
+# 	elif len(spis) == 3:
+# 		bal = str(int(spis[2])-10)
+# 		h = pol_js(spis[0], spis[1], bal)
+# 	elif len(spis) == 2:
+# 		bal = str(int(spis[1])-10)
+# 		h = pol_js(spis[0], bal)
+# 	if h != 0 and h != {}:
+# 		return h
+# 	else:
+# 		return "-1"
 
 #if __name__ == "__main__":
 	#app.run(host='0.0.0.0')

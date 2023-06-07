@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import aiohttp
+import aiofiles
 import asyncio
 import json
 import ujson
@@ -137,6 +138,14 @@ class api_url:
         elif check["code"] == 0:
             return check
 
+    async def download_img(self, name):
+        async with aiohttp.ClientSession() as session:
+            #url = "http://host/file.img"
+            async with session.get(self.url) as resp:
+                if resp.status == 200:
+                    f = await aiofiles.open(f'{name}', mode='wb')
+                    await f.write(await resp.read())
+                    await f.close()
 
 
 
