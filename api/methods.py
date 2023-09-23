@@ -26,47 +26,48 @@ class methods:
         return -1
 
     async def users_chek(self, peer_id, apis):
-        response = await apis.api_get("messages.getConversationMembers", peer_id=peer_id, v=self.v)
-        if "error" not in response:
-            users = []
-            users_vse = []
-            users_adm = []
-            for element in response["items"]:
-                if element.get("is_admin"):
-                    users.append({"user_id": element["member_id"], "admin": True})
-                    # users[element["member_id"]] = {"admin": True}
-                    users_adm.append(element["member_id"])
-                    # users.append({"user_id": element["member_id"], "admin": True})
-                    users_vse.append(element["member_id"])
-                else:
-                    users.append({"user_id": element["member_id"], "admin": False})
-                    # users[element["member_id"]] = {"admin": False}
-                    # users.append({"user_id": element["member_id"], "admin": False})
-                    users_vse.append(element["member_id"])
-            return users, users_vse, users_adm
-            # users = {}
-            # users_vse = []
-            # users_adm = []
-            # for element in response["items"]:
-            #     if "is_admin" in element:
-            #         if element["is_admin"] is True:
-            #             users[element["member_id"]] = {"admin": True}
-            #             users_adm.append(element["member_id"])
-            #             #users.append({"user_id": element["member_id"], "admin": True})
-            #             users_vse.append(element["member_id"])
-            #     else:
-            #         users[element["member_id"]] = {"admin": False}
-            #         #users.append({"user_id": element["member_id"], "admin": False})
-            #         users_vse.append(element["member_id"])
-            #
-            # return users, users_vse, users_adm
-        return False
+        if int(peer_id) > 0:
+            response = await apis.api_get("messages.getConversationMembers", peer_id=peer_id, v=self.v)
+            if "error" not in response:
+                users = []
+                users_vse = []
+                users_adm = []
+                for element in response["items"]:
+                    if element.get("is_admin"):
+                        users.append({"user_id": element["member_id"], "admin": True})
+                        # users[element["member_id"]] = {"admin": True}
+                        users_adm.append(element["member_id"])
+                        # users.append({"user_id": element["member_id"], "admin": True})
+                        users_vse.append(element["member_id"])
+                    else:
+                        users.append({"user_id": element["member_id"], "admin": False})
+                        # users[element["member_id"]] = {"admin": False}
+                        # users.append({"user_id": element["member_id"], "admin": False})
+                        users_vse.append(element["member_id"])
+                return users, users_vse, users_adm
+                # users = {}
+                # users_vse = []
+                # users_adm = []
+                # for element in response["items"]:
+                #     if "is_admin" in element:
+                #         if element["is_admin"] is True:
+                #             users[element["member_id"]] = {"admin": True}
+                #             users_adm.append(element["member_id"])
+                #             #users.append({"user_id": element["member_id"], "admin": True})
+                #             users_vse.append(element["member_id"])
+                #     else:
+                #         users[element["member_id"]] = {"admin": False}
+                #         #users.append({"user_id": element["member_id"], "admin": False})
+                #         users_vse.append(element["member_id"])
+                #
+                # return users, users_vse, users_adm
+            return False
 
 
 
 class messages_edit:
 
-    def __init__(self, v, club_id, apis, peer_id, text):
+    def __init__(self, v, club_id, apis, peer_id, text, conversation_message_id=0):
 
         self.v = v
         self.club_id = club_id
@@ -74,17 +75,28 @@ class messages_edit:
         self.text = text
         self.peer_id = peer_id
         self.masg = 0
+        self.conversation_message_id = conversation_message_id
 
-
+    def answer_msg(self):
+        msg = {
+            "conversation_message_ids": [self.conversation_message_id],
+            "peer_id": self.peer_id,
+            "is_reply": True
+        }
+        msg = json.dumps(msg, ensure_ascii=False).encode('utf-8')
+        msg = str(msg.decode('utf-8'))
+        return msg
     async def start_send(self):
 
-        self.msg = await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id, message=self.text, random_id=0)
+        self.msg = await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id, message=self.text,
+                                            random_id=0, forward=self.answer_msg())
 
         return
 
     async def finish(self, new_text):
 
-        await self.apis.api_post("messages.edit", v=self.v, peer_id=self.peer_id, message=new_text, random_id=0, message_id=self.msg)
+        await self.apis.api_post("messages.edit", v=self.v, peer_id=self.peer_id, message=new_text, random_id=0,
+                                 message_id=self.msg, keep_forward_messages=1)
         return
 
     async def del_sms(self):

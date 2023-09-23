@@ -17,10 +17,12 @@ import re
 
 from Telegram.bot_setting import bot
 from Telegram.user import users
+from middlewares import SimpleHandler
 from sql import pol_js
-from generating_questions import questions, questions_col, loop_new, create_mongo
+from generating_questions import questions, questions_col, loop_new, create_mongo, global_dict
 from api import api_url
 from edite_text import URL_REGEX
+#from settings import *
 
 # from aiogram import Bot, types
 # from aiogram.dispatcher import Dispatcher
@@ -200,6 +202,17 @@ def snils_check(from_id, txt="0", snils="0", flag=0):
 
 def set_create_mongo(create_mongo_new):
     create_mongo["create_mongo"] = create_mongo_new
+
+def set_global_dict(mongo_manager, settings_info, loop, collection_bots, document_tokens, url_dj, client, tree_questions):
+    global_dict["mongo_manager"] = mongo_manager
+    global_dict["settings_info"] = settings_info
+    global_dict["loop"] = loop
+    global_dict["collection_bots"] = collection_bots
+    global_dict["document_tokens"] = document_tokens
+    global_dict["url_dj"] = url_dj
+    global_dict["client"] = client
+    global_dict["tree_questions"] = tree_questions
+
 
 def gen_menu(f):
     markup = InlineKeyboardMarkup()
@@ -567,10 +580,48 @@ def message_handler(message):
 # def message_handler(message):
 #     bot.send_message(message.chat.id, f"{message.chat.id}") #-1001290867279
 
+
+
+@bot.callback_query_handler(func=lambda call: True)
+def callback_query_new(call):
+    #print(call.message.chat)
+    if call.message.chat.type == "private":
+        message_dict = {
+            "peer_id": call.from_user.id,
+            "from_id": call.from_user.id,
+            "message": call.message,
+            "date": call.message.date,
+            "text": call.data,
+            # "conversation_message_id": 0,
+            "id": call.message.message_id,
+            # "fwd_messages": [],
+        }
+        #print(message_dict)
+        global_dict["loop"].create_task(
+            SimpleHandler("105", 1768876438, message_dict, bot,
+                          "tema1",
+                          create_mongo["create_mongo"], global_dict["collection_bots"],
+                          global_dict["document_tokens"], global_dict["url_dj"],
+                          global_dict["loop"], global_dict["client"],
+                          mongo_manager=global_dict["mongo_manager"],
+                          settings_info=global_dict["settings_info"],
+                          tree_questions=global_dict["tree_questions"],
+                          is_telegram=True).middleware_ls())
+
+
+
 @bot.message_handler()
 def message_handler_empty(message):
     #print(message)
-    if message.text.lower() == "привязать":
+    if int(message.from_user.id) == 447019454:pass
+        #print(message)
+
+        #print(bot.get_chat_member(message.chat.id))
+        #print(bot.get_chat_member())
+        # print(bot.get_chat_administrators(message.chat.id))
+        # for i in bot.get_chat_administrators(message.chat.id):
+        #     print(i)
+    if message.text.lower() == "/привязать" and int(message.from_user.id) == 447019454:
         print(message.chat.id, message.chat.title)
         # post = await api_url(f"http://45.155.207.247/api/").post_json(club_id=message.chat.title,
         #                                                               Conver=message.chat.id, create_bs=2)
@@ -589,12 +640,79 @@ def message_handler_empty(message):
         else:
             bot.send_message(message.chat.id, "✅ Беседа успешно привязана")
 
-    if message.text.lower() == "/start":
-        text = '<div>На какие мероприятия от РТУ МИРЭА сходить в ближайшую неделю.</div><div><br></div><div>Регистрация на все мероприятия доступна в личном кабинете школьника на сайте приёмной комиссии https://vk.cc/cds2zi.</div><div><br></div><div>Дни открытых дверей</div><div><br></div><div>25 марта, суббота, 11:00 — День открытых дверей всех образовательных программ, онлайн. Регистрация https://vk.cc/cluy5V</div><div><br></div><div>26 марта, воскресенье, 11:00 — День открытых дверей Колледжа программирования и кибербезопасности, проспект Вернадского, 78. Регистрация https://vk.cc/cluyjc</div><div><br></div><div>2 апреля, воскресенье — День открытых дверей всех образовательных программ, проспект Вернадского, 78.&nbsp;</div><div><br></div><div>Регистрация 11:00 https://vk.cc/cluyrZ</div><div><br></div><div>Регистрация 13:00 https://vk.cc/cluyy7</div><div><br></div><div>(Программы для Дня открытых дверей с началом в 11:00 и с началом в 13:00 идентичны).</div><div><br></div><div>Важное&nbsp;</div><div><br></div><div>Московский конкурс межпредметных навыков и знаний «Интеллектуальный мегаполис. Потенциал». Участвовать https://vk.cc/cluwtq</div><div><br></div><div>Другие олимпиады и конкурсы, которые могут помочь в поступлении https://vk.cc/cjmsgx</div><div><br></div><div>Онлайн отборочный тур «Кибербиатлон-2023». Участвовать https://vk.cc/clZ5pP</div><div><br></div><div>29 марта, среда, 13:00-18:00 — День абитуриента Роскосмоса. Адрес:пр-т Мира, 119, ВДНХ, павильон №34</div><div><br></div><div>Лучшие мероприятия</div><div><br></div><div>Меганаправление «Информационные технологии и анализ данных»</div><div><br></div><div>23 марта, четверг, 17:00 — очная экскурсия в локацию Института информационных технологий. Адрес: проспект Вернадского, 78. Регистрация https://vk.cc/cm9GBg</div><div><br></div><div>28 марта, вторник, 16:20 — онлайн лекция «Цифровая трансформация процессов и организаций». Регистрация https://vk.cc/cmmzR7</div><div><br></div><div>Все мероприятия меганаправления https://vk.cc/cjmskK</div><div><br></div><div>Меганаправление «Химия и биотехнологиях»</div><div><br></div><div>23 марта, четверг, 17:00 — онлайн встреча «100 вопросов представителю Института тонких химических технологий им. М.В. Ломоносова». Регистрация https://vk.cc/clZ6a9</div><div>27 марта, понедельник, 16:00 — один день с Институтом перспективных технологий и индустриального программирования. Знакомство с направлением подготовки «Материаловедение и технологии материалов». Адрес: улица Стромынка, 20. Регистрация https://vk.cc/cmmA7t</div><div><br></div><div>Все мероприятия меганаправления https://vk.cc/cjmsoh</div><div><br></div><div>Меганаправление «Радиоэлектроника»</div><div><br></div><div>23 марта, четверг, 16:30 — онлайн лекция «Структура и принцип работы радиолокатора». Регистрация https://vk.cc/cm9GZw</div><div><br></div><div>24 марта, пятница, 16:30 — очная экскурсия по учебно-научным лабораториям кафедры радиоволновых процессов и технологий. Адрес: проспект Вернадского, 78. Регистрация https://vk.cc/cmmAA5</div><div><br></div><div>Все мероприятия меганаправления https://vk.cc/ciAL8K</div><div><br></div><div>Меганаправление «Робототехника и автоматизация производств»</div><div><br></div><div>23 марта, четверг, 16:30 — очный мастер-класс «Сквозной монтаж компонентов на печатные платы». Адрес: проспект Вернадского, 78. Регистрация https://vk.cc/clZ7xb</div><div><br></div><div>Все мероприятия меганаправления https://vk.cc/ciALTZ</div><div><br></div><div>Меганаправление «Экономика и управление»</div><div><br></div><div>21 марта, вторник, 16:30 — онлайн встреча с представителем направления Управление персоналом. Регистрация https://vk.cc/cm9HjI</div><div><br></div><div>27 марта, понедельник, 18:00 — онлайн мастер-класс «Урок финансовой грамотности: триггеры маркетинга или как управляют покупателями». Регистрация https://vk.cc/cmmAVy</div><div><br></div><div>Все мероприятия меганаправления https://vk.cc/ciAMcy</div><div><br></div><div>Меганаправление «Юриспруденция»</div><div><br></div><div>22 марта, среда, 16:00 — очная лекция «Проблемы защиты государства от промышленного шпионажа». Адрес: улица Стромынка, 20. Регистрация https://vk.cc/cm9HRo</div><div><br></div><div>27 марта, понедельник, 16:00 — очная экскурсия на кафедру Правовое обеспечение национальной безопасности. Адрес: улица Стромынка, 20. Регистрация https://vk.cc/cmmB4E</div><div><br></div><div>Все мероприятия меганаправления https://vk.cc/cjmsLe</div><div><br></div><div>Меганаправление «Дизайн»</div><div><br></div><div>23 марта, четверг, 16:30 — очный мастер-класс «Изготовление небольшого керамического изделия». Адрес: улица Стромынка, 20. Регистрация https://vk.cc/cm9I6v</div><div><br></div><div>27 марта, понедельник, 17:10 — очная экскурсия по лабораториям кафедры компьютерного дизайна. Адрес: 5-я улица Соколиной Горы, 22. Регистрация https://vk.cc/cmmBkt</div><div><br></div><div>Все мероприятия меганаправления https://vk.cc/cm9HZ3</div>'
-        text = text.replace("<div>", "").replace("</div>", "").replace("<br>", "\n\n").replace("&nbsp;", "")
-        #bot.send_message(message.chat.id, '[inline URL](http://www.example.com/)', parse_mode='Markdown')
-        bot.send_message(message.chat.id, text,
-                         parse_mode='HTML')
+
+    if message.chat.type == "supergroup":
+
+        message_dict = {
+            "peer_id": message.chat.id,
+            "from_id": message.from_user.id,
+            "message": message,
+            "date": message.date,
+            "text": message.text,
+            # "conversation_message_id": 0,
+            "id": message.message_id,
+            # "fwd_messages": [],
+        }
+        #print("TEST")
+        #print(bot.resol)
+        #print(message.entities[0])
+        #print(bot.get_chat_administrators(message.chat.id)[0])
+
+        global_dict["loop"].create_task(
+            SimpleHandler("105", 1768876438, message_dict, bot,
+                          "tema1",
+                          create_mongo["create_mongo"], global_dict["collection_bots"],
+                          global_dict["document_tokens"], global_dict["url_dj"],
+                          global_dict["loop"], global_dict["client"],
+                          mongo_manager=global_dict["mongo_manager"],
+                          settings_info=global_dict["settings_info"], is_telegram=True).middleware_ls(True))
+
+    if message.chat.type == "private":
+        # if message.text.lower() == "/start" and int(message.from_user.id) == 447019454:
+        #     bot.send_message(message.chat.id, "Привет, я — бот приёмной комиссии."
+        #                                       "Я попробую ответить на ваши вопросы."
+        #                                       "Если что-то пойдёт не так, переведу на сотрудника."
+        #                                       "Если вы хотите сразу поговорить с сотрудником напишите слово «оператор»."
+        #                                       "Укажите, о чём вы хотели бы узнать (цифрой).",
+        #                              reply_markup=gen_menu_new(True))
+
+            # ter = bot.send_message(message.chat.id, "Test")
+            # print(ter)
+            message_dict = {
+                "peer_id": message.chat.id,
+                "from_id": message.from_user.id,
+                "message": message,
+                "date": message.date,
+                "text": message.text,
+                # "conversation_message_id": 0,
+                "id": message.message_id,
+                # "fwd_messages": [],
+            }
+            #print("TEST")
+            #print(bot.resol)
+            #print(message.entities[0])
+            #print(bot.get_chat_administrators(message.chat.id)[0])
+
+            global_dict["loop"].create_task(
+                SimpleHandler("105", 1768876438, message_dict, bot,
+                              "tema1",
+                              create_mongo["create_mongo"], global_dict["collection_bots"],
+                              global_dict["document_tokens"], global_dict["url_dj"],
+                              global_dict["loop"], global_dict["client"],
+                              mongo_manager=global_dict["mongo_manager"],
+                              settings_info=global_dict["settings_info"],
+                              tree_questions=global_dict["tree_questions"],
+                              is_telegram=True).middleware_ls())
+
+
+
+
+    # if message.text.lower() == "/start":
+    #     text = '<div>На какие мероприятия от РТУ МИРЭА сходить в ближайшую неделю.</div><div><br></div><div>Регистрация на все мероприятия доступна в личном кабинете школьника на сайте приёмной комиссии https://vk.cc/cds2zi.</div><div><br></div><div>Дни открытых дверей</div><div><br></div><div>25 марта, суббота, 11:00 — День открытых дверей всех образовательных программ, онлайн. Регистрация https://vk.cc/cluy5V</div><div><br></div><div>26 марта, воскресенье, 11:00 — День открытых дверей Колледжа программирования и кибербезопасности, проспект Вернадского, 78. Регистрация https://vk.cc/cluyjc</div><div><br></div><div>2 апреля, воскресенье — День открытых дверей всех образовательных программ, проспект Вернадского, 78.&nbsp;</div><div><br></div><div>Регистрация 11:00 https://vk.cc/cluyrZ</div><div><br></div><div>Регистрация 13:00 https://vk.cc/cluyy7</div><div><br></div><div>(Программы для Дня открытых дверей с началом в 11:00 и с началом в 13:00 идентичны).</div><div><br></div><div>Важное&nbsp;</div><div><br></div><div>Московский конкурс межпредметных навыков и знаний «Интеллектуальный мегаполис. Потенциал». Участвовать https://vk.cc/cluwtq</div><div><br></div><div>Другие олимпиады и конкурсы, которые могут помочь в поступлении https://vk.cc/cjmsgx</div><div><br></div><div>Онлайн отборочный тур «Кибербиатлон-2023». Участвовать https://vk.cc/clZ5pP</div><div><br></div><div>29 марта, среда, 13:00-18:00 — День абитуриента Роскосмоса. Адрес:пр-т Мира, 119, ВДНХ, павильон №34</div><div><br></div><div>Лучшие мероприятия</div><div><br></div><div>Меганаправление «Информационные технологии и анализ данных»</div><div><br></div><div>23 марта, четверг, 17:00 — очная экскурсия в локацию Института информационных технологий. Адрес: проспект Вернадского, 78. Регистрация https://vk.cc/cm9GBg</div><div><br></div><div>28 марта, вторник, 16:20 — онлайн лекция «Цифровая трансформация процессов и организаций». Регистрация https://vk.cc/cmmzR7</div><div><br></div><div>Все мероприятия меганаправления https://vk.cc/cjmskK</div><div><br></div><div>Меганаправление «Химия и биотехнологиях»</div><div><br></div><div>23 марта, четверг, 17:00 — онлайн встреча «100 вопросов представителю Института тонких химических технологий им. М.В. Ломоносова». Регистрация https://vk.cc/clZ6a9</div><div>27 марта, понедельник, 16:00 — один день с Институтом перспективных технологий и индустриального программирования. Знакомство с направлением подготовки «Материаловедение и технологии материалов». Адрес: улица Стромынка, 20. Регистрация https://vk.cc/cmmA7t</div><div><br></div><div>Все мероприятия меганаправления https://vk.cc/cjmsoh</div><div><br></div><div>Меганаправление «Радиоэлектроника»</div><div><br></div><div>23 марта, четверг, 16:30 — онлайн лекция «Структура и принцип работы радиолокатора». Регистрация https://vk.cc/cm9GZw</div><div><br></div><div>24 марта, пятница, 16:30 — очная экскурсия по учебно-научным лабораториям кафедры радиоволновых процессов и технологий. Адрес: проспект Вернадского, 78. Регистрация https://vk.cc/cmmAA5</div><div><br></div><div>Все мероприятия меганаправления https://vk.cc/ciAL8K</div><div><br></div><div>Меганаправление «Робототехника и автоматизация производств»</div><div><br></div><div>23 марта, четверг, 16:30 — очный мастер-класс «Сквозной монтаж компонентов на печатные платы». Адрес: проспект Вернадского, 78. Регистрация https://vk.cc/clZ7xb</div><div><br></div><div>Все мероприятия меганаправления https://vk.cc/ciALTZ</div><div><br></div><div>Меганаправление «Экономика и управление»</div><div><br></div><div>21 марта, вторник, 16:30 — онлайн встреча с представителем направления Управление персоналом. Регистрация https://vk.cc/cm9HjI</div><div><br></div><div>27 марта, понедельник, 18:00 — онлайн мастер-класс «Урок финансовой грамотности: триггеры маркетинга или как управляют покупателями». Регистрация https://vk.cc/cmmAVy</div><div><br></div><div>Все мероприятия меганаправления https://vk.cc/ciAMcy</div><div><br></div><div>Меганаправление «Юриспруденция»</div><div><br></div><div>22 марта, среда, 16:00 — очная лекция «Проблемы защиты государства от промышленного шпионажа». Адрес: улица Стромынка, 20. Регистрация https://vk.cc/cm9HRo</div><div><br></div><div>27 марта, понедельник, 16:00 — очная экскурсия на кафедру Правовое обеспечение национальной безопасности. Адрес: улица Стромынка, 20. Регистрация https://vk.cc/cmmB4E</div><div><br></div><div>Все мероприятия меганаправления https://vk.cc/cjmsLe</div><div><br></div><div>Меганаправление «Дизайн»</div><div><br></div><div>23 марта, четверг, 16:30 — очный мастер-класс «Изготовление небольшого керамического изделия». Адрес: улица Стромынка, 20. Регистрация https://vk.cc/cm9I6v</div><div><br></div><div>27 марта, понедельник, 17:10 — очная экскурсия по лабораториям кафедры компьютерного дизайна. Адрес: 5-я улица Соколиной Горы, 22. Регистрация https://vk.cc/cmmBkt</div><div><br></div><div>Все мероприятия меганаправления https://vk.cc/cm9HZ3</div>'
+    #     text = text.replace("<div>", "").replace("</div>", "").replace("<br>", "\n\n").replace("&nbsp;", "")
+    #     #bot.send_message(message.chat.id, '[inline URL](http://www.example.com/)', parse_mode='Markdown')
+    #     bot.send_message(message.chat.id, text,
+    #                      parse_mode='HTML')
     # if message.from_user.id != 777000 and message.from_user.id != 57923444 and message.from_user.id != 447019454\
     #         and message.from_user.id != 1087968824:
     #     if message.chat.type != "private":
@@ -762,10 +880,13 @@ def message_handler_empty(message):
                 #                               reply_markup=gen_choice(check[2], pol_sql["quantity"]))
 
 
-def test1(create_mongo_new):
+def test1(create_mongo_new, mongo_manager, settings_info, loop, collection_bots, document_tokens, url_dj, client,
+          tree_questions):
     #generating_q("FAQ_T")
     #generating_col("FAQ_T_col")
     set_create_mongo(create_mongo_new)
+    set_global_dict(mongo_manager, settings_info, loop, collection_bots, document_tokens, url_dj, client,
+                    tree_questions)
     bot.polling(none_stop=True)
 
 # @dp.message_handler(commands=['start'])

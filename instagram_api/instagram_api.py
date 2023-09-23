@@ -2,8 +2,7 @@ from instagrapi import Client
 import requests
 import pprint
 
-ACCOUNT_USERNAME = "vladtit81@gmail.com"
-ACCOUNT_PASSWORD = "035184951sS"
+
 
 
 

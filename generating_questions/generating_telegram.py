@@ -10,6 +10,8 @@ loop_new = asyncio.get_event_loop()
 
 create_mongo = {"create_mongo": 0}
 
+global_dict = {}
+
 
 
 

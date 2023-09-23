@@ -44,6 +44,14 @@ class Start(WorkUser):
             users_new.append(User_conversation(user_id=i['user_id'],
                                                start_time=self.current_time,
                                                admin=i['admin']).class_dict)
+            await self.get_user(user_id=i['user_id'])
+            user_info = self.users_info[i['user_id']].user
+            if user_info.tribe == "NoName":
+                user_info.tribe = await self.get_tribe()
+                user_info.update = True
+                await self.update_all_user_new()
+
+
         await self.manager_db.user_insert_update_all(users_new, users_all, user_admins, str(peer_id))
 
         await self.get_peer_ids(peer_id)
@@ -56,6 +64,14 @@ class Start(WorkUser):
     async def get_all_peer_ids(self):
         result = await self.manager_db.peer_ids_get_all(self.peer_ids)
         return result
+
+
+if __name__ == "__main__11":
+    tribes = {"name": 0, "name2": 0, "name3": 0, "name4": 0}
+    #key = min(tribes, key=lambda k: tribes[k])
+    minval = min(tribes.values())
+    res = [k for k, v in tribes.items() if v == minval]
+    print(res)
 
 
 if __name__ == "__main__":
@@ -93,7 +109,7 @@ if __name__ == "__main__":
     print(res)
 
     #test2 = loop.run_until_complete(wok.test(user_id=123456, peer_id=2000001, from_id_check=True))
-    test2 = loop.run_until_complete(con.run(peer_id=2000001, users=res[0], users_all=users_all))
+    test2 = loop.run_until_complete(con.run(peer_id=2000001, users=res[0], users_all=users_all, user_admins=res[2]))
     # test2 = loop.run_until_complete(wok.add_warn_user(user_info=123456, cause="Спам"))
     # pprint(test2)
     print(test2)

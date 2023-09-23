@@ -11,7 +11,7 @@ class endless_questions(commands):
         res = await self.create_mongo.get_users_ls_status_questions(self.from_id)
         if not res:
             await self.create_mongo.add_users_ls_status_questions(self.from_id, 11)
-        #else:
+
         if self.text.lower() == "помощь по приёму":
             await self.create_mongo.add_users_ls_status_questions(self.from_id, 11)
             text_new = self.tree_questions.search(level=11)
@@ -48,6 +48,7 @@ class endless_questions(commands):
         msg = text_new[1].replace("Если вы хотите вернуться на предыдущий шаг, отправьте цифру 1.", "")
         msg = msg.replace("(укажите цифрой)", "")
         msg = msg.replace("(цифрой)", "")
+        msg = msg.replace("Если вы хотите вернуться на предыдущий шаг отправьте цифру 1.", "")
         await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
                                  message=msg,
                                  random_id=0,

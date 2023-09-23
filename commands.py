@@ -32,8 +32,8 @@ class commands:
         self.message_id = self.message["id"]
         self.fwd_messages = self.message["fwd_messages"]
         self.attachments = self.message["attachments"]
-        self.methods = methods(self.v, self.club_id)
         self.apis = apis
+        self.methods = methods(self.v, self.club_id)
         self.them = them
         self.create_mongo = create_mongo
         self.collection_bots = collection_bots
@@ -732,7 +732,13 @@ class commands:
                 return False
         elif len(self.text.lower().split(' ')) > 1:
             if "vk.com/" in self.text.lower():
-                t = await self.opredel_skreen(self.text.lower().split(' ')[1], self.text.lower())
+                text_list = self.text.lower().split(' ')
+                for i in text_list:
+                    if "vk.com/" in i:
+                        t = await self.opredel_skreen(i, self.text.lower())
+                        if not t:
+                            break
+                #t = await self.opredel_skreen(self.text.lower().split(' ')[1], self.text.lower())
                 # test = await vk.api.utils.resolve_screen_name(screen_name=t)
                 test = await self.apis.api_post("utils.resolveScreenName", v=self.v, screen_name=t)
                 if test["type"] == "group":
@@ -762,11 +768,11 @@ class commands:
         return False
 
 
-    async def getting_number(self):
+    async def getting_number(self, limit=20):
         try:
-            s = [int(s) for s in re.findall(r'-?\d+\.?\d*', self.text.lower())]
+            s = [int(s) for s in re.findall(r'(?<!\w)\d+(?!\w)', self.text.lower())]
             for i in s:
-                if i < 20:
+                if i < limit:
                     return i
             return 1
         except:

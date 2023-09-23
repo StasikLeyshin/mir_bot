@@ -4,6 +4,7 @@ from Tree.message_analysis.message_analysis import MessageAnalysisProcessing
 from command_ls import command_ls_dictionary, command_ls_list
 from commands_ls import issuing_directions, choice_conversation, response_text_admin
 from command_besed import command_bs_dictionary, command_list
+from commands_tg import CommandsTg
 from message_handling import processing, processing_new
 
 from Tree import Node
@@ -13,7 +14,8 @@ from summer_module.work_ls.work_ls import WorkLs
 class SimpleHandler:
 
     def __init__(self, v, club_id, message, apis, them, create_mongo, collection_bots, document_tokens,
-                            url_dj, loop, client=None, tree_questions=None, mongo_manager=None, settings_info=None):
+                            url_dj, loop, client=None, tree_questions=None, mongo_manager=None, settings_info=None,
+                 is_telegram=False):
         self.v = v
         self.club_id = club_id
         self.message = message
@@ -29,6 +31,7 @@ class SimpleHandler:
         self.tree_questions = tree_questions
         self.mongo_manager = mongo_manager
         self.settings_info = settings_info
+        self.is_telegram = is_telegram
         #print("SIMPLE HANDLER", self.tree_questions)
         #print(command_ls_dictionary)
         #self.root = self.tree_distribution_root()
@@ -81,6 +84,8 @@ class SimpleHandler:
                     if res == 1:
                         continue
                     if res == 0:
+                        continue
+                    if self.is_telegram and not issubclass(res.process, CommandsTg):
                         continue
                     if flag_regular:
                         return res, result[0]
@@ -164,11 +169,21 @@ class SimpleHandler:
             return cmd
 
     async def tree_analysis(self, command_list):
-        work_ls = WorkLs(manager_db=self.mongo_manager, settings_info=self.settings_info, user_id=self.from_id)
+        if self.is_telegram:
+            #print("Третий user_id: ", int(str(self.from_id) + str(self.message["message"].message_id)))
+            work_ls = WorkLs(manager_db=self.mongo_manager, settings_info=self.settings_info,
+                             user_id=int(str(self.from_id) + str(self.message["message"]["message_id"])))
+        else:
+            work_ls = WorkLs(manager_db=self.mongo_manager, settings_info=self.settings_info, user_id=self.from_id)
         res = await work_ls.location_tree_check()
+        #print(res.ignore_tree)
         if res.ignore_tree:
+            #print("DA")
             for c in command_list:
                 if c.name == res.location_tree:
+                    if self.is_telegram and not issubclass(c.process, CommandsTg):
+                        print(c.name)
+                        continue
                     return c
         return 1
 
@@ -176,7 +191,12 @@ class SimpleHandler:
         #print(cmd.name, command_ls_dictionary)
         if cmd.name in command_ls_dictionary:
             #res = await self.create_mongo.get_users_ls_status(self.from_id)
-            work_ls = WorkLs(manager_db=self.mongo_manager, settings_info=self.settings_info, user_id=self.from_id)
+            if self.is_telegram:
+                #print(self.message)
+                work_ls = WorkLs(manager_db=self.mongo_manager, settings_info=self.settings_info,
+                                 user_id=int(str(self.from_id) + str(self.message["message"]["message_id"])))
+            else:
+                work_ls = WorkLs(manager_db=self.mongo_manager, settings_info=self.settings_info, user_id=self.from_id)
             res = await work_ls.location_tree_check()
             #print("res ", res, command_ls_dictionary[cmd.name][1].root.name)
             #if res:
@@ -216,11 +236,17 @@ class SimpleHandler:
             #     return cmd
 
         else:
-            work_ls = WorkLs(manager_db=self.mongo_manager, settings_info=self.settings_info, user_id=self.from_id)
+            if self.is_telegram:
+                work_ls = WorkLs(manager_db=self.mongo_manager, settings_info=self.settings_info,
+                                 user_id=int(str(self.from_id) + str(self.message["message"]["message_id"])))
+            else:
+                work_ls = WorkLs(manager_db=self.mongo_manager, settings_info=self.settings_info, user_id=self.from_id)
             res = await work_ls.location_tree_check()
             if res.ignore_tree:
                 for c in command_list:
                     if c.name == res.location_tree:
+                        if self.is_telegram and not issubclass(c.process, CommandsTg):
+                            continue
                         return c
             return cmd
 
@@ -277,14 +303,14 @@ class SimpleHandler:
                                                       settings_info=self.settings_info).run())
                 return
             if self.them == "tema1":
-
-                self.loop.create_task(MessageAnalysisProcessing(self.v, self.club_id, self.message, self.apis, self.them,
-                                                     self.create_mongo,
-                                                     self.collection_bots,
-                                                     self.document_tokens,
-                                                     self.url_dj, client=self.client, tree_questions=self.tree_questions,
-                                                     mongo_manager=self.mongo_manager,
-                                                     settings_info=self.settings_info).run())
+                if not self.is_telegram:
+                    self.loop.create_task(MessageAnalysisProcessing(self.v, self.club_id, self.message, self.apis, self.them,
+                                                         self.create_mongo,
+                                                         self.collection_bots,
+                                                         self.document_tokens,
+                                                         self.url_dj, client=self.client, tree_questions=self.tree_questions,
+                                                         mongo_manager=self.mongo_manager,
+                                                         settings_info=self.settings_info).run())
 
                 # self.loop.create_task(processing_new(self.v, self.club_id, self.message, self.apis, self.them,
                 #                                      self.create_mongo,

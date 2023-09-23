@@ -2,7 +2,7 @@
 from datetime import datetime
 
 from summer_module.convert import num2text
-from summer_module.user_conversation import WorkUser, Unban, TaskUserBot
+from summer_module.user_conversation import WorkUser, Unban, TaskUserBot, SettingTime
 import numpy as np
 
 
@@ -33,7 +33,23 @@ class UnbanLs(WorkUser):
         #                     "current_time": self.current_time
         #                 }
 
-    async def unban_all(self):
+    async def accrue_influence(self, finish_time):
+        setting_time = SettingTime(start_time=self.current_time)
+        setting_time.self_generator(
+            await self.manager_db.user_insert_one(setting_time.class_dict, self.setting_time_documents))
+        flag = False
+        if setting_time.finish_time == 0:
+            setting_time.finish_time = finish_time
+            flag = True
+        elif setting_time.finish_time <= self.current_time:
+            setting_time.finish_time = finish_time
+            setting_time.start_time = self.current_time
+            flag = True
+        await self.manager_db.user_update_one(setting_time.class_dict, self.setting_time_documents)
+        return flag
+
+
+    async def unban_all(self, finish_time):
         peer_ids = await self.manager_db.peer_ids_get_all(self.peer_ids)
         for i in peer_ids:
             #print(i)
@@ -41,6 +57,7 @@ class UnbanLs(WorkUser):
             user_list = []
             for user in unban_list:
                 flag = False
+
                 if user["punishments"]["ban"].get("status"):
                     if self.current_time >= user["punishments"]["ban"]["finish_time"]:
                         user["punishments"]["ban"]["status"] = False
@@ -57,6 +74,17 @@ class UnbanLs(WorkUser):
                 if flag:
                     user_list.append(user)
             await self.manager_db.users_update_ban_warn(user_list, str(i))
+
+        if await self.accrue_influence(finish_time):
+            users_list = await self.manager_db.user_get_all(self.users_documents)
+            for user in users_list:
+                #print(user)
+                if user.get('xp'):
+                    lvl_list = await self.lvl_list(user['xp'])
+                    user['influence'] = lvl_list['limit']['influence']
+            await self.manager_db.users_update_influence(users_list, self.users_documents)
+
+
         msg = "Обновил успешно"
         return_dict = {"message": msg}
         return return_dict
@@ -370,7 +398,7 @@ if __name__ == "__main__":
     #  wok = WorkUser(mongo_manager, settings_info,  55, 100)
 
     #unban = UnbanLs(mongo_manager, settings_info,  123456, 100)
-    unban = UnbanLs(mongo_manager, settings_info, current_time=999999)
+    unban = UnbanLs(mongo_manager, settings_info, current_time=300)
 
     #test2 = loop.run_until_complete(wok.test(user_id=123456, peer_id=2000001, from_id_check=True))
     #test2 = loop.run_until_complete(unban.record_list_peer_ids())
@@ -378,7 +406,7 @@ if __name__ == "__main__":
     # test2 = loop.run_until_complete(unban.run(answer_number=1))
     #test2 = loop.run_until_complete(unban.task_user_bot_unban())
     # test2 = loop.run_until_complete(wok.add_warn_user(user_info=123456, cause="Спам"))
-    test2 = loop.run_until_complete(unban.unban_all())
+    test2 = loop.run_until_complete(unban.unban_all(400))
     # pprint(test2)
     print(test2)
 

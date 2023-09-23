@@ -49,7 +49,7 @@ class reputation_minus(commands):
 
 reputation_minuss = command_besed.Command()
 
-reputation_minuss.keys = ['-реп', '-rep']
+reputation_minuss.keys = ['uyrjthgrf', 'rtytheruyjtiko']
 reputation_minuss.description = 'Минус репутация'
 reputation_minuss.process = reputation_minus
 reputation_minuss.topics_blocks = []

@@ -17,6 +17,7 @@ async def executor_post(request: web.Request):
         if event['type'] == "confirmation":
             return web.Response(text="9d5be991")
         if event['type'] == "message_new":
+            #print(event['object'])
             #LS
             if event['object']["message"]["from_id"] == event['object']["message"]["peer_id"]:
                 #LS
@@ -32,10 +33,92 @@ async def executor_post(request: web.Request):
                 loop.create_task(
                     SimpleHandler(V, event['group_id'], event['object']["message"], apis[event['group_id']],
                                   loop_control[event['group_id']],
-                                  create_mongo, collection_bots, document_tokens, url_dj, loop, client, mongo_manager=mongo_manager, settings_info=settings_info).middleware_ls(True))
+                                  create_mongo, collection_bots, document_tokens, url_dj, loop, client,
+                                  mongo_manager=mongo_manager, settings_info=settings_info).middleware_ls(True))
         return web.Response(text="ok")
+
+    elif "update_id" in event:
+        #print(event)
+        if "callback_query" in event:
+            if event["callback_query"]["message"]["chat"]["type"] == "private":
+                event = event["callback_query"]
+                message_dict = {
+                    "peer_id": event["message"]["chat"]["id"],
+                    "from_id": event["message"]["from"]["id"],
+                    "message": event["message"],
+                    "date": event["message"]["date"],
+                    "text": event["data"],
+                    # "conversation_message_id": 0,
+                    "id": event["message"]["message_id"],
+                    # "fwd_messages": [],
+                }
+
+                loop.create_task(
+                    SimpleHandler("105", from_bot_id_tg, message_dict, apis[int(from_bot_id_tg)],
+                                  "tema1",
+                                  create_mongo, collection_bots,
+                                  document_tokens, url_dj,
+                                  loop, client,
+                                  mongo_manager=mongo_manager,
+                                  settings_info=settings_info,
+                                  tree_questions=tree_questions,
+                                  is_telegram=True).middleware_ls())
+        if "message" in event:
+            if event["message"]["chat"]["type"] == "private":
+                #LS
+                #print(event)
+                message_dict = {
+                    "peer_id": event["message"]["chat"]["id"],
+                    "from_id": event["message"]["from"]["id"],
+                    "message": event["message"],
+                    "date": event["message"]["date"],
+                    "text": event["message"]["text"],
+                    # "conversation_message_id": 0,
+                    "id": event["message"]["message_id"],
+                    # "fwd_messages": [],
+                }
+
+                loop.create_task(
+                    SimpleHandler("105", from_bot_id_tg, message_dict, apis[int(from_bot_id_tg)],
+                                  "tema1",
+                                  create_mongo, collection_bots,
+                                  document_tokens, url_dj,
+                                  loop, client,
+                                  mongo_manager=mongo_manager,
+                                  settings_info=settings_info,
+                                  tree_questions=tree_questions,
+                                  is_telegram=True).middleware_ls())
+
+            elif event["message"]["chat"]["type"] == "supergroup":
+                #BS
+                if event["message"].get("text"):
+                    message_dict = {
+                        "peer_id": event["message"]["chat"]["id"],
+                        "from_id": event["message"]["from"]["id"],
+                        "message": event["message"],
+                        "date": event["message"]["date"],
+                        "text": event["message"]["text"],
+                        # "conversation_message_id": 0,
+                        "id": event["message"]["message_id"],
+                        # "fwd_messages": [],
+                    }
+                    loop.create_task(
+                        SimpleHandler("105", from_bot_id_tg, message_dict, apis[int(from_bot_id_tg)],
+                                      "tema1",
+                                      create_mongo, collection_bots,
+                                      document_tokens, url_dj,
+                                      loop, client,
+                                      mongo_manager=mongo_manager,
+                                      settings_info=settings_info,
+                                      tree_questions=tree_questions,
+                                      is_telegram=True).middleware_ls(True))
+                else:pass
+                    #print(event)
+
+        return web.Response(text="ok")
+
     elif "channelType" in event:
-        print(event)
+        #print(event)
         from_id = event["userId"]
         try:
             number = int(event["queryText"])
@@ -49,8 +132,8 @@ async def executor_post(request: web.Request):
         if not res:
             await create_mongo.add_users_ls_status_questions(from_id, 11)
             res = 11
-        text_new = tree_questions.search(number=number, level=int(res))
-        #print(res, text_new)
+        text_new = tree_questions.search(number=int(number), level=int(res))
+        #print(from_id, res, text_new)
         #keyboard = self.generations_keyboard(text_new[2])
         await create_mongo.add_users_ls_status_questions(from_id, int(text_new[0]))
         # await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
@@ -88,8 +171,8 @@ async def executor_post(request: web.Request):
         #                                        loop_control[event['group_id']],
         #                                        create_mongo,
         #                                        collection_bots, document_tokens, url_dj, loop).middleware_ls())
-        return web.Response(text="ok")
-    if "token" in event and "soc" in event and "id" not in event:
+        #return web.Response(text="ok")
+    elif "token" in event and "soc" in event and "id" not in event:
         result = await api(0, event["token"]).api_get("groups.getById", v=f"{V}")
         if "error" not in result:
             data = {"status": 1, "id": result[0]["id"], "name": result[0]["name"]}

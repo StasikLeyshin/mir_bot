@@ -1,0 +1,535 @@
+
+id: 1
+
+user_id_admins:
+  - 55
+  - -5411326
+
+#settings:
+#  ban:
+#    default_time
+
+
+warn_awards:
+  - count: 1
+    text: С почином, добро пожаловать на контроль
+
+  - count: 3
+    text: На бан уже заработал, будем смотреть
+
+  - count: 5
+    text: Как ты только бан не получил? Или получил? Ну, всякое бывает
+
+  - count: 10
+    text: FBI OPEN UP!
+
+  - count: 20
+    text: Админ, ты в курсе, что есть перманентный бан? Двадцать варнов это уже ту мач
+
+
+warn_admin_awards:
+  - count: 1
+    text: Первый шажок
+    xp: 10
+
+  - count: 3
+    text: Пропасть уже найдена, осталось найти путь
+    xp: 15
+
+  - count: 5
+    text: Как ты только бан не получил? Или получил? Ну, всякое бывает
+    xp: 15
+
+  - count: 10
+    text: FBI OPEN UP!
+    xp: 15
+
+  - count: 20
+    text: Админ, ты в курсе, что есть перманентный бан? Двадцать варнов это уже ту мач
+    xp: 15
+
+
+ban_awards:
+  - count: 1
+    text: Любопытно, стоит ли ждать назад?
+
+  - count: 2
+    text: Посмотрите на это, урок не был усвоен. Не делайте так
+
+  - count: 5
+    text: КТО ИЗ АДМИНОВ ТВОЙ ДРУГ? ПРИЗНАВАЙСЯ!
+
+  - count: 7
+    text: Админ, он неисправим, одумайся
+
+  - count: 10
+    text: Никаких больше вечеринок. Я отказываюсь давать разбан
+
+
+ban_admin_awards:
+  - count: 1
+    text: Посвящённый
+    xp: 33
+
+  - count: 3
+    text: Ачивка 3
+    xp: 15
+
+  - count: 5
+    text: КТО ИЗ АДМИНОВ ТВОЙ ДРУГ? ПРИЗНАВАЙСЯ!
+    xp: 15
+
+  - count: 7
+    text: Админ, он неисправим, одумайся
+    xp: 15
+
+  - count: 10
+    text: Никаких больше вечеринок. Я отказываюсь давать разбан
+    xp: 15
+
+
+sms_awards:
+  - count: 100
+    text: Ууф, сотка сообщений, у нас любитель початиться
+    xp: 2
+
+  - count: 1000
+    text: Ого, тысяча сообщений, еще не флудер года, но всё впереди
+    xp: 6
+
+  - count: 2000
+    text: That's a lot of masseges! How abount a little more? Две тысячи сообщений пройдено!
+    xp: 9
+
+  - count: 5000
+    text: ГЛАВНЫЙ ФЛУДЕР ГОДА НАЙДЕН! ПЯТЬ ТЫСЯЧ СООБЩЕНИЙ ЕСТЬ!
+    xp: 12
+
+  - count: 10000
+    text: ДЕСЯТЬ ТЫСЯЧ СООБЩЕНИЙ!!! ДЕСЯЯЯЯЯТЬ! НАСПАМИЛ НА БЕЗБЕДНУЮ ЖИЗНЬ
+    xp: 15
+
+  - count: 20000
+    text: ТЫ ЧЕГО ДЕЛАЕШЬ, ТЫ ЧТО, БОГАТЫРЬ ЧТО ЛИ, КУДА СТОЛЬКО, КУДА??????
+    xp: 20
+
+  - count: 30000
+    text: ТЫ ЧЕГО ТУТ ДЕЛАЕШЬ? выйди траву потрогай, в зал сходи, жену погладь, сколько можно в чате сидеть.
+    xp: 40
+
+  - count: 50000
+    text: ЭТОТ ЧЕЛОВЕК СПАМЕР. ОФИЦИАЛЬНО!
+    xp: 50
+
+reputation_plus_awards:
+  - count: 1
+    text: А вы, я погляжу, хороший малый
+    xp: 1
+
+  - count: 5
+    text: Добрый чел, позитивный
+    xp: 3
+
+  - count: 10
+    text: Поднял репутацию уже десяти Си-Джеям!
+    xp: 6
+
+  - count: 50
+    text: "Репутация не палка: в руки не возьмёшь, а вы взяли... 50 раз"
+    xp: 9
+
+  - count: 200
+    text: "ТЫ ПОТРЯСАЮЩИЙ 👉🏻👈🏻"
+    xp: 12
+
+reputation_minus_awards:
+  - count: 1
+    text: Токсик обнаружен
+    xp: -0.001
+
+  - count: 2
+    text: Злой чел, негативный
+    xp: -0.01
+
+  - count: 5
+    text: Самый душный в чате
+    xp: -0.02
+
+  - count: 7
+    text: Ну давай, давай, нападай
+    xp: -0.04
+
+  - count: 9
+    text: Я ведь не отстану, каждому токсику по перевоспитанию
+    xp: -0.06
+
+  - count: 10
+    text: Вот это ты конечно натоксичил
+    xp: -0.07
+
+  - count: 13
+    text: Сжёг рейтинг уже тринадцати людям
+    xp: -0.08
+
+  - count: 16
+    text: Токсим токсим токсим каждый день
+    xp: -0.09
+
+  - count: 20
+    text: Партия недовольна вами, минус тарелка рис
+    xp: -0.1
+
+  - count: 30
+    text: ТРИЦАТОЧКА, ТРИ И ЦАТОЧКА, ТОКСИК ВСЕХ ТОКСИКОВ НАЙДЕН
+    xp: -0.11
+
+
+roulette_awards:
+  - count: 1
+    text: "🔫 Угадай куда я шмальну"
+    xp: 0.5
+
+  - count: 3
+    text: "💥 НАТАЛЬЯ МОРСКАЯ ПЕХОТА"
+    xp: 1.666
+
+  - count: 5
+    text: "☀ It's high noon"
+    xp: 2.333
+
+  - count: 7
+    text: "☠ Самый меткий стрелок на фронтире"
+    xp: 6.666
+
+  - count: 10
+    text: "🎲 Любимчик Фортуны"
+    xp: 7.777
+
+  - count: 18
+    text: "❄ Финский снайпер"
+    xp: 11.999
+
+
+warn_awards_smiley: "🏅"
+ban_awards_smiley: "🎖"
+warn_admin_awards_smiley: "🕵‍♀"
+ban_admin_awards_smiley: "🕵‍♂"
+sms_awards_smiley: "🏆"
+reputation_plus_awards_smiley: "😇"
+reputation_minus_awards_smiley: "😈"
+
+
+test:
+  tr:
+
+role_admin:
+  - role: &beginner
+      role: beginner
+
+  - role: &normal
+      role: normal
+
+  - role: &general
+      role: general
+
+command_admin_defaults:
+  - settings: &ban
+      cmd: ban
+      description: "Банит человека"
+
+  - settings: &globan
+      cmd: globan
+      description: "Добавляет человека в глобальный бан"
+
+  - settings: &warn
+      cmd: warn
+      description: "Варнит человека"
+
+  - settings: &del_sms
+      cmd: del_sms
+      description: "Удаляет определённое количество сообщений человека"
+
+  - settings: &history
+      cmd: history
+      description: "Отображает историю банов и варнов человека"
+
+  - settings: &give_achievement
+      cmd: give_achievement
+      description: "Отображает историю банов и варнов человека"
+
+
+
+
+
+  - settings: &role
+      <<: *beginner
+
+
+
+
+command_admin_level:
+  - lvl: 0
+    cmd_list:
+      - <<: *warn
+    role:
+      <<: *role
+    xp: 0
+
+  - lvl: 1
+    cmd_list:
+      - <<: *ban
+    role:
+      <<: *role
+    xp: 10
+
+  - lvl: 2
+    cmd_list:
+
+    xp: 50
+
+
+
+command_defaults:
+  - settings: &profile
+      cmd: profile
+      is_another_user: false
+      description: "Показывает профиль человека"
+
+  - settings: &roulette
+      cmd: roulette
+      description: "Русская рулетка"
+
+  - settings: &reputation_plus
+      cmd: reputation_plus
+      count: 0.25
+      description: "Повышает xp человеку"
+
+  - settings: &reputation_minus
+      cmd: reputation_minus
+      count: 0.25
+      description: "Понижает xp человеку"
+
+  - settings: &chance
+      cmd: chance
+      description: "Позволяет узнать, что происходит за границой реальности"
+
+  - settings: &report
+      cmd: report
+      description: "Позволяет поймать человека с поличным"
+
+  - settings: &my_tribe
+      cmd: my_tribe
+      description: "Показывает рейтинг вашей беседы"
+
+  - settings: &tribe_rating
+      cmd: tribe_rating
+      description: "Показывает рейтинг бесед"
+
+  - settings: &tribe_fight
+      cmd: tribe_fight
+      access_position: [1, 5]
+      description: "Начинает борьбу кланов"
+
+
+  - settings: &multiplier
+      multiplier: 1.1
+
+  - settings: &limit
+      cmd_limit: 15
+      warn_limit: 3
+      ban_default_time: 86400
+      ban_default_xp: -20
+      ban_default_tribe_points: -2
+      ban_default_attempts: 1
+      warn_default_time: 86400
+      warn_default_xp: -10
+      warn_default_tribe_points: -1
+      globan_default_xp: -60
+      influence: 3
+      influence_default_minus: -1
+      sms_limit: 25
+      sms_spam_limit: 10
+      sms_voice: 2
+      sms_video_circle: 1
+      sms_link: 1
+      sms_default_xp: -10
+      sms_default_tribe_points: -1
+      sms_time_interval: 60
+      report_default_tribe_points: 2
+      unban_questions_count: 10
+      unban_answers_count: 7
+      unban_default_seconds: 60
+
+
+role_user:
+  - role: &child
+      role: child
+
+  - role: &verified
+      role: verified
+
+  - role: &near
+      role: near
+
+role_user_limit:
+  verified:
+    sms_limit: -1
+    sms_link: -1
+  near:
+    sms_limit: -1
+    sms_link: -1
+
+
+command_level:
+  - lvl: 0
+    cmd_list:
+      - <<: *profile
+    limit:
+      <<: *limit
+    <<: *multiplier
+    multiplier: 1
+    xp: 0
+
+
+  - lvl: 1
+    cmd_list:
+#      - cmd: profile
+#        is_another_user: false
+      - <<: *roulette
+      - <<: *reputation_plus
+      - <<: *reputation_minus
+      - <<: *report
+      - <<: *my_tribe
+    <<: *multiplier
+    limit:
+      <<: *limit
+    xp: 20
+
+
+  - lvl: 2
+    cmd_list:
+      - <<: *profile
+        is_another_user: true
+    <<: *multiplier
+    multiplier: 1.2
+    limit:
+      <<: *limit
+      influence: 4
+    xp: 330
+
+
+  - lvl: 3
+    cmd_list:
+      - <<: *chance
+      - <<: *tribe_rating
+      - <<: *tribe_fight
+
+    <<: *multiplier
+    multiplier: 1.3
+    limit:
+      <<: *limit
+      influence: 5
+    xp: 350
+
+
+  - lvl: 4
+    cmd_list:
+      - <<: *reputation_plus
+        count: 0.4
+
+      - <<: *reputation_minus
+        count: 0.4
+
+    <<: *multiplier
+    multiplier: 1.4
+    limit:
+      <<: *limit
+      influence: 6
+    xp: 370
+
+
+  - lvl: 5
+    <<: *multiplier
+    multiplier: 1.5
+
+    limit:
+      <<: *limit
+      cmd_limit: 25
+      sms_limit: 35
+      count_warn_limit: 5
+      ban_default_time: 82800
+      warn_default_time: 82800
+      ban_default_xp: -30
+      warn_default_xp: -20
+      influence: 7
+      warn_limit: 4
+    xp: 390
+
+
+  - lvl: 6
+    cmd_list:
+      - <<: *reputation_plus
+        count: 0.6
+
+      - <<: *reputation_minus
+        count: 0.6
+
+    <<: *multiplier
+    multiplier: 1.5
+    limit:
+      <<: *limit
+      influence: 8
+    xp: 410
+
+
+  - lvl: 7
+    <<: *multiplier
+    multiplier: 1.5
+    limit:
+      <<: *limit
+      influence: 9
+    xp: 430
+
+  - lvl: 8
+    <<: *multiplier
+    multiplier: 1.5
+    limit:
+      <<: *limit
+      influence: 10
+    xp: 450
+
+  - lvl: 9
+    <<: *multiplier
+    multiplier: 1.5
+    limit:
+      <<: *limit
+    xp: 470
+
+  - lvl: 10
+    <<: *multiplier
+    multiplier: 1.5
+    limit:
+      <<: *limit
+      ban_default_time: 79200
+      warn_default_time: 79200
+    xp: 490
+
+
+
+
+
+
+
+#command_level:
+#  - 1:
+#    cmd_list: &lvl1
+#      - cmd: profile
+#        is_another_user: false
+#      - cmd: roulette
+#  - 2:
+#    <<: *lvl1
+#  - 2:
+#    cmd_list:
+#      - <<: *lvl1
+
+

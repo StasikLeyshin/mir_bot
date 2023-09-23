@@ -42,7 +42,7 @@ class BanGive(WorkUser):
     @checking_admin
     async def run(self, user_id: int, peer_id: int, time_plus: int = 0, cause: str = '', **kwargs):
         info = await self.manager_db.user_get_one(user_id, f"{peer_id}")
-        if not info:
+        if not info and not self.is_telegram:
             msg = f"⚠ Данного [id{user_id}|пользователя], возможно, нет в беседе." \
                   "❗ Обновите информацию командой /update."
             return_dict = {"message": msg, "action": "kick", "update": False, "kick_id": [user_id], "peer_id": peer_id,
@@ -108,7 +108,7 @@ class BanGive(WorkUser):
             await self.give_achievement(self.user_id, self.users_info[self.user_id].admin.punishments["count_ban"],
                                         achievements, self.users_info[self.user_id].admin.achievements, "ban_admin")
 
-
+            await self.set_user_xp(self.user_id, self.users_info[self.user_id].admin)
 
             ball = lvl_list['limit']['ban_default_xp'] * lvl_list['multiplier']
             # user_info.xp += ball
@@ -155,13 +155,16 @@ class BanGive(WorkUser):
                             f"разбана. " \
                             f"Напишите в мои личные сообщения 'разбан' без кавычек."
 
-            msg = "[id" + str(user_id) + "|{0}]"
+            if self.is_telegram:
+                msg = "{0}"
+            else:
+                msg = "[id" + str(user_id) + "|{0}]"
                 # msg += f", бан на {certain_time}\n📝 Причина: {cause}\n⏰ Время окончания: {end_time_msg}\n\n" \
                 #        f"🎁 У вас есть одна попытка разбана. " \
                 #        f"Напишите в мои личные сообщения 'разбан' без кавычек.{msg_ach}\n\n📊 XP: {user_info.xp}{msg_admin_ach}"
             #else:
             msg += f", бан на {certain_time}{msg_cause}\n⏰ Время окончания: {end_time_msg}{msg_unban}" \
-                   f"{msg_ach}\n\n📊 XP: {user_info.xp}{msg_admin_ach}"
+                   f"{msg_ach}\n\n📊 XP: {round(user_info.xp, 2)}{msg_admin_ach}"
             # user_ids_kick.append(user_info.user_id)
 
             user_info.log["ban"].append(await self.get_log_users(self.user_id, peer_id,

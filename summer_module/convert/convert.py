@@ -1,7 +1,7 @@
 
 
 from datetime import datetime
-
+import datetime as DT
 
 import decimal
 
@@ -183,3 +183,18 @@ async def unix_to_time(time_seconds):
     value = datetime.fromtimestamp(time_seconds)
     time_msg = value.strftime('%d.%m.%Y %H:%M')
     return time_msg
+
+
+async def unix_to_date(time_seconds):
+    value = datetime.fromtimestamp(time_seconds)
+    time_msg = value.strftime('%d.%m.%Y')
+    return time_msg
+
+
+def convert_date_unix(user_date):
+    dt = DT.datetime.strptime(f'{user_date} 00:00:00', '%d.%m.%Y %H:%M:%S')
+    return int(str(dt.timestamp())[:-2])
+
+
+if __name__ == "__main__":
+    print(convert_date_unix("14.06.2023"))

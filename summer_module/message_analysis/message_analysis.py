@@ -64,9 +64,7 @@ class MessageAnalysis(WorkUser):
                                     achievements, user_info.achievements, "sms", multiplier=lvl_list["multiplier"],
                                     admin_id=self.club_id)
 
-        if self.users_info[self.user_id].achievements:
-            for i in self.users_info[self.user_id].achievements:
-                user_info.xp += i["xp"]
+        await self.set_user_xp(self.user_id, self.users_info[self.user_id].user)
 
         adm = await self.is_admin(self.user_id, str(peer_id))
 
@@ -146,6 +144,16 @@ class MessageAnalysis(WorkUser):
             #         return await WarnGive(self.manager_db, self.settings_info, self.club_id, self.current_time,
             #                               self.users_info).run(user_id=self.user_id, peer_id=peer_id, cause=cause,
             #                                                    repeated=True)
+
+        if type_sms != "spam":
+            is_coins = random.choices([1, 0], weights=[lvl_list['limit']['chance'], 100])[0]
+            if is_coins == 1 and user_info.coins == 0:
+                if user_info.coins == 0:
+                    msg += "\n\n🎉 Поздравляю, вам выпала первая монетка!\n\n"
+                else:
+                    msg += "\n\n🎁 Поздравляю, вы получили монетку!\n\n"
+                user_info.coins += lvl_list['limit']['default_coins']
+
         msg_ach = ""
         if self.users_info[self.user_id].achievements:
             msg_ach = "\n\n👻 Полученные ачивки:\n" + \
@@ -195,6 +203,13 @@ class MessageAnalysis(WorkUser):
 
 
 if __name__ == "__main__":
+    from collections import Counter
+    test = Counter(random.choices(['монета', 'нет монеты'], weights=[1, 100])[0]for _ in range(100000))
+    print(test)
+    is_coins = random.choices([1, 0], weights=[99, 100])
+    print(is_coins)
+
+if __name__ == "__main__123":
     from motor import MotorClient
     from mongodb import MongoManager
     import asyncio

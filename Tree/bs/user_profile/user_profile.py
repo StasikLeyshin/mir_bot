@@ -46,6 +46,9 @@ class user_profile_info(commands):
 
                 await self.apis.api_post("messages.send", v=self.v, peer_id=self.from_id,
                                          message=result["message"].format(name), random_id=0)
+                await self.apis.api_post("messages.delete", v=self.v, peer_id=self.peer_id,
+                                         conversation_message_ids=self.conversation_message_id,
+                                         delete_for_all=1)
             else:
                 await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
                                          message="⚠ Я не могу вам написать. Разрешите мне отправку сообщения в лс, для этого напишите мне любое сообщение",

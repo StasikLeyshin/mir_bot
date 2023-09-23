@@ -8,6 +8,7 @@ class BindLsUpdate(commands):
 
     async def run(self):
         if self.from_id == 597624554:
+            print("DOSHLO")
             start = Start(self.mongo_manager, self.settings_info)
             peer_ids = await start.get_all_peer_ids()
             sms_list = []
@@ -35,7 +36,7 @@ class BindLsUpdate(commands):
 
 bind_ls_updates = command_ls.Command()
 
-bind_ls_updates.keys = ['обновить']
+bind_ls_updates.keys = ['обновить', '/обновить']
 bind_ls_updates.description = 'обновить'
 #bind_ls_updates.set_dictionary('bind_ls_update')
 bind_ls_updates.process = BindLsUpdate

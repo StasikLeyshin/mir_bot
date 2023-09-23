@@ -31,7 +31,7 @@ class chance(commands):
 
 chances = command_besed.Command()
 
-chances.keys = ['/help', '/команды']
+chances.keys = ['/help34544', '/команды225454t5t']
 chances.description = 'Команды бота'
 chances.process = chance
 chances.topics_blocks = []

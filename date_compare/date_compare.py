@@ -24,7 +24,7 @@ class date_compare:
             elif "час" in self.period:
                 d = self.date_new + datetime.timedelta(hours=number)
                 return d
-            elif "ден" in self.period or "сут" in self.period:
+            elif "ден" in self.period or "сут" in self.period or "дне":
                 d = self.date_new + datetime.timedelta(days=number)
                 return d
             elif "неде" in self.period:

@@ -43,6 +43,11 @@ class infinity_beskon:
         dt = DT.datetime.fromisoformat(tek.strftime('%Y-%m-%d %H:%M:%S'))
         return str(dt.timestamp())[:-2]
 
+    async def current_time_zero(self):
+        tek = DT.datetime.now()
+        dt = DT.datetime.fromisoformat(tek.strftime('%Y-%m-%d'))
+        return str(dt.timestamp())[:-2]
+
 
     async def generate(self, st):
         thems = {}
@@ -77,7 +82,7 @@ class infinity_beskon:
             .replace("<p>", "").replace("</p>", "")
         bot.send_message(chat_id, f"{text}", parse_mode='HTML')
 
-    async def dispatch(self, kwargs, spis_ras, gen, id_ras):
+    async def dispatch(self, kwargs, spis_ras,  gen, id_ras):
         loop = asyncio.get_running_loop()
         post = kwargs["post"]
         if len(post) > 1:
@@ -100,9 +105,9 @@ class infinity_beskon:
                                     # text_telegram = str(kwargs["content"]).replace("<p>", "").replace("</p>", "").\
                                     #     replace("<b>", "**").replace("</b>", "**").replace("<i>", "__").\
                                     #     replace("</i>", "__")
-                                    text_telegram = kwargs["content"]
+                                    #text_telegram = kwargs["content"]
                                     sl.append(i)
-                                    loop.create_task(self.send_telegram(i, text_telegram))
+                                    loop.create_task(self.send_telegram(i, text))
 
 
 
@@ -137,11 +142,15 @@ class infinity_beskon:
     async def withdrawal_warn_ban(self):
         tek = await self.current_time()
 
+        tek_zero = await self.current_time_zero()
+
         # await self.sending_users(int(tek))
 
         #await self.create_mongo.remove_ban_warn(tek)
         unban = UnbanLs(self.mongo_manager, self.settings_info, current_time=int(tek))
-        await unban.unban_all()
+        await unban.unban_all(int(tek_zero) + 86400)
+
+
 
     async def get_soup(self, txt):
         soup = BeautifulSoup(txt, 'html.parser')

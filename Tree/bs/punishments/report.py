@@ -38,14 +38,14 @@ class Report(commands):
                                         conversation_message_id_forward=int(conversation_message_ids),
                                         conversation_message_id_original=int(res),
                                         type_sms="rep")
-                await self.apis.api_post("messages.delete", v=self.v, peer_id=self.peer_id,
-                                         conversation_message_ids=self.conversation_message_id,
-                                         delete_for_all=1)
             else:
                 if await self.ls_open_check(self.from_id):
                     await self.apis.api_post("messages.send", v=self.v, peer_id=self.from_id,
                                              message="⚠ Перешлите сообщение, чтобы зарепортить и поймать человека с поличным.",
                                              random_id=0)
+            await self.apis.api_post("messages.delete", v=self.v, peer_id=self.peer_id,
+                                     conversation_message_ids=self.conversation_message_id,
+                                     delete_for_all=1)
 
 
         except Exception as e:

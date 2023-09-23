@@ -53,7 +53,7 @@ class reputation_plus(commands):
 
 reputation_pluss = command_besed.Command()
 
-reputation_pluss.keys = ['+реп', '+rep']
+reputation_pluss.keys = ['iyrutebrvre', 'trytuyikuyjt']
 reputation_pluss.description = 'Плюс репутация'
 reputation_pluss.process = reputation_plus
 reputation_pluss.topics_blocks = []

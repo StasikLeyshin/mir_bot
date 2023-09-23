@@ -6,6 +6,7 @@ from pymongo import MongoClient
 import pprint
 
 from Tree import tree_distribution_root
+from generating_questions.generating_questions import GeneratingCardTaro
 from mongodb import create_mongodb, MongoManager
 from api import api, api_url, tokens_setting, collecting_list_users
 from infinity import infinity_bots, infinity_beskon
@@ -107,6 +108,10 @@ user_bot = config["Userbot"]
 user_bot_id = user_bot["user_id"]
 user_bot_token = user_bot["token"]
 
+telegram_bot = config["Telegram"]
+from_bot_id_tg = telegram_bot["from_id"]
+token_bot_tg = telegram_bot["token"]
+
 load_modules(f"{bs}", f"{ls}", f"{ls_chain}")
 tree_distribution_root()
 
@@ -120,8 +125,11 @@ mongo_manager = MongoManager(client)
 with open('description_commands.yaml', encoding="utf-8") as fh:
     read_data = yaml.load(fh, Loader=yaml.FullLoader)
 
-#loop.run_until_complete(mongo_manager.settings_update_one(read_data, "settings"))
-# settings_info = loop.run_until_complete(mongo_manager.settings_insert_one(read_data, "settings"))
+generating_card_taro = GeneratingCardTaro("Таро/ТАРО").start("Для бота")
+read_data["taro"] = generating_card_taro
+
+loop.run_until_complete(mongo_manager.settings_update_one(read_data, "settings"))
+settings_info = loop.run_until_complete(mongo_manager.settings_insert_one(read_data, "settings"))
 
 
 # gen = generating(questions_file, create_mongo)
@@ -147,6 +155,8 @@ apis = apis_generate(spis)
 
 apis[int(user_bot_id)] = api(int(user_bot_id), user_bot_token)
 
+apis[int(from_bot_id_tg)] = api(int(from_bot_id_tg), token_bot_tg, True)
+
 print(f"number of working tokens: {len(apis)}")
 
 inf = infinity_bots(V, create_mongo, collection_bots, document_tokens, url_dj)
@@ -163,7 +173,7 @@ for i in spis:
     loop_control[i["id"]] = i["them"]
 
 
-#   tree_questions = generating_answers('test').start('Вопросы JS НОЯБРЬ')
+tree_questions = generating_answers('test').start('Вопросы JS НОЯБРЬ')
 
 # pprint.pprint(spis)
 # pprint.pprint(loop_control)

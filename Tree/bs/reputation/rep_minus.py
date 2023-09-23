@@ -4,6 +4,7 @@ import traceback
 import command_besed
 from commands import commands
 from record_achievements import achievements
+from summer_module.reputation.rep_minus import RepMinus
 
 
 class rep_minus(commands):
@@ -24,14 +25,35 @@ class rep_minus(commands):
                                              random_id=0, forward=self.answer_msg())
                     return
                 number_issued = await self.getting_number()
-                print("number_issued", number_issued)
-                res = await achievements(self.client, int(user_id), self.v).minus_rep(
-                    apis=self.apis, peer_id=self.peer_id,
-                    user_id=self.from_id, start_time=self.date, number_issued=number_issued)
-                if res:
-                    await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
-                                             message=res,
-                                             random_id=0, forward=self.answer_msg(), keyboard=self.pusto())
+
+                rep = RepMinus(self.mongo_manager, self.settings_info, int(self.from_id), int(self.date))
+                result = await rep.run(user_id=int(user_id), peer_id=int(self.peer_id), number_issued=number_issued)
+                if result['message']:
+                    if not result['error']:
+                        await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
+                                                 message=result['message'],
+                                                 random_id=0, forward=self.answer_msg(), keyboard=self.pusto())
+                    else:
+                        if await self.ls_open_check(self.from_id):
+                            await self.apis.api_post("messages.send", v=self.v, peer_id=self.from_id,
+                                                     message=result['message'],
+                                                     random_id=0)
+                        else:
+                            await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
+                                                     message="⚠ Я не могу вам написать. Разрешите мне отправку сообщения в лс, для этого напишите мне любое сообщение",
+                                                     forward=self.answer_msg(),
+                                                     random_id=0)
+            await self.apis.api_post("messages.delete", v=self.v, peer_id=self.peer_id,
+                                     conversation_message_ids=self.conversation_message_id,
+                                     delete_for_all=1)
+                # print("number_issued", number_issued)
+                # res = await achievements(self.client, int(user_id), self.v).minus_rep(
+                #     apis=self.apis, peer_id=self.peer_id,
+                #     user_id=self.from_id, start_time=self.date, number_issued=number_issued)
+                # if res:
+                #     await self.apis.api_post("messages.send", v=self.v, peer_id=self.peer_id,
+                #                              message=res,
+                #                              random_id=0, forward=self.answer_msg(), keyboard=self.pusto())
 
             # if await self.ls_open_check(self.from_id):
             #     user_id = await self.getting_user_id()
@@ -94,9 +116,15 @@ class rep_minus(commands):
 
 rep_minuss = command_besed.Command()
 
-rep_minuss.keys = ['осудить', 'осуждаю']
+rep_minuss.keys = ['осудить', 'осуждаю', '-rep', 'rep-', '-реп', 'реп-']
 rep_minuss.description = 'Минус реп'
 rep_minuss.set_dictionary('rep_minus')
 rep_minuss.process = rep_minus
 rep_minuss.topics_blocks = []
 rep_minuss.topics_resolution = ["tema1"]
+
+if __name__ == "__main__":
+    import re
+    text = "23 gffd 44 5"
+    ger = re.findall(r'(?<!\w)\d+(?!\w)', text)
+    print(ger)

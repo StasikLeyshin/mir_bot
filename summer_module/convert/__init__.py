@@ -1,4 +1,4 @@
-from .convert import convert_seconds_to_human_time, unix_to_time, num2text
+from .convert import convert_seconds_to_human_time, unix_to_time, num2text, unix_to_date, convert_date_unix
 
 # # -*- coding: utf-8 -*-
 # '''

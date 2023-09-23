@@ -54,24 +54,32 @@ class MongoManager:
 
         return users_list
 
-    async def user_get_one(self, user_id, documents):
-        users = self.db[str(documents)].find({"user_id": user_id})
+    async def user_get_one(self, user_id, documents, is_telegram=False):
+        if is_telegram:
+
+            users = self.db[str(documents)].find({"telegram_user_id": user_id})
+        else:
+            users = self.db[str(documents)].find({"user_id": user_id})
 
 
         async for user in users:
             del user["_id"]
             return user  # ujson.loads(dumps(user))
 
-    async def user_insert_one(self, user, documents):
+    async def user_insert_one(self, user, documents, is_telegram=False):
         #print(user)
-        _user = await self.user_get_one(user_id=user["user_id"], documents=documents)
-        #print(user)
+        if is_telegram:
+            user_id = user["telegram_user_id"]
+        else:
+            user_id = user["user_id"]
+        _user = await self.user_get_one(user_id=user_id, documents=documents, is_telegram=is_telegram)
+        #print(_user)
         if not _user:
             # print("Error")
         #else:
             await self.db[str(documents)].insert_one(user)
 
-            _user = await self.user_get_one(user_id=user["user_id"], documents=documents)
+            _user = await self.user_get_one(user_id=user_id, documents=documents, is_telegram=is_telegram)
 
         return _user
 
@@ -85,6 +93,8 @@ class MongoManager:
             #print(i["user_id"])
             if i["user_id"] in user_admins:
                 i["admin"] = True
+            else:
+                i["admin"] = False
             if i["user_id"] in users_all:
                 i["output"] = False
                 # for j in users:
@@ -149,25 +159,45 @@ class MongoManager:
 
 
 
-    async def user_update_one(self, user, documents):
+    async def user_update_one(self, user, documents, is_telegram=False):
         #_user = user
-        await self.db[str(documents)].update_one({"user_id": user["user_id"]}, {"$set": user})
-        user_updated = await self.user_get_one(user_id=user["user_id"], documents=documents)
+        if is_telegram:
+            await self.db[str(documents)].update_one({"telegram_user_id": user["telegram_user_id"]}, {"$set": user})
+            user_updated = await self.user_get_one(user_id=user["user_id"], documents=documents)
+        else:
+            await self.db[str(documents)].update_one({"user_id": user["user_id"]}, {"$set": user})
+            user_updated = await self.user_get_one(user_id=user["user_id"], documents=documents)
 
         return user_updated
+
+    async def users_update_influence(self, users_list, documents):
+        operations_ist = []
+        for i in users_list:
+            if i.get('influence'):
+                operations_ist.append(UpdateOne({'user_id': i['user_id']},
+                                                {'$set': {
+                                                    'influence': i['influence']
+                                                }}))
+        if operations_ist:
+            await self.db[str(documents)].bulk_write(operations_ist)
+        return True
+
 
     async def users_update_ban_warn(self, users_list, documents):
         operations_ist = []
         for i in users_list:
-            operations_ist.append(UpdateOne({'user_id': i['user_id']},
-                                            {'$set': {
-                                                'punishments': {
-                                                    'ban': i['punishments']['ban'],
-                                                    'warn': {
-                                                        'warn_list': i['punishments']['warn']['warn_list']
-                                                    }
-                                                },
-                                            }}))
+            #if i['punishments']['warn'].get('warn_list'):
+            if i['punishments']['warn']:
+                #print(i['punishments']['warn'])
+                operations_ist.append(UpdateOne({'user_id': i['user_id']},
+                                                {'$set': {
+                                                    'punishments': {
+                                                        'ban': i['punishments']['ban'],
+                                                        'warn': {
+                                                            'warn_list': i['punishments']['warn']['warn_list']
+                                                        }
+                                                    },
+                                                }}))
         if operations_ist:
             await self.db[str(documents)].bulk_write(operations_ist)
         return True
@@ -364,6 +394,53 @@ class MongoManager:
 
         return user_updated
 
+    async def tribe_get_all(self, documents):
+        users_list = []
+        tribes = self.db[str(documents)].find({})
+
+        async for tribe in tribes:
+            del tribe["_id"]
+            # users_list.append(ujson.loads(dumps(user)))
+            users_list.append(tribe)
+
+        return users_list
+
+    async def tribe_get_one(self, cut, documents):
+        tribes = self.db[str(documents)].find({"cut": cut})
+
+
+        async for tribe in tribes:
+            del tribe["_id"]
+            return tribe  # ujson.loads(dumps(user))
+
+    async def tribe_insert_one(self, tribe, documents):
+        #print(user)
+        _tribe = await self.tribe_get_one(cut=tribe["cut"], documents=documents)
+        #print(user)
+        if not _tribe:
+            # print("Error")
+        #else:
+            await self.db[str(documents)].insert_one(tribe)
+
+            _tribe = await self.tribe_get_one(cut=tribe["cut"], documents=documents)
+
+        return _tribe
+
+    async def tribe_users_count(self, cut, documents):
+        result = await self.db[str(documents)].count_documents({"tribe": cut})
+        return result
+
+    async def tribe_users_get(self, cut, documents):
+        users_list = []
+        tribes = self.db[str(documents)].find({"tribe": cut})
+
+        async for tribe in tribes:
+            del tribe["_id"]
+            # users_list.append(ujson.loads(dumps(user)))
+            users_list.append(tribe)
+
+        return users_list
+
     async def questions_unban_get_all(self, dj_db, documents):
         questions = self.client[dj_db][str(documents)].find({})
 
@@ -374,6 +451,36 @@ class MongoManager:
             questions_list.append(question)
         return questions_list
 
+    async def get_log_add_leave(self, time_start, time_finish, peer_id, documents):
+        chat_returned_user = await self.db[str(documents)].count_documents({"type": "chat_returned_user",
+                                                                            "peer_id": peer_id,
+                                                                "$and": [
+                                                                    {"current_time": {"$gte": time_start}},
+                                                                    {"current_time": {"$lte": time_finish}}
+                                                                ]})
+        chat_exit_user = await self.db[str(documents)].count_documents({"type": "chat_exit_user", "peer_id": peer_id,
+                                                                "$and": [
+                                                                    {"current_time": {"$gte": time_start}},
+                                                                    {"current_time": {"$lte": time_finish}}
+                                                                ]})
+        return chat_returned_user, chat_exit_user
+
+    async def get_log_sms_active(self, time_start, time_finish, documents):
+        sms_active = await self.db[str(documents)].count_documents({"type": "sms",
+                                                                "$and": [
+                                                                    {"current_time": {"$gte": time_start}},
+                                                                    {"current_time": {"$lte": time_finish}}
+                                                                ]})
+        return sms_active
+
+
+    async def get_log_cmd(self, time_start, time_finish, tupe_cmd):
+        sms_active = await self.db["logs"].count_documents({"type": tupe_cmd,
+                                                                "$and": [
+                                                                    {"current_time": {"$gte": time_start}},
+                                                                    {"current_time": {"$lte": time_finish}}
+                                                                ]})
+        return sms_active
 
     #
     # async def user_delete_one(self, user: User) -> List[User]:

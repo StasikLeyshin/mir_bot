@@ -9,7 +9,7 @@ class WarnGive(WorkUser):
     @checking_admin
     async def run(self, user_id: int, peer_id: int, time_plus: int = 0, cause: str = '', **kwargs):
         info = await self.manager_db.user_get_one(user_id, f"{peer_id}")
-        if not info:
+        if not info and not self.is_telegram:
             msg = f"⚠ Данного [id{user_id}|пользователя], возможно, нет в беседе." \
                   "❗ Обновите информацию командой /update."
             return_dict = {"message": msg, "action": "kick", "update": False, "error_message": True}
@@ -75,7 +75,7 @@ class WarnGive(WorkUser):
             cause = "Достигнут лимит варнов"
             return await BanGive(self.manager_db, self.settings_info,
                                  self.user_id, self.current_time,
-                                 self.users_info).run(user_id=user_id, peer_id=peer_id,
+                                 self.users_info, is_telegram=self.is_telegram).run(user_id=user_id, peer_id=peer_id,
                                                       time_plus=time_plus, cause=cause, repeated=True)
 
         if time_plus == 0:
@@ -110,6 +110,8 @@ class WarnGive(WorkUser):
         await self.give_achievement(self.user_id, self.users_info[self.user_id].admin.punishments["count_warn"],
                                     achievements, self.users_info[self.user_id].admin.achievements, "warn_admin")
 
+        await self.set_user_xp(self.user_id, self.users_info[self.user_id].admin)
+
         achievements = self.settings_info["warn_awards"]
         await self.give_achievement(user_id, user_info.punishments["warn"]["count"],
                                     achievements, user_info.achievements, "warn", ball)
@@ -134,7 +136,7 @@ class WarnGive(WorkUser):
 
             return await BanGive(self.manager_db, self.settings_info,
                                  self.user_id, self.current_time,
-                                 self.users_info).run(user_id=user_id, peer_id=peer_id,
+                                 self.users_info, is_telegram=self.is_telegram).run(user_id=user_id, peer_id=peer_id,
                                                       time_plus=time_plus, cause=cause, repeated=True)
 
         certain_time = await convert_seconds_to_human_time(time_plus)
@@ -157,10 +159,13 @@ class WarnGive(WorkUser):
         if cause:
             msg_cause = f"\n📝 Причина: {cause}"
 
-        msg = "[id" + str(user_id) + "|{0}]"
+        if self.is_telegram:
+            msg = "{0}"
+        else:
+            msg = "[id" + str(user_id) + "|{0}]"
         msg += f", вам выдан варн [{len(warn_info['warn_list'])}/{lvl_list['limit']['warn_limit']}] " \
                f"на {certain_time}{msg_cause}\n" \
-               f"⏰ Время окончания: {end_time_msg}{msg_ach}\n\n📊 XP: {user_info.xp}{msg_admin_ach}"
+               f"⏰ Время окончания: {end_time_msg}{msg_ach}\n\n📊 XP: {round(user_info.xp, 2)}{msg_admin_ach}"
 
         user_info.log["warn"].append(await self.get_log_users(self.user_id, peer_id,
                                                               action, finish_time,
@@ -208,7 +213,7 @@ if __name__ == "__main__":
     #  wok = WorkUser(mongo_manager, settings_info,  55, 100)
 
     #ban = BanGive(mongo_manager, settings_info,  55, 100)
-    warn = WarnGive(mongo_manager, settings_info,  55, 9999999)
+    warn = WarnGive(mongo_manager, settings_info,  55, 100)
 
     #test2 = loop.run_until_complete(wok.test(user_id=123456, peer_id=2000001, from_id_check=True))
     test2 = loop.run_until_complete(warn.run(user_id=123456, peer_id=2000001, cause="Спам"))

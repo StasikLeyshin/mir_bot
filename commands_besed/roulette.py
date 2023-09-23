@@ -129,7 +129,7 @@ class roulette(commands):
 
 roulettes = command_besed.Command()
 
-roulettes.keys = ['/roulette', '/рулетка']
+roulettes.keys = ['/rouletteqerg45fer', '/рулеткаh65ggtgg']
 roulettes.description = 'Для тестов'
 roulettes.process = roulette
 roulettes.topics_blocks = []

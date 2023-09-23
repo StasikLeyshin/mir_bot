@@ -2,9 +2,9 @@
 from datetime import datetime
 import time
 import functools
-from mongodb import MongoManager
-#from punishments import BanGive
+import random
 
+from mongodb import MongoManager
 
 
 class Model:
@@ -44,7 +44,7 @@ class User(Model):
                                  #     }
                                  }
         # self.reports: dict = {}
-        self.xp: int = 0
+        self.xp: float = 0
         self.coins: int = 0
         self.tribe_points: int = 0  # трайб поинты, начисляются за заслуги перед кланом(беседы) /репорт, помощь
         self.influence: int = 4
@@ -83,10 +83,11 @@ class Tribe(Model):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.peer_id: int = 0
         self.name: str = ""
-        self.xp: int = 50
-        self.tribe_points = 0
+        self.cut: str = ""
+        self.tribe_points: int = 0
+        self.war: dict = {}
+
         self.log: list = []
         self.self_generator(kwargs)
 
@@ -114,7 +115,6 @@ class Log(Model):
         self.from_id: int = 0
         self.peer_id: int = 0
         self.current_time: int = 0
-        #self.creator_cmd: bool = False
         self.self_generator(kwargs)
 
 
@@ -124,6 +124,7 @@ class ConversationZl(Model):
         self.peer_id_zl = 0
         self.peer_id = 0
         self.self_generator(kwargs)
+
 
 class ConversationSt(Model):
     def __init__(self, **kwargs):
@@ -186,6 +187,16 @@ class TaskUserBot(Model):
         self.self_generator(kwargs)
 
 
+class SettingTime(Model):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.user_id: int = 1
+        self.start_time: int = 0
+        self.finish_time: int = 0
+        self.log: list = []
+        self.self_generator(kwargs)
+
+
 class UserObject:
     def __init__(self, kwargs):
         for k, v in kwargs.iteritems():
@@ -193,6 +204,9 @@ class UserObject:
                 setattr(self, k, [obj(x) if isinstance(x, dict) else x for x in v])
             else:
                 setattr(self, k, obj(v) if isinstance(v, dict) else v)
+
+
+
 
 
 class UserInfo:
@@ -250,7 +264,8 @@ def checking_admin(fun):
 
 
 class WorkUser:
-    def __init__(self, manager_db, settings_info=None, user_id: int = 0, current_time: int = 0, users_info=None):
+    def __init__(self, manager_db, settings_info=None, user_id: int = 0, current_time: int = 0, users_info=None,
+                 is_telegram=False):
         if users_info is None:
             users_info = {}
         self.manager_db = manager_db
@@ -260,6 +275,8 @@ class WorkUser:
         self.users_info = users_info
 
         self.current_time = current_time
+
+        self.is_telegram = is_telegram
 
         self.users_documents: str = "users"
         self.users_admin_documents: str = "users_admin"
@@ -271,12 +288,22 @@ class WorkUser:
         self.unban_documents = "unban"
         self.task_user_bot_documents = "task_user_bot"
         self.work_ls_documents = "work_ls"
+        self.setting_time_documents = "setting_time"
+        self.tribe_documents = "tribes"
 
         self.collection_django = "test4"
         self.django_unban_documents = "article_answers_unban_new1"
 
         self.club_id = -5411326
         self.user_id_bot = 799863315
+
+        self.tribes = {
+            "NoName": "Без клана",
+            "musk_deer": "🦌 Кабарги",
+            "sea_lion": "🐋 Сивучи",
+            "manul": "🐈 Манулы",
+            "kulan": "🐴 Куланы"
+        }
 
     async def display_time(self, seconds, granularity=2):
         intervals = (
@@ -313,10 +340,17 @@ class WorkUser:
         await self.create_user_info(user_id)
 
         if not self.users_info[user_id].user:
-            self.users_info[user_id].user = User(user_id=user_id, start_time=self.current_time)
-            self.users_info[user_id].user.self_generator(
-                await self.manager_db.user_insert_one(self.users_info[user_id].user.class_dict,
-                                                      self.users_documents))
+            if not self.is_telegram:
+                self.users_info[user_id].user = User(user_id=user_id, start_time=self.current_time)
+                self.users_info[user_id].user.self_generator(
+                    await self.manager_db.user_insert_one(self.users_info[user_id].user.class_dict,
+                                                          self.users_documents))
+            else:
+                self.users_info[user_id].user = User(telegram_user_id=user_id, start_time=self.current_time)
+                self.users_info[user_id].user.self_generator(
+                    await self.manager_db.user_insert_one(self.users_info[user_id].user.class_dict,
+                                                          self.users_documents, self.is_telegram))
+
 
     async def get_user_conversation(self, user_id: int, users_documents_bs: str):
         await self.create_user_info(user_id)
@@ -342,7 +376,8 @@ class WorkUser:
         for i in self.users_info:
             if self.users_info[i].user and self.users_info[i].user.update:
                 self.users_info[i].user.update = False
-                await self.manager_db.user_update_one(self.users_info[i].user.class_dict, self.users_documents)
+                await self.manager_db.user_update_one(self.users_info[i].user.class_dict, self.users_documents,
+                                                      self.is_telegram)
             if self.users_info[i].user_conversation:
                 for peer_id in self.users_info[i].user_conversation:
                     if self.users_info[i].user_conversation[peer_id].update:
@@ -379,6 +414,49 @@ class WorkUser:
     async def update_peer_ids(self, peer_ids):
         await self.manager_db.conversation_zl_update_one(peer_ids.class_dict, self.peer_ids)
 
+    async def get_tribe(self):
+        tribes = {}
+        for i in self.settings_info['tribe']:
+            i = i['settings']
+            tribe = Tribe(cut=i['cut'], name=i['name'])
+            tribe.self_generator(await self.manager_db.tribe_insert_one(tribe.class_dict, self.tribe_documents))
+            count = await self.manager_db.tribe_users_count(i['cut'], self.users_documents)
+            tribes[i['cut']] = count
+
+        minval = min(tribes.values())
+        res = [k for k, v in tribes.items() if v == minval]
+        return random.choice(res)
+
+    async def set_user_xp(self, user_id, user):
+        if self.users_info[user_id].achievements:
+            for i in self.users_info[user_id].achievements:
+                user.xp += i["xp"]
+                if i.get("tribe_points"):
+                    user.tribe_points += i["tribe_points"]
+
+    async def set_count_cmd(self, user_info, type_cmd):
+        if user_info.cmd.get(type_cmd):
+            if user_info.cmd[type_cmd].get("count"):
+                user_info.cmd[type_cmd]["count"] += 1
+            else:
+                user_info.cmd[type_cmd]["count"] = 1
+        else:
+            user_info.cmd[type_cmd] = {"count": 1}
+    async def is_empty_user(self, user_id: int, peer_id: int):
+        info = await self.manager_db.user_get_one(user_id, self.users_documents)
+        if not info:
+            info = await self.manager_db.user_get_one(user_id, f"{peer_id}")
+            if not info:
+                msg = "👽 Такого пользователя не существует"
+                return_dict = {"message": msg}
+                return return_dict
+        return False
+
+    async def add_log_user(self, user_info, type_name: str, log_dict: dict):
+        if user_info.log.get(str(type_name)):
+            user_info.log[str(type_name)].append(log_dict)
+        else:
+            user_info.log[str(type_name)] = [log_dict]
 
     async def lvl_cmd_add_list(self, user, cmd):
         command_level = self.settings_info["command_level"]
@@ -387,11 +465,13 @@ class WorkUser:
         sum_xp = 0
         for i in command_level:
             sum_xp += i["xp"]
-            if xp >= sum_xp or sum_xp == 0:
+            if xp >= sum_xp and xp != 0:
                 if i.get("cmd_list"):
                     for j in i["cmd_list"]:
                         if cmd == j["cmd"]:
                             cmd_dict[cmd] = j
+                cmd_dict["limit"] = i["limit"]
+                cmd_dict["multiplier"] = i["multiplier"]
             elif xp <= 0:
                 if i.get("cmd_list"):
                     for j in i["cmd_list"]:
@@ -402,8 +482,51 @@ class WorkUser:
                 break
             else:
                 break
-            cmd_dict["limit"] = i["limit"]
-            cmd_dict["multiplier"] = i["multiplier"]
+            # cmd_dict["limit"] = i["limit"]
+            # cmd_dict["multiplier"] = i["multiplier"]
+        return cmd_dict
+
+    async def lvl_cmd_get_list(self, xp):
+        command_level = self.settings_info["command_level"]
+        cmd_dict = {"cmd_list": []}
+        sum_xp = 0
+        for i in command_level:
+            sum_xp += i["xp"]
+            if xp >= sum_xp and xp != 0:
+                if i.get("cmd_list"):
+                    for cmd in i["cmd_list"]:
+                        flag = False
+                        k = 0
+                        for j in cmd_dict["cmd_list"]:
+                            if cmd["cmd"] == j["cmd"]:
+                                cmd_dict["cmd_list"][k] = cmd
+                                flag = True
+                            k += 1
+                        if not flag:
+                            cmd_dict["cmd_list"].append(cmd)
+
+                cmd_dict["limit"] = i["limit"]
+                cmd_dict["multiplier"] = i["multiplier"]
+            elif xp <= 0:
+                if i.get("cmd_list"):
+                    if i.get("cmd_list"):
+                        for cmd in i["cmd_list"]:
+                            flag = False
+                            k = 0
+                            for j in cmd_dict["cmd_list"]:
+                                if cmd["cmd"] == j["cmd"]:
+                                    cmd_dict["cmd_list"][k] = cmd
+                                    flag = True
+                                k += 1
+                            if not flag:
+                                cmd_dict["cmd_list"].append(cmd)
+                cmd_dict["limit"] = i["limit"]
+                cmd_dict["multiplier"] = i["multiplier"]
+                break
+            else:
+                break
+            # cmd_dict["limit"] = i["limit"]
+            # cmd_dict["multiplier"] = i["multiplier"]
         return cmd_dict
 
 
@@ -416,7 +539,7 @@ class WorkUser:
             cmd_dict["lvl"] = i["lvl"]
             sum_xp += i["xp"]
             end_xp = i["xp"]
-            if xp >= sum_xp or sum_xp == 0:
+            if xp >= sum_xp and xp != 0:
                 cmd_dict["limit"] = i["limit"]
                 cmd_dict["multiplier"] = i["multiplier"]
             elif xp <= 0:
@@ -426,7 +549,7 @@ class WorkUser:
             else:
                 break
 
-        if end_xp >= 0:
+        if end_xp > 0:
             cmd_dict["lvl_percent_short"] = int((xp - (sum_xp - end_xp)) / end_xp * 20)
             cmd_dict["lvl_percent"] = int((xp - (sum_xp - end_xp)) / end_xp * 100)
         else:
@@ -463,10 +586,15 @@ class WorkUser:
                                "type": type_achievement,
                                "current_time": self.current_time}
                     else:
-                        ach = {'text': f'{self.settings_info[f"{type_achievement}_awards_smiley"]} {i["text"]}',
+                        if self.settings_info.get(f"{type_achievement}_awards_smiley"):
+                            smile = str(self.settings_info.get(f"{type_achievement}_awards_smiley")) + " "
+                        else:
+                            smile = ""
+                        ach = {'text': f'{smile}{i["text"]}',
                                "admin": admin_id,
                                "count": count,
                                "xp": i["xp"] * multiplier,
+                               "tribe_points": i.get("tribe_points"),
                                "type": type_achievement,
                                "current_time": self.current_time}
                     user_achievements.append(ach)

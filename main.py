@@ -24,6 +24,7 @@ from callback import executor_post
 from settings import *
 
 
+
 def get_files(folder):
     files_list = os.listdir(path=folder)
     for i in files_list.copy():
@@ -254,7 +255,7 @@ async def executor_get(request: web.Request):
     #event = await request.json()
     event = await request.text()
     print(event)
-    return web.Response(text="Hello, wor ld")
+    return web.Response(text="Hello, world")
 
 
 async def tes():
@@ -284,7 +285,8 @@ async def add_group(spis_new):
     ap_url = api_url(f"{url_dj}?")
     for i in spis_new:
         if "peer_id" in i:
-            await ap_url.post_json(create=1, token=i["token"], id_group=i["id"], name=i["name"], them=i["them"], peer_id=i["peer_id"])
+            await ap_url.post_json(create=1, token=i["token"], id_group=i["id"], name=i["name"], them=i["them"],
+                                   peer_id=i["peer_id"])
         else:
             await ap_url.post_json(create=1, token=i["token"], id_group=i["id"], name=i["name"], them=i["them"])
     return
@@ -397,8 +399,9 @@ if __name__ == "__main__":
     #tasks.append(test1())
 
     #  Telegram
-    #   x = threading.Thread(target=test1, args=(create_mongo,))
-    #   x.start()
+    #x = threading.Thread(target=test1, args=(create_mongo, mongo_manager, settings_info, loop,
+    #                                         collection_bots, document_tokens, url_dj, client, tree_questions))
+    #x.start()
 
     #tasks.append(loop.create_task(add_group(spis_new)))
     #tasks.append(loop.create_task(te()))

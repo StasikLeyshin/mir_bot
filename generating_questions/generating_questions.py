@@ -192,12 +192,26 @@ class Tree_answer_new:
         #        "\n1) Как записаться. \n2) Какие есть программы." \
         #        "\n3) С какого возраста можно прийти. \n4) Инфраструктура." \
         #        "\n5) Партнёры. \n6) Шаг назад. "
-        pattern = re.compile(r"(\d+)\)((\s\D+)+)\.")
+        #print(self.data)
+        pattern = re.compile(r"(\d+)\)((\s\D+)+)")
         # for item in text:
         list_number = pattern.findall(self.data)
+        list_number_new = []
         if len(list_number) == 0:
             list_number = [('1', 'Шаг назад')]
-        return list_number
+        #print(list_number)
+        for i in range(len(list_number)):
+            li = []
+            for j in range(len(list_number[i])):
+                text = list_number[i][j].replace("\n", " ").replace(".", "").strip()
+                if len(text.encode('utf-8')) > 64:
+                    li.append(str(text[:30] + "..."))
+                else:
+                    li.append(str(text))
+            list_number_new.append(li)
+
+        #print(list_number_new)
+        return list_number_new
 
     def analysis(self, data, data_parent):
         if data.replace(".", "").lower() in data_parent.replace(".", "").lower():
@@ -291,7 +305,7 @@ class Tree_answer_new:
                 for i in self.list_data:
                     #print(i[1].lower().strip(), text.lower().replace(".", "").strip())
 
-                    if text.lower().replace(".", "").strip() == i[1].lower().strip():
+                    if text.lower().replace(".", "").strip() == i[1].lower().replace(".", "").strip():
                         return self.children[int(i[0]) - 1].level, self.children[int(i[0]) - 1].data,\
                                self.children[int(i[0]) - 1].list_data
                 #print(len(self.list_data), len(self.children), self.list_data)
@@ -318,9 +332,26 @@ class Tree_answer_new:
             return 1, self.data
 
 
+class GeneratingCardTaro:
+    def __init__(self, file):
+        self.file = file
 
-
-
+    def start(self, sheet):
+        wb = load_workbook(f'{self.file}.xlsx')
+        sheet = wb.get_sheet_by_name(f'{sheet}')
+        card_days_dict = []
+        for row in sheet.rows:
+            name = ""
+            text = ""
+            for cell in row:
+                if cell.value != None:
+                    if cell.column == 1 and not cell.row == 1:
+                        name = cell.value
+                    elif cell.column == 3 and not cell.row == 1:
+                        text = cell.value
+            if name and text:
+                card_days_dict.append({"file": name, "text": text})
+        return card_days_dict
 
 class generating_answers:
 
@@ -389,14 +420,16 @@ class generating_answers:
 
         return tree
         # level = 11
+        # ff = tree.search(level=level)
+        # print(ff[1])
         # while True:
         #     #ff = tree.search()
         #     #print(ff)
-        #     s = int(input("Введите число: "))
-        #     #s = input("Введите строку: ")
-        #     ff = tree.search(number=s, level=level)
+        #     #s = int(input("Введите число: "))
+        #     s = input("Введите строку: ")
+        #     ff = tree.search(text=s, level=level)
         #     level = ff[0]
-        #     print(ff[1])
+        #     print(ff)
 
         # for row in sheet.iter_cols():
         #     for cell in row:
@@ -430,7 +463,24 @@ class generating_answers:
 
 
 if __name__ == "__main__":
-    generating_answers('test').start('Вопросы JS НОЯБРЬ')
+    #generating_answers('test').start('Вопросы JS НОЯБРЬ')
+
+    print(GeneratingCardTaro("ТАРО").start("Для бота"))
+
+    #print('Подобрать мероприятие по интересам.'.encode('utf-8'))
+    # text = "Детский технопарк «Альтаир» — уникальный проект, созданный РТУ МИРЭА при поддержке Правительства Москвы." \
+    #        "На площадке детского технопарка школьники могут принять участие в программах профориентации, " \
+    #        "ознакомиться с работой высокотехнологичного оборудования и освоить программы дополнительного " \
+    #        "образования, разработанные сотрудниками университета при участии индустриальных партнёров детского " \
+    #        "технопарка. Что вы хотите узнать о Детском технопарке (укажите цифрой)? " \
+    #        "\n1) Как записаться \n2) Какие есть программы." \
+    #        "\n3) С какого возраста можно прийти. \n4) Инфраструктура." \
+    #        "\n5) Партнёры. \n6) Шаг назад. "
+    # pattern = re.compile(r"(\d+)\)((\s\D+)+)\n")
+    # # for item in text:
+    # list_number = pattern.findall(text)
+    # print(list_number)
+
     # txt = "Курсы подготовки к творческому вступительному испытанию"
     # print(txt[:37])
 

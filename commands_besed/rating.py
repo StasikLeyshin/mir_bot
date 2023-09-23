@@ -32,7 +32,7 @@ class rating(commands):
 
 ratings = command_besed.Command()
 
-ratings.keys = ['/рейтинг', '/rating']
+ratings.keys = ['/рейтингrtrtrt', '/ratingrtrtwrtwrt']
 ratings.description = 'Рейтинг'
 ratings.process = rating
 ratings.topics_blocks = []

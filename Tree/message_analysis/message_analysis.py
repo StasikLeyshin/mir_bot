@@ -227,6 +227,13 @@ class MessageAnalysisProcessing(commands):
 
         #print(type_sms)
 
+        if type_sms == "text":
+            #res = text_analysis(self.text).analysis()
+            if len(self.text.split(' ')) < 2:
+                type_sms = "spam"
+        # if self.from_id == 597624554:
+        #     print(type_sms)
+
         msg_analysis = MessageAnalysis(self.mongo_manager, self.settings_info, user_id=self.from_id,
                                 current_time=self.date)
         result = await msg_analysis.run(peer_id=self.peer_id, type_sms=type_sms, message=self.message)
