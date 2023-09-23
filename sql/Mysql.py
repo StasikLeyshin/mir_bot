@@ -17,7 +17,7 @@ def pol_js(u1, u2=0, u3=0, u4=0, f=0):
 	connection = pymysql.connect(
 				host='127.0.0.1',
 				user='ivan',
-				password='0351',
+				password='1234',
 				db='test5',
 				port=3306)
 	cursor = connection.cursor()
